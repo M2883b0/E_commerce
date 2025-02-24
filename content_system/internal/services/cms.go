@@ -108,6 +108,33 @@ func connDB(app *CmsAPP) {
 	//if env == "test" {
 	//	mysqlDB = mysqlDB.Debug()
 	//}
+
+	////===创建zipkin链路追踪
+	////上报zipkin的地址
+	//report := reporter.NewReporter("http://localhost:9411/api/v2/spans")
+	////本地节点
+	//endpoint, err := zipkin.NewEndpoint("mysql", "localhost:8080")
+	//if err != nil {
+	//	panic(err)
+	//}
+	////创建链路实例
+	//tracer, err := zipkin.NewTracer(report,
+	//	zipkin.WithTraceID128Bit(true),
+	//	zipkin.WithLocalEndpoint(endpoint))
+	//if err != nil {
+	//	panic(err)
+	//}
+	////zipkin转化为opentracing（opentracing桥接转化）
+	//zipkinTracer := zipkinot.Wrap(tracer)
+	////配置opentracing
+	//opentracing.SetGlobalTracer(zipkinTracer)
+	//// 使用gorm的插件，设置链路追踪
+	//err = mysqlDB.Use(gormopentracing.New(gormopentracing.WithTracer(zipkinTracer)))
+	//if err != nil {
+	//	panic(err)
+	//}
+	////===
+
 	app.db = mysqlDB
 	//return mysqlDB
 }
