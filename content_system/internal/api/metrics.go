@@ -16,8 +16,8 @@ func prometheusMiddleware() gin.HandlerFunc {
 		Name: "http_requests_total",          //这个中间件的名称
 		Help: "Total number of http request", //这个中间件的解释
 	}, []string{
-		"method",
-		"path",
+		"method", //接口不同方法的统计
+		"path",   //接口不同路径的统计
 	})
 	//统计各个接口响应的状态码的次数
 	requestsCodeTotal := prometheus.NewCounterVec(prometheus.CounterOpts{

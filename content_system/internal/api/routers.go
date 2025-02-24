@@ -16,8 +16,12 @@ func CmsRouter(r *gin.Engine) {
 	cmsApp := services.NewCmsApp()
 	//创建中间件实例
 	sessionAuth := NewSessionAuth()
+
 	//资源监控中间件，上报数据到prometheus
 	r.Use(prometheusMiddleware())
+	//链路追踪中间件，上报数据到zipkin
+	r.Use(opentracingMiddleware())
+
 	//创建【路由组/cms/】
 	cmsGroup := r.Group(rootPath + "/cms").Use(sessionAuth.Auth) //使用Use()方法，为这个组的接口，加入鉴权Auth中间件
 	//cmsGroup := r.Group(rootPath + "/cms").Use(JwtToken()) //使用jwt中间件
