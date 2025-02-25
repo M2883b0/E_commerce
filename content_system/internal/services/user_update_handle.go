@@ -54,7 +54,7 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 0,
-		"msg":  "ok",
+		"msg":  "更新成功",
 		"data": rsp,
 	})
 }
