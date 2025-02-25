@@ -10,15 +10,17 @@ service User {
 	rpc CreateUser (CreateUserRequest) returns (CreateUserReply);
 	rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply);
 	rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply);
-	rpc GetUser (GetUserRequest) returns (GetUserReply);
-	rpc ListUser (ListUserRequest) returns (ListUserReply);
+	rpc GetUser (GetUserRequest) returns (GetUserReply);    //查询单个用户
 }
 
 message UserInfo {
 	int64 id = 1;
-	string userid = 2;
-	string password = 3;
-	string nickname = 4;
+	string phone_number = 2;  //手机号
+	string password = 3;      //密码
+	string user_name = 4;     //用户名
+	int32 user_type = 5;     //用户类型（0-普通用户，1-商家用户）
+	string img_url = 6;       //头像url
+	string description = 7;    //用户个人简介
 }
 
 message CreateUserRequest {
@@ -38,15 +40,7 @@ message DeleteUserReply {}
 
 message GetUserRequest {
 	int64 id = 1;
-	string userid = 2;
-	string nickname = 3;
-	int32 page = 4;
-	int32 page_size = 5;
 }
 message GetUserReply {
-	int64 total = 1;
-	repeated UserInfo user = 2;
+	UserInfo user = 1;
 }
-
-message ListUserRequest {}
-message ListUserReply {}

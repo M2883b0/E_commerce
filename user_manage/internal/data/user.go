@@ -21,22 +21,28 @@ func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
 
 type UserDetail struct {
 	gorm.Model
-	UserID   string `gorm:"column:user_id;"`
-	Password string `gorm:"column:password;"`
-	Nickname string `gorm:"column:nickname;"`
+	Phone_number string `gorm:"column:phone_number;"`
+	Password     string `gorm:"column:password;"`
+	User_name    string `gorm:"column:user_name;"`
+	User_type    int32  `gorm:"column:user_type;"`
+	Img_url      string `gorm:"column:img_url;"`
+	Descrption   string `gorm:"column:descrption;"`
 }
 
 func (UserDetail) TableName() string {
-	table := "cms_content.user"
+	table := "ec.user" //数据库的表名
 	return table
 }
 
 func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
 	c.log.Infof("userRepo Create user = %+v", user)
 	detail := UserDetail{
-		UserID:   user.UserID,
-		Password: user.Password,
-		Nickname: user.Nickname,
+		Phone_number: user.Phone_number,
+		Password:     user.Password,
+		User_name:    user.User_name,
+		User_type:    user.User_type,
+		Img_url:      user.Img_url,
+		Descrption:   user.Description,
 	}
 	db := c.data.db
 	if err := db.Create(&detail).Error; err != nil {
@@ -50,9 +56,12 @@ func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
 func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) error {
 	c.log.Infof("userRepo Update user = %+v", user)
 	detail := UserDetail{
-		UserID:   user.UserID,
-		Password: user.Password,
-		Nickname: user.Nickname,
+		Phone_number: user.Phone_number,
+		Password:     user.Password,
+		User_name:    user.User_name,
+		User_type:    user.User_type,
+		Img_url:      user.Img_url,
+		Descrption:   user.Description,
 	}
 	db := c.data.db
 	if err := db.Where("id = ?", id).Updates(&detail).Error; err != nil {
@@ -88,46 +97,27 @@ func (c *userRepo) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.User, int64, error) {
+func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) (*biz.User, error) {
 	query := c.data.db.Model(&UserDetail{})
 	// 构造查询条件
 	if params.ID != 0 {
 		query = query.Where("id = ?", params.ID)
 	}
-	if params.UserID != "" {
-		query = query.Where("user_id = ?", params.UserID)
-	}
-	if params.Nickname != "" {
-		query = query.Where("nickname = ?", params.Nickname)
-	}
-	// 总数
-	var total int64
-	if err := query.Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-	//设置默认页大小
-	var page, pageSize = 1, 10
-	if params.Page > 0 {
-		page = int(params.Page)
-	}
-	if params.Page_Size > 0 {
-		pageSize = int(params.Page_Size)
-	}
-	offset := (page - 1) * pageSize
-	var results []*UserDetail
-	if err := query.Offset(offset).Limit(pageSize).Find(&results).Error; err != nil {
+	var results *UserDetail
+	if err := query.Find(&results).Error; err != nil {
 		c.log.WithContext(ctx).Errorf("user find error = %v", err)
-		return nil, 0, err
+		return nil, err
 	}
-	var users []*biz.User
-	for _, r := range results {
-		users = append(users, &biz.User{
-			ID:       int64(r.ID),
-			UserID:   r.UserID,
-			Nickname: r.Nickname,
-		})
+	var users *biz.User
+	users = &biz.User{
+		ID:           int64(results.ID),
+		Phone_number: results.Phone_number,
+		User_name:    results.User_name,
+		User_type:    results.User_type,
+		Img_url:      results.Img_url,
+		Description:  results.Descrption,
 	}
-	return users, total, nil
+	return users, nil
 }
 
 //操作db

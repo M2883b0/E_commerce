@@ -9,10 +9,13 @@ import (
 func (a *UserService) UpdateUser(ctx context.Context, req *operate.UpdateUserRequest) (*operate.UpdateUserReply, error) {
 	user := req.GetUser()
 	err := a.uc.UpdateUser(ctx, &biz.User{
-		ID:       user.GetId(),
-		UserID:   user.GetUserid(),
-		Password: user.GetPassword(),
-		Nickname: user.GetNickname(),
+		ID:           user.Id,
+		Phone_number: user.GetPhoneNumber(),
+		Password:     user.GetPassword(),
+		User_name:    user.GetUserName(),
+		User_type:    user.GetUserType(),
+		Img_url:      user.GetImgUrl(),
+		Description:  user.GetDescription(),
 	})
 	if err != nil {
 		return nil, err

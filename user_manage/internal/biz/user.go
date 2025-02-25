@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 	"github.com/go-kratos/kratos/v2/log"
-	"time"
 )
 
 type User struct {
-	ID       int64     `json:"id"`
-	UserID   string    `json:"user_id"`
-	Password string    `json:"password"`
-	Nickname string    `json:"nickname"`
-	Ct       time.Time `json:"created_at"` // 内容更新时间
-	Ut       time.Time `json:"updated_at"` // 内容创建时间
+	ID           int64  `json:"id"`
+	Phone_number string `json:"phone_number"`
+	Password     string `json:"password"`
+	User_name    string `json:"user_name"`
+	User_type    int32  `json:"user_type"`
+	Img_url      string `json:"img_url"`
+	Description  string `json:"description"`
 }
 
 type UserRepo interface {
@@ -21,16 +21,12 @@ type UserRepo interface {
 	Update(context.Context, int64, *User) error
 	IsExist(context.Context, int64) (bool, error)
 	Delete(context.Context, int64) error
-	Find(context.Context, *FindParams) ([]*User, int64, error)
+	Find(context.Context, *FindParams) (*User, error)
 }
 
 // 查找的参数
 type FindParams struct {
-	ID        int64
-	UserID    string
-	Nickname  string
-	Page      int32
-	Page_Size int32
+	ID int64
 }
 
 type UserUsecase struct {
@@ -49,7 +45,7 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, g *User) error {
 
 func (uc *UserUsecase) UpdateUser(ctx context.Context, g *User) error {
 	uc.log.WithContext(ctx).Infof("UpdateUser: %+v", g)
-	return uc.repo.Update(ctx, g.ID, g)
+	return uc.repo.Update(ctx, int64(g.ID), g)
 }
 
 func (uc *UserUsecase) DeleteUser(ctx context.Context, id int64) error {
@@ -66,12 +62,12 @@ func (uc *UserUsecase) DeleteUser(ctx context.Context, id int64) error {
 	return uc.repo.Delete(ctx, id)
 }
 
-func (uc *UserUsecase) FindUser(ctx context.Context, params *FindParams) ([]*User, int64, error) {
-	users, total, err := uc.repo.Find(ctx, params)
+func (uc *UserUsecase) FindUser(ctx context.Context, params *FindParams) (*User, error) {
+	users, err := uc.repo.Find(ctx, params)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return users, total, nil
+	return users, nil
 }
 
 //执行组合逻辑

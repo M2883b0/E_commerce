@@ -11,7 +11,7 @@ import (
 func main() {
 	conn, err := grpc.DialInsecure(
 		context.Background(),
-		grpc.WithEndpoint("127.0.0.1:9000"),
+		grpc.WithEndpoint("127.0.0.1:59815"),
 		grpc.WithMiddleware(
 			recovery.Recovery(),
 		),
@@ -25,30 +25,34 @@ func main() {
 	//增
 	//reply, err := client.CreateUser(context.Background(), &operate.CreateUserRequest{
 	//	User: &operate.UserInfo{
-	//		Userid:   "1",
-	//		Password: "1",
-	//		Nickname: "1",
+	//		PhoneNumber: "123",
+	//		Password:    "123",
+	//		UserName:    "lyx",
+	//		UserType:    0,
+	//		ImgUrl:      "xxx.jpg",
+	//		Description: "111",
 	//	},
 	//})
 	//改
 	//reply, err := client.UpdateUser(context.Background(), &operate.UpdateUserRequest{
 	//	User: &operate.UserInfo{
-	//		Id:       1,
-	//		Userid:   "123456",
-	//		Password: "123456789",
-	//		Nickname: "user_lyx1",
+	//		Id:          1,
+	//		PhoneNumber: "191",
+	//		Password:    "",
+	//		UserName:    "",
+	//		UserType:    0,
+	//		ImgUrl:      "",
+	//		Description: "",
 	//	},
 	//})
 	//删
-	//reply, err := client.DeleteUser(context.Background(), &operate.DeleteUserRequest{
-	//	Id: 2,
-	//})
-	//查
-	reply, err := client.GetUser(context.Background(), &operate.GetUserRequest{
-		//Id:       1,
-		Page:     1,
-		PageSize: 2,
+	reply, err := client.DeleteUser(context.Background(), &operate.DeleteUserRequest{
+		Id: 1,
 	})
+	//查
+	//reply, err := client.GetUser(context.Background(), &operate.GetUserRequest{
+	//	Id: 1,
+	//})
 
 	if err != nil {
 		log.Fatal(err)

@@ -7,27 +7,23 @@ import (
 )
 
 func (a *UserService) GetUser(ctx context.Context, req *operate.GetUserRequest) (*operate.GetUserReply, error) {
-	users, total, err := a.uc.FindUser(ctx, &biz.FindParams{
-		Page:      req.GetPage(),
-		Page_Size: req.GetPageSize(),
-		UserID:    req.GetUserid(),
-		Nickname:  req.GetNickname(),
-		ID:        req.GetId(),
+	users, err := a.uc.FindUser(ctx, &biz.FindParams{
+		ID: req.GetId(),
 	})
 	if err != nil {
 		return nil, err
 	}
-	var usersInfo []*operate.UserInfo
-	for _, user := range users {
-		usersInfo = append(usersInfo, &operate.UserInfo{
-			Id:       user.ID,
-			Userid:   user.UserID,
-			Nickname: user.Nickname,
-		})
+	var usersInfo *operate.UserInfo
+	usersInfo = &operate.UserInfo{
+		Id:          users.ID,
+		PhoneNumber: users.Phone_number,
+		UserName:    users.User_name,
+		UserType:    users.User_type,
+		ImgUrl:      users.Img_url,
+		Description: users.Description,
 	}
 	return &operate.GetUserReply{
-		Total: total,
-		User:  usersInfo,
+		User: usersInfo,
 	}, nil
 
 }
