@@ -1,8 +1,7 @@
 package services
 
 import (
-	"content_system/internal/dao"
-	"content_system/internal/model"
+	"content_system/internal/api/operate"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -26,53 +25,62 @@ func (cms *CmsAPP) Register(c *gin.Context) {
 	//初始化前端的返回结构实例
 	var req RegisterReq
 
-	//要求前端按照HelloReq结构体中定义的那样，如果不按照，则会报错
+	//要求前端按照RegisterReq结构体中定义的那样，如果不按照，则会报错
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"前端传参error": err.Error()})
 		return
 	}
 
 	//如果前端正确发送请求，则执行下面的程序，返回响应数据
-	fmt.Printf("register info = %+v \n", req) //%v是只打印【值】，%+v是打印【字段+值】
+	//fmt.Printf("register info = %+v \n", req) //%v是只打印【值】，%+v是打印【字段+值】
 
-	//初始化dao层的实例，用dao层的方法，实现功能逻辑
-	accountDao := dao.NewAccountDao(cms.db)
-
-	//账号校验（数据库中存在该账号的话，要提示注册错误）
-	isExist, err := accountDao.IsExist(req.Phone_number)
-	if err != nil { //注册发生错误
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if isExist { //如果账号存在的话
-		c.JSON(http.StatusBadRequest, gin.H{"error": "账号已存在"})
-		return
-	} //如果不存在，则执行下面的内容
-
-	//密码要实现加密
-	hashedPassword, err := encryptPassword(req.Password)
+	rsp, err := cms.operateUserClient.Register(c, &operate.RegisterRequest{})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-	fmt.Printf("hashed password = [%s]\n", hashedPassword)
-
-	//账号信息持久化(写入数据库)
-	if err := accountDao.Create(model.Account{ //填写Account所有字段
-		Phone_number: req.Phone_number,
-		Password:     hashedPassword,
-		User_name:    req.User_name,
-	}); err != nil { //如果发生错误
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	//回包
-	c.JSON(http.StatusOK, gin.H{ //注册成功
-		"msg": "ok",
-		"data": &RegisterRes{
-			Message: "注册成功,请跳转登录页面进行登录",
-		},
+	c.JSON(http.StatusOK, gin.H{
+		"data": rsp,
 	})
+
+	////初始化dao层的实例，用dao层的方法，实现功能逻辑
+	//accountDao := dao.NewAccountDao(cms.db)
+	//
+	////账号校验（数据库中存在该账号的话，要提示注册错误）
+	//isExist, err := accountDao.IsExist(req.Phone_number)
+	//if err != nil { //注册发生错误
+	//	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//if isExist { //如果账号存在的话
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "账号已存在"})
+	//	return
+	//} //如果不存在，则执行下面的内容
+	//
+	////密码要实现加密
+	//hashedPassword, err := encryptPassword(req.Password)
+	//if err != nil {
+	//	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//}
+	//fmt.Printf("hashed password = [%s]\n", hashedPassword)
+	//
+	////账号信息持久化(写入数据库)
+	//if err := accountDao.Create(model.Account{ //填写Account所有字段
+	//	Phone_number: req.Phone_number,
+	//	Password:     hashedPassword,
+	//	User_name:    req.User_name,
+	//}); err != nil { //如果发生错误
+	//	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//
+	////回包
+	//c.JSON(http.StatusOK, gin.H{ //注册成功
+	//	"msg": "ok",
+	//	"data": &RegisterRes{
+	//		Message: "注册成功,请跳转登录页面进行登录",
+	//	},
+	//})
 }
 
 // 密码加密函数

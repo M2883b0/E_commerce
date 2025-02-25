@@ -5,10 +5,12 @@ go 1.22
 toolchain go1.23.3
 
 require (
+	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20250210091908-15168b5a1b7d
 	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/google/wire v0.6.0
 	go.etcd.io/etcd/client/v3 v3.5.18
 	go.uber.org/automaxprocs v1.5.1
+	golang.org/x/crypto v0.32.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.1
 	gorm.io/driver/mysql v1.5.7
@@ -21,7 +23,6 @@ require (
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-kratos/aegis v0.2.0 // indirect
-	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20250210091908-15168b5a1b7d // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/form/v4 v4.2.1 // indirect

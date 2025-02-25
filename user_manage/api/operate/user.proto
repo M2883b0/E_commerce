@@ -8,6 +8,8 @@ option java_package = "api.operate";
 
 service User {
 	rpc CreateUser (CreateUserRequest) returns (CreateUserReply);
+	rpc Register (RegisterRequest) returns (RegisterReply);
+	rpc Login (LoginRequest) returns (LoginReply);
 	rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply);
 	rpc DeleteUser (DeleteUserRequest) returns (DeleteUserReply);
 	rpc GetUser (GetUserRequest) returns (GetUserReply);    //查询单个用户
@@ -22,11 +24,37 @@ message UserInfo {
 	string img_url = 6;       //头像url
 	string description = 7;    //用户个人简介
 }
-
 message CreateUserRequest {
 	UserInfo user = 1;
 }
 message CreateUserReply {}
+
+
+message RegisterInfo {
+	string phone_number = 1;  //账号
+	string password = 2;      //密码
+	string user_name = 3;     //用户名
+}
+message RegisterRequest {
+	RegisterInfo register = 1;
+}
+message RegisterReply {
+	int32 code = 1;
+	string msg = 2;
+}
+
+message LoginInfo {
+	string phone_number = 1;  //账号
+	string password = 2;      //密码
+}
+message LoginRequest {
+	RegisterInfo register = 1;
+}
+message LoginReply {
+	int32 code = 1;
+	string msg = 2;
+	UserInfo user = 3;
+}
 
 message UpdateUserRequest {
 	UserInfo user = 1;
