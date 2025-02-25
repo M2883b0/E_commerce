@@ -48,7 +48,7 @@ message LoginInfo {
 	string password = 2;      //密码
 }
 message LoginRequest {
-	RegisterInfo register = 1;
+	LoginInfo login = 1;
 }
 message LoginReply {
 	int32 code = 1;

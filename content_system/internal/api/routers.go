@@ -13,7 +13,7 @@ const (
 func CmsRouter(r *gin.Engine) {
 	//cms对象实例化
 	cmsApp := services.NewCmsApp()
-	//创建中间件实例
+	//创建sessionID中间件实例
 	sessionAuth := NewSessionAuth()
 
 	////资源监控中间件，上报数据到prometheus
@@ -36,8 +36,8 @@ func CmsRouter(r *gin.Engine) {
 		//路径/api/cms/content/find
 		cmsGroup.POST("/content/find", cmsApp.ContentFind)
 
-		//路径/api/cms/user/create
-		cmsGroup.POST("/user/create", cmsApp.UserCreate)
+		////路径/api/cms/user/create
+		//cmsGroup.POST("/user/create", cmsApp.UserCreate)
 		//路径/api/cms/content/update
 		cmsGroup.POST("/user/update", cmsApp.UserUpdate)
 		//路径/api/cms/content/delete
@@ -49,7 +49,7 @@ func CmsRouter(r *gin.Engine) {
 	noAuthGroup := r.Group(rootPath + "/noauth")
 	{
 		//注册路径/api/noauth/register
-		noAuthGroup.POST("/register", cmsApp.Register) //去到services层的xxx_handle，一个函数实现整个操作逻辑
+		noAuthGroup.POST("/register", cmsApp.Register)
 		//登录路径/api/noauth/register
 		noAuthGroup.POST("/login", cmsApp.Login)
 	}

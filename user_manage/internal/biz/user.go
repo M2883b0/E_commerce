@@ -79,7 +79,7 @@ func (uc *UserUsecase) RegisterUser(ctx context.Context, g *Register) (*Register
 		return &RegisterRsp{
 			Code: 400,
 			Msg:  "注册失败，账号已注册",
-		}, err
+		}, nil
 	}
 	err = uc.repo.Register(ctx, g)
 	if err != nil {
@@ -124,7 +124,7 @@ func (uc *UserUsecase) LoginUser(ctx context.Context, g *Login) (*LoginRsp, erro
 			Code: 400,
 			Msg:  "登录失败，密码错误",
 			User: User{},
-		}, err
+		}, nil
 	}
 	//密码也正确，登录成功，并返回用户的信息
 	return &LoginRsp{

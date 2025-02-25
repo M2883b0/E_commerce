@@ -7,10 +7,10 @@ import (
 )
 
 func (a *UserService) Login(ctx context.Context, req *operate.LoginRequest) (*operate.LoginReply, error) {
-	user := req.GetRegister()
+	user := req.GetLogin()
 	res, err := a.uc.LoginUser(ctx, &biz.Login{
 		Phone_number: user.GetPhoneNumber(),
-		Password:     user.GetUserName(),
+		Password:     user.GetPassword(),
 	})
 	if err != nil {
 		return nil, err

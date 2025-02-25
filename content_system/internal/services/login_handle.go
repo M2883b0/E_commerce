@@ -1,13 +1,12 @@
 package services
 
 import (
-	"content_system/internal/dao"
+	"content_system/internal/api/operate"
 	"content_system/internal/utils"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
 )
@@ -40,23 +39,21 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//初始化dao层的实例，用dao层的方法，实现功能逻辑
-	accountDao := dao.NewAccountDao(cms.db)
 
-	//先判断数据库中是否存在这个用户
-	account, err := accountDao.GetInfoByUserID(req.Phone_number)
+	rsp, err := cms.operateUserClient.Login(c, &operate.LoginRequest{
+		Login: &operate.LoginInfo{
+			PhoneNumber: req.Phone_number,
+			Password:    req.Password,
+		},
+	})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "账号不存在，请先注册"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//如果存在用户，则比较数据库中的密码和用户传的密码，是否一致
-	if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "密码不正确"})
-		return
+	sessionID := ""
+	if rsp.Code == 0 {
+		sessionID, err = cms.GenerateSessionId(context.Background(), rsp.User.PhoneNumber)
 	}
-
-	//账号密码校验成功，接下来返回Session信息给前端
-	sessionID, err := cms.GenerateSessionId(context.Background(), account.Phone_number)
 
 	//上面是Session的方法，在GenerateSessionId函数中，需要使用redis存入内存中。
 	//这里我们使用jwt的方法，加密的方法 import "content_system/jwt"
@@ -66,20 +63,53 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "系统设置session错误，请重新尝试"})
 	}
 
-	//回包
-	c.JSON(http.StatusOK, gin.H{ //登录成功
-		"msg": "ok",
-		"data": &LoginRes{
-			SessionID:   sessionID,
-			ID:          int64(account.ID),
-			user_name:   account.User_name,
-			user_type:   account.User_type,
-			img_url:     account.Img_url,
-			description: account.Description,
-		},
+	c.JSON(http.StatusOK, gin.H{
+		"msg":        rsp.Msg,
+		"code":       rsp.Code,
+		"data":       rsp.User,
+		"session_id": sessionID,
 	})
 
-	return
+	////初始化dao层的实例，用dao层的方法，实现功能逻辑
+	//accountDao := dao.NewAccountDao(cms.db)
+	//
+	////先判断数据库中是否存在这个用户
+	//account, err := accountDao.GetInfoByUserID(req.Phone_number)
+	//if err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "账号不存在，请先注册"})
+	//	return
+	//}
+	////如果存在用户，则比较数据库中的密码和用户传的密码，是否一致
+	//if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(req.Password)); err != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "密码不正确"})
+	//	return
+	//}
+	//
+	////账号密码校验成功，接下来返回Session信息给前端
+	//sessionID, err := cms.GenerateSessionId(context.Background(), account.Phone_number)
+	//
+	////上面是Session的方法，在GenerateSessionId函数中，需要使用redis存入内存中。
+	////这里我们使用jwt的方法，加密的方法 import "content_system/jwt"
+	////sessionID, err := jwt.SetToken(req.UserID)
+	//
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "系统设置session错误，请重新尝试"})
+	//}
+	//
+	////回包
+	//c.JSON(http.StatusOK, gin.H{ //登录成功
+	//	"msg": "ok",
+	//	"data": &LoginRes{
+	//		SessionID:   sessionID,
+	//		ID:          int64(account.ID),
+	//		user_name:   account.User_name,
+	//		user_type:   account.User_type,
+	//		img_url:     account.Img_url,
+	//		description: account.Description,
+	//	},
+	//})
+	//
+	//return
 }
 
 func (cms *CmsAPP) GenerateSessionId(ctx context.Context, userID string) (string, error) {

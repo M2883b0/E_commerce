@@ -82,6 +82,7 @@ func (c *userRepo) Login(ctx context.Context, user *biz.Login) (*biz.User, error
 	users = &biz.User{
 		ID:           int64(results.ID),
 		Phone_number: results.Phone_number,
+		Password:     results.Password,
 		User_name:    results.User_name,
 		User_type:    results.User_type,
 		Img_url:      results.Img_url,

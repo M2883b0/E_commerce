@@ -34,13 +34,25 @@ func (cms *CmsAPP) Register(c *gin.Context) {
 	//如果前端正确发送请求，则执行下面的程序，返回响应数据
 	//fmt.Printf("register info = %+v \n", req) //%v是只打印【值】，%+v是打印【字段+值】
 
-	rsp, err := cms.operateUserClient.Register(c, &operate.RegisterRequest{})
+	//实现密码加密
+	hashedPassword, err := encryptPassword(req.Password)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	rsp, err := cms.operateUserClient.Register(c, &operate.RegisterRequest{
+		Register: &operate.RegisterInfo{
+			PhoneNumber: req.Phone_number,
+			Password:    hashedPassword,
+			UserName:    req.User_name,
+		},
+	})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"data": rsp,
+		"msg":  rsp.Msg,
+		"code": rsp.Code,
 	})
 
 	////初始化dao层的实例，用dao层的方法，实现功能逻辑
