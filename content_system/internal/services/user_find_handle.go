@@ -8,11 +8,7 @@ import (
 
 // 前端的请求数据结构
 type UserFindReq struct {
-	ID        int64  `json:"id"`
-	UserID    string `json:"user_id"`
-	Nickname  string `json:"nickname"`
-	Page      int32  `json:"page"`
-	Page_Size int32  `json:"page_size"`
+	ID int64 `json:"id"`
 }
 
 func (c *CmsAPP) UserFind(ctx *gin.Context) {
@@ -22,13 +18,7 @@ func (c *CmsAPP) UserFind(ctx *gin.Context) {
 		return
 	}
 	//下面不走，直接db的方法，走的是grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
-	rsp, err := c.operateUserClient.GetUser(ctx, &operate.GetUserRequest{
-		Id:       req.ID,
-		Userid:   req.UserID,
-		Nickname: req.Nickname,
-		Page:     req.Page,
-		PageSize: req.Page_Size,
-	})
+	rsp, err := c.operateUserClient.GetUser(ctx, &operate.GetUserRequest{Id: req.ID})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

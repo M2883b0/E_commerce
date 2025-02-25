@@ -7,9 +7,12 @@ import (
 )
 
 type UserCreateReq struct {
-	UserID   string `json:"user_id"`
-	Password string `json:"password"`
-	Nickname string `json:"nickname"`
+	Phone_number string `json:"phone_number"`
+	Password     string `json:"password"`
+	User_name    string `json:"user_name"`
+	User_type    int32  `json:"user_type"`
+	Img_url      string `json:"img_url"`
+	Description  string `json:"description"`
 }
 
 func (c *CmsAPP) UserCreate(ctx *gin.Context) {
@@ -26,9 +29,12 @@ func (c *CmsAPP) UserCreate(ctx *gin.Context) {
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateUserClient.CreateUser(ctx, &operate.CreateUserRequest{
 		User: &operate.UserInfo{
-			Userid:   req.UserID,
-			Password: hashedPassword,
-			Nickname: req.Nickname,
+			PhoneNumber: req.Description,
+			Password:    hashedPassword,
+			UserName:    req.User_name,
+			UserType:    req.User_type,
+			ImgUrl:      req.Img_url,
+			Description: req.Description,
 		},
 	})
 	if err != nil {

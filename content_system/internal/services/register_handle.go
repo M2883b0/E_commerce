@@ -12,9 +12,9 @@ import (
 // 模型的绑定与验证：绑定：【处理我们自定义的数据结构体】；字段验证：【不能为空，手机号规则，邮箱规则,长度】
 // 前端请求的结构体数据集【注册账号，前端要传给我：用户名、密码、名称这3个信息】
 type RegisterReq struct {
-	UserID   string `json:"user_id" binding:"required"` //定义前端传过来，必须要包含该字段(required)
-	Password string `json:"password" binding:"required"`
-	Nickname string `json:"nickname" binding:"required"`
+	Phone_number string `json:"phone_number" binding:"required"` //定义前端传过来，必须要包含该字段(required)
+	Password     string `json:"password" binding:"required"`
+	User_name    string `json:"user_name" binding:"required"`
 }
 
 // 响应结构体
@@ -35,18 +35,11 @@ func (cms *CmsAPP) Register(c *gin.Context) {
 	//如果前端正确发送请求，则执行下面的程序，返回响应数据
 	fmt.Printf("register info = %+v \n", req) //%v是只打印【值】，%+v是打印【字段+值】
 
-	//密码要实现加密
-	hashedPassword, err := encryptPassword(req.Password)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-	fmt.Printf("hashed password = [%s]\n", hashedPassword)
-
 	//初始化dao层的实例，用dao层的方法，实现功能逻辑
 	accountDao := dao.NewAccountDao(cms.db)
 
 	//账号校验（数据库中存在该账号的话，要提示注册错误）
-	isExist, err := accountDao.IsExist(req.UserID)
+	isExist, err := accountDao.IsExist(req.Phone_number)
 	if err != nil { //注册发生错误
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -56,11 +49,18 @@ func (cms *CmsAPP) Register(c *gin.Context) {
 		return
 	} //如果不存在，则执行下面的内容
 
+	//密码要实现加密
+	hashedPassword, err := encryptPassword(req.Password)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	fmt.Printf("hashed password = [%s]\n", hashedPassword)
+
 	//账号信息持久化(写入数据库)
 	if err := accountDao.Create(model.Account{ //填写Account所有字段
-		UserID:   req.UserID,
-		Password: hashedPassword,
-		Nickname: req.Nickname,
+		Phone_number: req.Phone_number,
+		Password:     hashedPassword,
+		User_name:    req.User_name,
 	}); err != nil { //如果发生错误
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -70,7 +70,7 @@ func (cms *CmsAPP) Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{ //注册成功
 		"msg": "ok",
 		"data": &RegisterRes{
-			Message: "注册成功",
+			Message: "注册成功,请跳转登录页面进行登录",
 		},
 	})
 }

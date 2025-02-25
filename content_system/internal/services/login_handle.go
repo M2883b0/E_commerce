@@ -17,15 +17,18 @@ const session_time = 8 * time.Hour
 // 模型的绑定与验证：绑定：【处理我们自定义的数据结构体】；字段验证：【不能为空，手机号规则，邮箱规则,长度】
 // 前端请求的结构体数据【登录只需要前端传给我账号和密码】
 type LoginReq struct {
-	UserID   string `json:"user_id" binding:"required"` //定义前端传过来，必须要包含该字段(required)
-	Password string `json:"password" binding:"required"`
+	Phone_number string `json:"phone_number" binding:"required"` //定义前端传过来，必须要包含该字段(required)
+	Password     string `json:"password" binding:"required"`
 }
 
 // 响应结构体
 type LoginRes struct {
-	SessionID string `json:"session_id"` //定义返回内容，返回一个sessionID
-	UserID    string `json:"user_id"`    //同时返回一些常用的信息
-	Nickname  string `json:"nickname"`
+	SessionID   string `json:"session_id"` //定义返回内容，需要返回一个sessionID
+	ID          int64  `json:"id"`         //同时返回一些用户的信息
+	user_name   string `json:"user_name"`
+	user_type   int32  `json:"user_type"`
+	img_url     string `json:"img_url"`
+	description string `json:"description"`
 }
 
 func (cms *CmsAPP) Login(c *gin.Context) {
@@ -41,7 +44,7 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 	accountDao := dao.NewAccountDao(cms.db)
 
 	//先判断数据库中是否存在这个用户
-	account, err := accountDao.GetInfoByUserID(req.UserID)
+	account, err := accountDao.GetInfoByUserID(req.Phone_number)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "账号不存在，请先注册"})
 		return
@@ -53,7 +56,7 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 	}
 
 	//账号密码校验成功，接下来返回Session信息给前端
-	sessionID, err := cms.GenerateSessionId(context.Background(), account.UserID)
+	sessionID, err := cms.GenerateSessionId(context.Background(), account.Phone_number)
 
 	//上面是Session的方法，在GenerateSessionId函数中，需要使用redis存入内存中。
 	//这里我们使用jwt的方法，加密的方法 import "content_system/jwt"
@@ -67,9 +70,12 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{ //登录成功
 		"msg": "ok",
 		"data": &LoginRes{
-			SessionID: sessionID,
-			UserID:    account.UserID,
-			Nickname:  account.Nickname,
+			SessionID:   sessionID,
+			ID:          int64(account.ID),
+			user_name:   account.User_name,
+			user_type:   account.User_type,
+			img_url:     account.Img_url,
+			description: account.Description,
 		},
 	})
 

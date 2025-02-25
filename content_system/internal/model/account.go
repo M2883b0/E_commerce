@@ -6,13 +6,16 @@ import (
 
 type Account struct {
 	gorm.Model
-	UserID   string `gorm:"column:user_id;"`
-	Password string `gorm:"column:password;"`
-	Nickname string `gorm:"column:nickname;"`
+	Phone_number string `gorm:"column:phone_number;"`
+	Password     string `gorm:"column:password;"`
+	User_name    string `gorm:"column:user_id;"`
+	User_type    int32  `gorm:"column:user_type;"`
+	Img_url      string `gorm:"column:img_url;"`
+	Description  string `gorm:"column:description;"`
 }
 
 // 指定表名
 func (Account) TableName() string {
-	table := "cms_content.user"
+	table := "ec.user"
 	return table
 }

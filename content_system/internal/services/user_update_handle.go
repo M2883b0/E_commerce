@@ -8,10 +8,13 @@ import (
 
 // 前端更新，需要传的内容结构。id是必须传的，需要知道对哪条内容进行更新操作
 type UserUpdateReq struct {
-	ID       int64  `json:"id"`
-	UserID   string `json:"user_id"`
-	Password string `json:"password"`
-	Nickname string `json:"nickname"`
+	ID           int64  `json:"id"`
+	Phone_number string `json:"phone_number"`
+	Password     string `json:"password"`
+	User_name    string `json:"user_name"`
+	User_type    int32  `json:"user_type"`
+	Img_url      string `json:"img_url"`
+	Description  string `json:"description"`
 }
 
 func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
@@ -22,7 +25,7 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 	}
 
 	if req.ID == 0 {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新，需要指定更新的ID"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新操作，需要指定更新的ID"})
 	}
 
 	//密码加密
@@ -36,10 +39,13 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 	//下面不走，直接db的方法，走的是grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateUserClient.UpdateUser(ctx, &operate.UpdateUserRequest{
 		User: &operate.UserInfo{
-			Id:       req.ID,
-			Userid:   req.UserID,
-			Password: hashedPassword,
-			Nickname: req.Nickname,
+			Id:          req.ID,
+			PhoneNumber: req.Phone_number,
+			Password:    hashedPassword,
+			UserName:    req.User_name,
+			UserType:    req.User_type,
+			ImgUrl:      req.Img_url,
+			Description: req.Description,
 		},
 	})
 	if err != nil { //出现错误
