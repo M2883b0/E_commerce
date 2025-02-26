@@ -1,7 +1,7 @@
 package api
 
 import (
-	"content_system/internal/services"
+	"Gateway/internal/services"
 	"github.com/gin-gonic/gin"
 )
 

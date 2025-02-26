@@ -1,7 +1,7 @@
 package main
 
 import (
-	"content_system/internal/api"
+	"Gateway/internal/api"
 	"fmt"
 	"github.com/gin-gonic/gin"
 )

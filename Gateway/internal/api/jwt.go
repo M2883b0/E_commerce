@@ -1,7 +1,7 @@
 package api
 
 import (
-	"content_system/internal/api/operate"
+	"Gateway/internal/api/operate"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"

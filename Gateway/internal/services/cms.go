@@ -1,7 +1,7 @@
 package services
 
 import (
-	"content_system/internal/api/operate"
+	"Gateway/internal/api/operate"
 	"context"
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"

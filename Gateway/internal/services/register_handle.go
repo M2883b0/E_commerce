@@ -1,7 +1,7 @@
 package services
 
 import (
-	"content_system/internal/api/operate"
+	"Gateway/internal/api/operate"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"

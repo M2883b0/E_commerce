@@ -1,4 +1,4 @@
-module content_system
+module Gateway
 
 go 1.23.3
 

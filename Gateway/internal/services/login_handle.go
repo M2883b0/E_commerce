@@ -1,7 +1,7 @@
 package services
 
 import (
-	"content_system/internal/api/operate"
+	"Gateway/internal/api/operate"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
