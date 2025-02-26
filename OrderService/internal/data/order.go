@@ -18,7 +18,6 @@ type orderRepo struct {
 type OrderInfo struct {
 	gorm.Model
 	UserID        uint64         `gorm:"user_id"`
-	UserCurrency  string         `gorm:"user_currency"`
 	PhoneNumber   string         `gorm:"phone_number"`
 	IsPaid        string         `gorm:"is_paid"`
 	StreetAddress string         `gorm:"street_address"`

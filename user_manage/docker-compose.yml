@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: user_manage_db
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: ec
+      # 关键配置 👇
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_0900_ai_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+#    ports:
+#      - "3306:3306"
+    volumes:
+      - ./data/mysql_data:/var/lib/mysql
+    networks:
+      - priNet
+
+  python:
+    image: python:3.11
+    command:
+      - python
+      - -c
+      - |
+        while True:
+          print("d", end="")
+    networks:
+      - priNet
+
+networks:
+  priNet:
+    driver: bridge
+    internal: true
+
+
+

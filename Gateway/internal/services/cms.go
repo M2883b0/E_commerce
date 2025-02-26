@@ -150,6 +150,6 @@ func connOrderServiceClient(app *CmsAPP) {
 	if err != nil {
 		panic(err)
 	}
-	appclient := order.NewOrderServiceClient(conn)
-	app.orderServiceClient = appclient
+	appClient := order.NewOrderServiceClient(conn)
+	app.orderServiceClient = appClient
 }

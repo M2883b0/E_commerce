@@ -10,7 +10,6 @@ import (
 type Order struct {
 	OrderId       uint64       `json:"order_id"`
 	UserID        uint64       `json:"user_id"`
-	UserCurrency  string       `json:"user_currency"`
 	PhoneNumber   string       `json:"phone_number"`
 	IsPaid        string       `json:"is_paid"`
 	StreetAddress string       `json:"street_address"`
