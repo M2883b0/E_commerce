@@ -13,8 +13,8 @@ const (
 func CmsRouter(r *gin.Engine) {
 	//cms对象实例化
 	cmsApp := services.NewCmsApp()
-	//创建sessionID中间件实例
-	sessionAuth := NewSessionAuth()
+	//创建JWT中间件实例
+	jwtAuth := NewJWTAuth()
 
 	////资源监控中间件，上报数据到prometheus
 	//r.Use(prometheusMiddleware())
@@ -22,8 +22,7 @@ func CmsRouter(r *gin.Engine) {
 	//r.Use(opentracingMiddleware())
 
 	//创建【路由组/cms/】
-	cmsGroup := r.Group(rootPath + "/cms").Use(sessionAuth.Auth) //使用Use()方法，为这个组的接口，加入鉴权Auth中间件
-	//cmsGroup := r.Group(rootPath + "/cms").Use(JwtToken()) //使用jwt中间件
+	cmsGroup := r.Group(rootPath + "/cms").Use(jwtAuth.Auth) //使用jwt中间件
 	{
 		//路径/api/cms/ping
 		cmsGroup.GET("/ping", cmsApp.Hello)

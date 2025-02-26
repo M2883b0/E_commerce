@@ -7,9 +7,9 @@ import (
 
 type AuthService struct {
 	operate.UnimplementedAuthServer
-	uc *biz.GreeterUsecase
+	uc *biz.AuthUsecase
 }
 
-func NewAuthService(uc *biz.GreeterUsecase) *AuthService {
+func NewAuthService(uc *biz.AuthUsecase) *AuthService {
 	return &AuthService{uc: uc}
 }

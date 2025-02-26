@@ -2,11 +2,7 @@ package services
 
 import (
 	"content_system/internal/api/operate"
-	"content_system/internal/utils"
-	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
 	"time"
 )
@@ -52,13 +48,14 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 		return
 	}
 	sessionID := ""
-	if rsp.Code == 0 { //如果没报错，就生成sessionID
-		sessionID, err = cms.GenerateSessionId(context.Background(), rsp.User.PhoneNumber)
+	if rsp.Code == 0 { //如果没报错,登录成功，就生成sessionID
+		jwt_rsp, err := cms.operateAuthClient.DeliverTokenByRPC(c, &operate.DeliverTokenReq{UserId: rsp.User.PhoneNumber})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		sessionID = jwt_rsp.Token
 	}
-
-	//上面是Session的方法，在GenerateSessionId函数中，需要使用redis存入内存中。
-	//这里我们使用jwt的方法，加密的方法 import "content_system/jwt"
-	//sessionID, err := jwt.SetToken(req.UserID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "系统设置session错误，请重新尝试"})
@@ -70,65 +67,4 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 		"data":       rsp.User,
 		"session_id": sessionID,
 	})
-
-	////初始化dao层的实例，用dao层的方法，实现功能逻辑
-	//accountDao := dao.NewAccountDao(cms.db)
-	//
-	////先判断数据库中是否存在这个用户
-	//account, err := accountDao.GetInfoByUserID(req.Phone_number)
-	//if err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": "账号不存在，请先注册"})
-	//	return
-	//}
-	////如果存在用户，则比较数据库中的密码和用户传的密码，是否一致
-	//if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(req.Password)); err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": "密码不正确"})
-	//	return
-	//}
-	//
-	////账号密码校验成功，接下来返回Session信息给前端
-	//sessionID, err := cms.GenerateSessionId(context.Background(), account.Phone_number)
-	//
-	////上面是Session的方法，在GenerateSessionId函数中，需要使用redis存入内存中。
-	////这里我们使用jwt的方法，加密的方法 import "content_system/jwt"
-	////sessionID, err := jwt.SetToken(req.UserID)
-	//
-	//if err != nil {
-	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "系统设置session错误，请重新尝试"})
-	//}
-	//
-	////回包
-	//c.JSON(http.StatusOK, gin.H{ //登录成功
-	//	"msg": "ok",
-	//	"data": &LoginRes{
-	//		SessionID:   sessionID,
-	//		ID:          int64(account.ID),
-	//		user_name:   account.User_name,
-	//		user_type:   account.User_type,
-	//		img_url:     account.Img_url,
-	//		description: account.Description,
-	//	},
-	//})
-	//
-	//return
-}
-
-func (cms *CmsAPP) GenerateSessionId(ctx context.Context, userID string) (string, error) {
-	//SessionID的生成
-	session_id := uuid.New().String()
-	//SessionID的持久化。用于判断用户的session_id是否正确
-	key := utils.GetSessionKey(userID)
-	err := cms.rdb.Set(ctx, key, session_id, session_time).Err()
-	if err != nil { //验证用户给的session_id是否有效
-		fmt.Printf("redis set sessionid err:%v\n", err)
-		return "", err
-	}
-	//同时以session_id为key，再存储一个。用于判断session_id是否过期
-	authkey := utils.GetAuthKey(session_id)
-	err = cms.rdb.Set(ctx, authkey, time.Now().Unix(), session_time).Err()
-	if err != nil { //判断session_id是否过期了
-		fmt.Printf("redis set sessionid err:%v\n", err)
-		return "", err
-	}
-	return session_id, nil
 }
