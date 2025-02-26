@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package api.order;
+
+option go_package = "Gateway/internal/api/order;order";
+option java_multiple_files = true;
+option java_package = "api.order";
+
+service OrderService {
+	rpc PlaceOrder(PlaceOrderReq) returns (PlaceOrderResp) {}
+	rpc ListOrder(ListOrderReq) returns (ListOrderResp) {}
+	rpc MarkOrderPaid(MarkOrderPaidReq) returns (MarkOrderPaidResp) {}
+}
+
+// PlaceOrderReq
+message Address {
+	string street_address = 1;
+	string city = 2;
+	string country = 3;
+	uint32 zip_code = 4;
+}
+
+message OrderItem {
+	uint64 product_id = 1;
+	uint32 quantity = 2;
+	float cost = 3;
+}
+
+message PlaceOrderReq {
+	uint64 user_id = 1;
+	Address address = 3;
+	string phone_number = 4;
+	repeated OrderItem order_items = 5;
+}
+//PlaceOrderResp
+
+message PlaceOrderResp {
+	uint64 order_id = 1;
+}
+
+//
+
+message ListOrderReq {
+	uint64 user_id = 1;
+}
+// ListOrderResp
+message Order {
+	repeated OrderItem order_items = 1;
+	uint64 order_id = 2;
+	uint64 user_id = 3;
+	Address address = 5;
+	string phone_number = 6;
+	string pay_state = 7;
+}
+
+message ListOrderResp {
+	int64 total = 1;
+	repeated Order orders = 2;
+}
+
+message MarkOrderPaidReq {
+	uint64 order_id = 1;
+}
+
+message MarkOrderPaidResp {}
