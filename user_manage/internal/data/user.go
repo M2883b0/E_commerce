@@ -61,6 +61,10 @@ func (c *userRepo) Register(ctx context.Context, user *biz.Register) error {
 		Phone_number: user.Phone_number,
 		Password:     user.Password,
 		User_name:    user.User_name,
+		User_type:    1,
+		Img_url:      "default.jpg",
+		Description:  "Hello World",
+		Address:      "GZHU",
 	}
 	db := c.data.db
 	if err := db.Create(&detail).Error; err != nil {
