@@ -51,7 +51,11 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 		},
 	})
 	if err != nil { //出现错误
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 400,
+			"msg":  err.Error(),
+			"data": rsp,
+		})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{

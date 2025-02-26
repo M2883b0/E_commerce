@@ -23,9 +23,15 @@ func (c *CmsAPP) UserFind(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	code := 0
+	msg := "ok"
+	if rsp == nil || rsp.User.Id == 0 {
+		code = 400
+		msg = "用户不存在"
+	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
+		"code": code,
+		"msg":  msg,
 		"data": rsp,
 	})
 }
