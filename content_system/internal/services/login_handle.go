@@ -28,6 +28,7 @@ type LoginRes struct {
 	user_type   int32  `json:"user_type"`
 	img_url     string `json:"img_url"`
 	description string `json:"description"`
+	address     string `json:"address"`
 }
 
 func (cms *CmsAPP) Login(c *gin.Context) {
@@ -51,7 +52,7 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 		return
 	}
 	sessionID := ""
-	if rsp.Code == 0 {
+	if rsp.Code == 0 { //如果没报错，就生成sessionID
 		sessionID, err = cms.GenerateSessionId(context.Background(), rsp.User.PhoneNumber)
 	}
 

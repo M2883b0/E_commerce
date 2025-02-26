@@ -15,6 +15,7 @@ type UserUpdateReq struct {
 	User_type    int32  `json:"user_type"`
 	Img_url      string `json:"img_url"`
 	Description  string `json:"description"`
+	Address      string `json:"address"`
 }
 
 func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
@@ -46,6 +47,7 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 			UserType:    req.User_type,
 			ImgUrl:      req.Img_url,
 			Description: req.Description,
+			Address:     req.Address,
 		},
 	})
 	if err != nil { //出现错误

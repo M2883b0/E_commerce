@@ -21,6 +21,7 @@ func (a *UserService) GetUser(ctx context.Context, req *operate.GetUserRequest) 
 		UserType:    users.User_type,
 		ImgUrl:      users.Img_url,
 		Description: users.Description,
+		Address:     users.Address,
 	}
 	return &operate.GetUserReply{
 		User: usersInfo,

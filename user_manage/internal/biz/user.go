@@ -15,6 +15,7 @@ type User struct {
 	User_type    int32  `json:"user_type"`
 	Img_url      string `json:"img_url"`
 	Description  string `json:"description"`
+	Address      string `json:"address"`
 }
 type Register struct {
 	Phone_number string `json:"phone_number"`
@@ -137,6 +138,7 @@ func (uc *UserUsecase) LoginUser(ctx context.Context, g *Login) (*LoginRsp, erro
 			User_type:    users.User_type,
 			Img_url:      users.Img_url,
 			Description:  users.Description,
+			Address:      users.Address,
 		},
 	}, nil
 }

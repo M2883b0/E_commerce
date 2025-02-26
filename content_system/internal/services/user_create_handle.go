@@ -13,6 +13,7 @@ type UserCreateReq struct {
 	User_type    int32  `json:"user_type"`
 	Img_url      string `json:"img_url"`
 	Description  string `json:"description"`
+	Address      string `json:"address"`
 }
 
 func (c *CmsAPP) UserCreate(ctx *gin.Context) {
@@ -35,6 +36,7 @@ func (c *CmsAPP) UserCreate(ctx *gin.Context) {
 			UserType:    req.User_type,
 			ImgUrl:      req.Img_url,
 			Description: req.Description,
+			Address:     req.Address,
 		},
 	})
 	if err != nil {

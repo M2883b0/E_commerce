@@ -23,6 +23,7 @@ func (a *UserService) Login(ctx context.Context, req *operate.LoginRequest) (*op
 		UserType:    res.User.User_type,
 		ImgUrl:      res.User.Img_url,
 		Description: res.User.Description,
+		Address:     res.User.Address,
 	}
 	return &operate.LoginReply{
 		Code: res.Code,

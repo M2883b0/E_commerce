@@ -27,6 +27,7 @@ type UserDetail struct {
 	User_type    int32  `gorm:"column:user_type;"`
 	Img_url      string `gorm:"column:img_url;"`
 	Description  string `gorm:"column:description;"`
+	Address      string `gorm:"column:address;"`
 }
 
 func (UserDetail) TableName() string {
@@ -43,6 +44,7 @@ func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
 		User_type:    user.User_type,
 		Img_url:      user.Img_url,
 		Description:  user.Description,
+		Address:      user.Address,
 	}
 	db := c.data.db
 	if err := db.Create(&detail).Error; err != nil {
@@ -87,6 +89,7 @@ func (c *userRepo) Login(ctx context.Context, user *biz.Login) (*biz.User, error
 		User_type:    results.User_type,
 		Img_url:      results.Img_url,
 		Description:  results.Description,
+		Address:      results.Address,
 	}
 	return users, nil
 }
@@ -100,6 +103,7 @@ func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) error {
 		User_type:    user.User_type,
 		Img_url:      user.Img_url,
 		Description:  user.Description,
+		Address:      user.Address,
 	}
 	db := c.data.db
 	if err := db.Where("id = ?", id).Updates(&detail).Error; err != nil {
@@ -168,6 +172,7 @@ func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) (*biz.User,
 		User_type:    results.User_type,
 		Img_url:      results.Img_url,
 		Description:  results.Description,
+		Address:      results.Address,
 	}
 	return users, nil
 }

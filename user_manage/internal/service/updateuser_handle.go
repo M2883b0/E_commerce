@@ -16,6 +16,7 @@ func (a *UserService) UpdateUser(ctx context.Context, req *operate.UpdateUserReq
 		User_type:    user.GetUserType(),
 		Img_url:      user.GetImgUrl(),
 		Description:  user.GetDescription(),
+		Address:      user.GetAddress(),
 	})
 	if err != nil {
 		return nil, err

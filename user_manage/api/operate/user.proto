@@ -17,12 +17,13 @@ service User {
 
 message UserInfo {
 	int64 id = 1;
-	string phone_number = 2;  //手机号
+	string phone_number = 2;  //登录账号
 	string password = 3;      //密码
 	string user_name = 4;     //用户名
 	int32 user_type = 5;     //用户类型（0-普通用户，1-商家用户）
 	string img_url = 6;       //头像url
 	string description = 7;    //用户个人简介
+	string address = 8;        //收货地址
 }
 message CreateUserRequest {
 	UserInfo user = 1;
