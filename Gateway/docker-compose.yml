@@ -22,13 +22,3 @@ services:
       - "8080:8080"
     depends_on:
       - etcd-server
-#    networks:
-#      priNet:
-#        ipv4_address: 172.20.0.3
-#
-#networks:
-#  priNet:
-#    driver: bridge
-#    ipam:
-#      config:
-#        - subnet: 172.20.0.0/16

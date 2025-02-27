@@ -12,7 +12,8 @@ COPY --from=builder /src/bin /app
 
 WORKDIR /app
 
-RUN apt-get update && \
+RUN echo -e "deb https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib\n deb-src https://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib \n deb https://mirrors.aliyun.com/debian-security/ bookworm-security main \n deb-src https://mirrors.aliyun.com/debian-security/ bookworm-security main \n deb https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib\n deb-src https://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib \n deb https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib \n deb-src https://mirrors.aliyun.com/debian/ bookworm-backports main non-free non-free-firmware contrib">/etc/apt/sources.list \
+    &&apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates  \
     netbase \

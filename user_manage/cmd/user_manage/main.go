@@ -33,9 +33,10 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
-func newApp(logger log.Logger, gs *grpc.Server) *kratos.App {
+func newApp(c *conf.Data, logger log.Logger, gs *grpc.Server) *kratos.App {
+	log.Infof("the etcd config is %+v ===================", c.Redis.GetAddr())
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"}, //本地的etcd服务
+		Endpoints: []string{c.Redis.GetAddr()}, //本地的etcd服务
 	})
 	reg := etcd.New(client)
 	if err != nil {

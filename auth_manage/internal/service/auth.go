@@ -11,5 +11,6 @@ type AuthService struct {
 }
 
 func NewAuthService(uc *biz.AuthUsecase) *AuthService {
+
 	return &AuthService{uc: uc}
 }

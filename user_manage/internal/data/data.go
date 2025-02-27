@@ -25,7 +25,10 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	if er != nil {
 		panic(er)
 	}
-	mysqlDB.AutoMigrate(&UserDetail{}) //自动迁移，自动创建表，默认蛇行负数
+	err := mysqlDB.AutoMigrate(&UserDetail{})
+	if err != nil {
+		return nil, nil, err
+	} //自动迁移，自动创建表，默认蛇行负数
 	//拿到mysqlDB的实例
 	db, err := mysqlDB.DB()
 	if err != nil {

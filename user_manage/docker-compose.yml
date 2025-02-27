@@ -6,11 +6,13 @@ services:
       MYSQL_DATABASE: ec
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_0900_ai_ci
+    ports:
+      - "3306:3306"
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-    networks:
-      - priNet
+#    networks:
+#      - priNet
   user-manage:
     build:
       context: .
@@ -19,11 +21,11 @@ services:
       - "9001:9000"
     depends_on:
       - user_manage_mysql
-    networks:
-      - priNet
-networks:
-  priNet:
-    driver: bridge
-    internal: true
+#    networks:
+#      - priNet
+#networks:
+#  priNet:
+#    driver: bridge
+#    internal: true
 
 
