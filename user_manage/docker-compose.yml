@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - "9100:9000"
+      - "9100:9100"
     depends_on:
       - user_manage_mysql
     networks:

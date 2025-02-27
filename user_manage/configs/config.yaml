@@ -10,6 +10,6 @@ data:
     driver: mysql
     source: root:123456@tcp(user_manage_mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local
   redis:
-    addr: 127.0.0.1:2379
+    addr: 172.26.232.134:2379
     read_timeout: 0.2s
     write_timeout: 0.2s
