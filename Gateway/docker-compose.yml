@@ -13,3 +13,22 @@ services:
       - "ETCD_INITIAL_CLUSTER=node1=http://0.0.0.0:2380"
       - "ETCD_NAME=node1"
       - "ETCD_DATA_DIR=/opt/bitnami/etcd/data"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - etcd-server
+#    networks:
+#      priNet:
+#        ipv4_address: 172.20.0.3
+#
+#networks:
+#  priNet:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 172.20.0.0/16

@@ -1,0 +1,8 @@
+server:
+  http:
+    addr: 0.0.0.0:0
+    timeout: 1s
+data:
+  etcd:
+    addr: 127.0.0.1:2379
+

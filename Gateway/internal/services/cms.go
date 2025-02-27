@@ -29,7 +29,7 @@ func NewCmsApp() *CmsAPP {
 func connOperateAppClient(app *CmsAPP) {
 	// new etcd client
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
@@ -61,7 +61,7 @@ func connOperateAppClient(app *CmsAPP) {
 func connOperateUserClient(app *CmsAPP) {
 	// new etcd client
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
@@ -93,7 +93,7 @@ func connOperateUserClient(app *CmsAPP) {
 func connOperateAuthClient(app *CmsAPP) {
 	// new etcd client
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
@@ -125,7 +125,7 @@ func connOperateAuthClient(app *CmsAPP) {
 func connOrderServiceClient(app *CmsAPP) {
 	// new etcd client
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)

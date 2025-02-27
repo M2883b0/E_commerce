@@ -4,6 +4,7 @@ import (
 	"OrderService/api/order"
 	"OrderService/internal/conf"
 	"OrderService/internal/service"
+	"github.com/go-kratos/kratos/v2/middleware/metadata"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -15,6 +16,7 @@ func NewGRPCServer(c *conf.Server, orderService *service.OrderServiceService, lo
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
+			metadata.Server(),
 		),
 	}
 	if c.Grpc.Network != "" {

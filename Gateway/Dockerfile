@@ -1,4 +1,25 @@
-FROM ubuntu:latest
-LABEL authors="29935"
+FROM golang:1.23 AS builder
 
-ENTRYPOINT ["top", "-b"]
+COPY . /src
+WORKDIR /src
+
+
+RUN GOPROXY=https://goproxy.cn  mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+
+FROM debian:stable-slim
+
+COPY --from=builder /src/bin /app
+
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates  \
+    netbase \
+#    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/ \
+    && apt-get autoremove -y && apt-get autoclean -y \
+    && mv ./* server
+
+CMD ["./server"]
+#CMD ["nc", "-lvp", "9000"]
