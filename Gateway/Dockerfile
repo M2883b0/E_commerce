@@ -4,7 +4,7 @@ COPY . /src
 WORKDIR /src
 
 
-RUN GOPROXY=https://goproxy.cn  mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+RUN mkdir -p bin/ && GOPROXY=https://goproxy.cn go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
 
 FROM debian:stable-slim
 
