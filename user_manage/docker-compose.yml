@@ -6,26 +6,30 @@ services:
       MYSQL_DATABASE: ec
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_0900_ai_ci
-    ports:
-      - "3306:3306"
+#    ports:
+#      - "3306:3306"
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
-#    networks:
-#      - priNet
+    networks:
+      priNet:
+        ipv4_address: 172.22.0.2
   user-manage:
     build:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - "9001:9000"
+      - "9100:9000"
     depends_on:
       - user_manage_mysql
-#    networks:
-#      - priNet
-#networks:
-#  priNet:
-#    driver: bridge
-#    internal: true
+    networks:
+      priNet:
+        ipv4_address: 172.22.0.3
+networks:
+  priNet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16
 
 
