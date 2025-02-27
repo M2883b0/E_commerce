@@ -4,35 +4,16 @@ import (
 	"context"
 	"errors"
 	"github.com/go-kratos/kratos/v2/log"
-	"time"
 )
 
 type Content struct {
-	ID             int64         `json:"id"`              // 内容标题
-	ContentID      string        `json:"content_id"`      // 内容ID
-	Title          string        `json:"title"`           // 内容标题
-	VideoURL       string        `json:"video_url"`       // 视频播放URL
-	Author         string        `json:"author"`          // 作者
-	Description    string        `json:"description"`     // 内容描述
-	Thumbnail      string        `json:"thumbnail"`       // 封面图URL
-	Category       string        `json:"category"`        // 内容分类
-	Duration       time.Duration `json:"duration"`        // 内容时长
-	Resolution     string        `json:"resolution"`      // 分辨率 如720p、1080p
-	FileSize       int64         `json:"fileSize"`        // 文件大小
-	Format         string        `json:"format"`          // 文件格式 如MP4、AVI
-	Quality        int32         `json:"quality"`         // 视频质量 1-高清 2-标清
-	ApprovalStatus int32         `json:"approval_status"` // 审核状态 1-审核中 2-审核通过 3-审核不通过
-	UpdatedAt      time.Time     `json:"updated_at"`      // 内容更新时间
-	CreatedAt      time.Time     `json:"created_at"`      // 内容创建时间
-}
-
-// 增删改查，查的Find的查找的【参数定义】
-type FindParams struct {
-	ID       int64
-	Author   string
-	Title    string
-	Page     int32
-	PageSize int32
+	ID          int64    `json:"id"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Picture_url string   `json:"picture_url"`
+	Price       uint32   `json:"price"`
+	Quantity    uint32   `json:"quantity"`
+	Categories  []string `json:"categories"`
 }
 
 type ContentRepo interface {
@@ -40,7 +21,9 @@ type ContentRepo interface {
 	Update(context.Context, int64, *Content) error
 	IsExist(context.Context, int64) (bool, error)
 	Delete(context.Context, int64) error
-	Find(context.Context, *FindParams) ([]*Content, int64, error)
+	Find(context.Context, string, int32, int32) ([]*Content, int64, error)
+	Get(context.Context, int64) (*Content, error)
+	Recommend(context.Context, int64, int32, int32) ([]*Content, int64, error)
 }
 
 // ContentUsecase is a Content usecase.
@@ -80,11 +63,31 @@ func (uc *ContentUsecase) DeleteContent(ctx context.Context, id int64) error {
 }
 
 // FindContent find Content.
-func (uc *ContentUsecase) FindContent(ctx context.Context, params *FindParams) ([]*Content, int64, error) {
+func (uc *ContentUsecase) FindContent(ctx context.Context, query string, page, pageSize int32) ([]*Content, int64, error) {
 	repo := uc.repo
-	contents, total, err := repo.Find(ctx, params) //调用data层的Find实现
+	contents, total, err := repo.Find(ctx, query, page, pageSize) //调用data层的Find实现
 	if err != nil {
 		return nil, 0, err
 	}
 	return contents, total, nil
 }
+
+func (uc *ContentUsecase) GetContent(ctx context.Context, id int64) (*Content, error) {
+	repo := uc.repo
+	contents, err := repo.Get(ctx, id) //调用data层的Find实现
+	if err != nil {
+		return nil, err
+	}
+	return contents, nil
+}
+
+func (uc *ContentUsecase) RecommendContent(ctx context.Context, user_id int64, page int32, pageSize int32) ([]*Content, int64, error) {
+	repo := uc.repo
+	contents, total, err := repo.Recommend(ctx, user_id, page, pageSize) //调用data层的Find实现
+	if err != nil {
+		return nil, 0, err
+	}
+	return contents, total, nil
+}
+
+//执行组合逻辑

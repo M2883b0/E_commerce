@@ -4,7 +4,6 @@ import (
 	"content_manage/api/operate"
 	"content_manage/internal/biz"
 	"context"
-	"time"
 )
 
 func (a *AppService) UpdateContent(ctx context.Context,
@@ -12,19 +11,13 @@ func (a *AppService) UpdateContent(ctx context.Context,
 	content := req.GetContent()
 	uc := a.uc
 	err := uc.UpdateContent(ctx, &biz.Content{
-		ID:             content.GetId(),
-		Title:          content.GetTitle(),
-		VideoURL:       content.GetVideoUrl(),
-		Author:         content.GetAuthor(),
-		Description:    content.GetDescription(),
-		Thumbnail:      content.GetThumbnail(),
-		Category:       content.GetCategory(),
-		Duration:       time.Duration(content.GetDuration()),
-		Resolution:     content.GetResolution(),
-		FileSize:       content.GetFileSize(),
-		Format:         content.GetFormat(),
-		Quality:        content.GetQuality(),
-		ApprovalStatus: content.GetApprovalStatus(),
+		ID:          content.GetId(),
+		Title:       content.GetTitle(),
+		Description: content.GetDescription(),
+		Picture_url: content.GetPictureUrl(),
+		Price:       content.GetPrice(),
+		Quantity:    content.GetQuantity(),
+		Categories:  content.GetCategories(),
 	})
 	if err != nil {
 		return nil, err
