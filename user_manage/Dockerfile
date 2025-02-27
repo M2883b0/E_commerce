@@ -12,7 +12,7 @@ COPY --from=builder /src/configs /data/conf
 
 WORKDIR /app
 
-RUN echo "deb https://mirrors.aliyun.com/debian bookworm main\n deb-src https://mirrors.aliyun.com/debian bookworm main" > /etc/apt/sources.list &&\
+RUN echo "deb http://mirrors.aliyun.com/debian bookworm main\n deb-src https://mirrors.aliyun.com/debian bookworm main" > /etc/apt/sources.list &&\
     apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates  \
