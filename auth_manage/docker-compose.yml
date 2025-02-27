@@ -1,0 +1,35 @@
+services:
+  auth_manage_mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: ec
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_0900_ai_ci
+#    ports:
+#      - "3306:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    networks:
+      priNet:
+        ipv4_address: 172.23.0.2
+  user-manage:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "9200:9200"
+    depends_on:
+      - auth_manage_mysql
+    networks:
+      priNet:
+        ipv4_address: 172.23.0.3
+networks:
+  priNet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.23.0.0/16
+
+
