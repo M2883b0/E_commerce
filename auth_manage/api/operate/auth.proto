@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package api.operate;
+
+option go_package = "auth_manage/api/operate;operate";
+option java_multiple_files = true;
+option java_package = "api.operate";
+
+
+
+service Auth {
+	rpc DeliverTokenByRPC(DeliverTokenReq) returns (DeliveryResp) {}
+	rpc VerifyTokenByRPC(VerifyTokenReq) returns (VerifyResp) {}
+}
+
+message DeliverTokenReq {
+	string  user_id= 1;
+}
+
+message VerifyTokenReq {
+	string token = 1;
+}
+
+message DeliveryResp {
+	string token = 1;
+}
+
+message VerifyResp {
+	bool res = 1;
+	string msg = 2;
+}
