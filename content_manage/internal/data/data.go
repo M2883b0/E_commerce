@@ -19,9 +19,9 @@ var ProviderSet = wire.NewSet(NewData, NewContentRepo)
 
 // Data .
 type Data struct {
-	db    *gorm.DB
-	es    *elasticsearch.Client //新增ElasticSearch
-	gorse *client.GorseClient   // 新增Gorse
+	db *gorm.DB
+	es *elasticsearch.Client //新增ElasticSearch
+	//gorse *client.GorseClient   // 新增Gorse
 }
 
 // NewData .
