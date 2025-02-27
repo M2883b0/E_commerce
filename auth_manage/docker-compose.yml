@@ -14,7 +14,7 @@ services:
     networks:
       priNet:
         ipv4_address: 172.23.0.2
-  user-manage:
+  auth-manage:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -22,9 +22,11 @@ services:
       - "9200:9200"
     depends_on:
       - auth_manage_mysql
-    networks:
-      priNet:
-        ipv4_address: 172.23.0.3
+#    networks:
+#      priNet:
+#        ipv4_address: 172.23.0.3
+    restart:
+      always
 networks:
   priNet:
     driver: bridge
