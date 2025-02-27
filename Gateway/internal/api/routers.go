@@ -34,6 +34,8 @@ func CmsRouter(r *gin.Engine) {
 		cmsGroup.POST("/content/delete", cmsApp.ContentDelete)
 		//路径/api/cms/content/find
 		cmsGroup.POST("/content/find", cmsApp.ContentFind)
+		//路径/api/cms/content/get
+		cmsGroup.POST("/content/get", cmsApp.ContentGet)
 
 		////路径/api/cms/user/create
 		//cmsGroup.POST("/user/create", cmsApp.UserCreate)
