@@ -7,7 +7,7 @@ import (
 )
 
 type PlaceOrderReq struct {
-	UserId      uint64       `json:"user_id" binding:"required"`
+	UserId      int64        `json:"user_id" binding:"required"`
 	PhoneNumber string       `json:"phone_number"`
 	Address_    Address      `json:"address"`
 	OrderItems  []*OrderItem `json:"order_items"`
@@ -17,12 +17,12 @@ type Address struct {
 	StreetAddress string `json:"street_address"`
 	City          string `json:"city"`
 	Country       string `json:"country"`
-	ZipCode       uint32 `json:"zip_code"`
+	ZipCode       int32  `json:"zip_code"`
 }
 
 type OrderItem struct {
-	ProductId uint64  `json:"product_id"`
-	Quantity  uint32  `json:"quantity"`
+	ProductId int64   `json:"product_id"`
+	Quantity  int32   `json:"quantity"`
 	Cost      float32 `json:"cost"`
 }
 
@@ -64,7 +64,7 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 }
 
 type ListOrderReq struct {
-	UserId uint64 `json:"user_id" binding:"required"` // 内容标题
+	UserId int64 `json:"user_id" binding:"required"` // 内容标题
 }
 
 func (c *CmsAPP) ListOrder(ctx *gin.Context) {

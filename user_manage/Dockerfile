@@ -9,17 +9,11 @@ FROM debian:stable-slim
 
 COPY --from=builder /src/bin /app
 COPY --from=builder /src/configs /data/conf
+COPY --from=builder /src/init.sh /
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ca-certificates  \
-    netbase \
-#    netcat-openbsd \
-    && rm -rf /var/lib/apt/lists/ \
-    && apt-get autoremove -y && apt-get autoclean -y \
-    && mv ./* server
+RUN /init.sh
 
 CMD ["./server", "-conf", "/data/conf"]
 #CMD ["nc", "-lvp", "9000"]
