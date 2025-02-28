@@ -12,27 +12,24 @@ services:
 #      - --character-set-server=utf8mb4
 #      - --collation-server=utf8mb4_unicode_ci
     networks:
-      priNet:
+      - frontend
 #        ipv4_address: 172.22.0.2
   user-manage:
     build:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      ETCD_ADDR: "172.30.48.1:2379"
+      ETCD_ADDR: "172.26.232.134:2379"
     ports:
       - "9100:9100"
     depends_on:
       - user_manage_mysql
     restart: always
     networks:
-      priNet:
-#        ipv4_address: 172.22.0.3
+      - frontend
+
 networks:
-  priNet:
-    driver: bridge
-#    ipam:
-#      config:
-#        - subnet: 172.22.0.0/16
+  frontend:
+    external: true
 
 

@@ -35,7 +35,7 @@ func init() {
 
 func newApp(c *conf.Data, logger log.Logger, gs *grpc.Server) *kratos.App {
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{c.Redis.GetAddr()}, //本地的etcd服务
+		Endpoints: []string{os.Getenv("ETCD_ADDR")}, //本地的etcd服务
 	})
 	reg := etcd.New(client)
 	if err != nil {

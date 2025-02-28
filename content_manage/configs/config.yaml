@@ -12,14 +12,6 @@ data:
     driver: mysql
     source: root:123456@tcp(localhost:3306)/goods?charset=utf8mb4&parseTime=True&loc=Local
   redis:
-#    addr: 10.1.8.10:2379
     addr: 172.30.48.1:2379
     read_timeout: 0.2s
     write_timeout: 0.2s
-#  elasticsearch:
-#    addresses:
-#      - "http://127.0.0.1:9200"  #地址
-#    username: "elastic" #用户
-#    password: "123456"  #密码
-#    timeout: 10s  # 超时时间
-

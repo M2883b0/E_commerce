@@ -34,19 +34,15 @@ func init() {
 }
 
 func newApp(c *conf.Data, logger log.Logger, gs *grpc.Server) *kratos.App {
-
-	log.Infof("the etcd config is %+v ===================", c.Redis.GetAddr())
+	var etcdAddr = os.Getenv("ETCD_ADDR")
+	log.Infof("the etcd config is %+v ===================", etcdAddr)
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{c.Redis.GetAddr()}, //本地的etcd服务
+		Endpoints: []string{etcdAddr}, //本地的etcd服务
 	})
-	//_, err = client.Put(context.Background(), "/user_manage/", "9000")
 	if err != nil {
 		return nil
 	}
 	reg := etcd.New(client)
-	if err != nil {
-		panic(err)
-	}
 
 	return kratos.New(
 		kratos.ID(id),     //本台系统的名字

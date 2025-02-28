@@ -13,6 +13,8 @@ services:
       - "ETCD_INITIAL_CLUSTER=node1=http://0.0.0.0:2380"
       - "ETCD_NAME=node1"
       - "ETCD_DATA_DIR=/opt/bitnami/etcd/data"
+    networks:
+      - frontend
 
   gateway:
     build:
@@ -22,3 +24,9 @@ services:
       - "8080:8080"
     depends_on:
       - etcd-server
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    external: true
