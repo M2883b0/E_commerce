@@ -1,6 +1,7 @@
 package data
 
 import (
+	"OrderService/api/operate"
 	"OrderService/internal/biz"
 	"context"
 	"encoding/json"
@@ -163,4 +164,17 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 		})
 	}
 	return orders, total, nil
+}
+
+func (c *orderRepo) makeContentUpdate(ctx context.Context, params *biz.FindParams) ([]*biz.Order, int64, error) {
+
+	content := operate.Content{
+		Id: 0,
+	}
+	_, err := c.data.contentClient.UpdateContent(ctx, &operate.UpdateContentReq{Content: &content})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return nil, 0, nil
 }
