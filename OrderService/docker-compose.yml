@@ -6,19 +6,21 @@ services:
       MYSQL_ROOT_PASSWORD: order_service
       MYSQL_DATABASE: order_db
       MYSQL_CHARSET: utf8mb4
-    ports:
-      - "3306:3306"
+    restart: always
     networks:
       - server_net
   order-service:
     build:
       context: .
       dockerfile: ./Dockerfile
+    ports:
+      - "9000:9000"
     environment:
       ETCD_ADDR: "etcd-server:2379"
       MYSQL_ADDR: "root:order_service@tcp(order-service-mysql:3306)/order_db?charset=utf8mb4&parseTime=True&loc=Local"
     depends_on:
       - order-service-mysql
+    restart: always
     networks:
       - server_net
 networks:

@@ -9,7 +9,6 @@ import (
 type PlaceOrderReq struct {
 	UserId      uint64       `json:"user_id" binding:"required"`
 	PhoneNumber string       `json:"phone_number"`
-	IsPaid      string       `json:"is_paid"`
 	Address_    Address      `json:"address"`
 	OrderItems  []*OrderItem `json:"order_items"`
 }
