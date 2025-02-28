@@ -19,7 +19,8 @@ service App {
 	rpc GetContent (GetContentReq) returns (GetContentRsp);
 	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
 	rpc RecommendContent (RecommendContentReq) returns (RecommendContentRsp);
-	// 商品搜索
+	// 商品库存更新
+	rpc UpdateContentQuantity (UpdateContentQuantityReq) returns (UpdateContentQuantityRsp);
 }
 //数据格式
 message Content {
@@ -32,7 +33,7 @@ message Content {
 	// 图片url
 	string picture_url = 4;
 	// 商品价格
-	uint32 price = 5;
+	float price = 5;
 	// 商品库存>=0
 	uint32 quantity = 6;
 	// 商品分类（可多个分类）
@@ -98,4 +99,16 @@ message RecommendContentRsp {
 	int64 total = 1;
 	// 内容列表
 	repeated Content contents = 2;
+}
+
+message UpdateContentQuantityReq {
+	// 商品id
+	int64 id = 1;
+	// 商品库存操作类型
+	int32 is_add = 2;
+	// 操作的商品数量
+	int32 quantity = 3;
+}
+message UpdateContentQuantityRsp {
+	bool is_success = 1;
 }
