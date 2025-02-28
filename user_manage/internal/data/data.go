@@ -5,6 +5,7 @@ import (
 	"github.com/google/wire"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"os"
 	"user_manage/internal/conf"
 )
 
@@ -21,7 +22,11 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")
 	}
-	mysqlDB, er := gorm.Open(mysql.Open(c.GetDatabase().GetSource()))
+	mysqlAddr := os.Getenv("MYSQL_ADDR")
+	if mysqlAddr == "" {
+		mysqlAddr = c.GetDatabase().GetSource()
+	}
+	mysqlDB, er := gorm.Open(mysql.Open(mysqlAddr))
 	if er != nil {
 		panic(er)
 	}

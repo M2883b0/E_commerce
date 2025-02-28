@@ -5,31 +5,25 @@ services:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: ec
       MYSQL_CHARSET: utf8mb4
-#      MYSQL_COLLATION: utf8mb4_0900_ai_ci
-#    ports:
-#      - "3306:3306"
-#    command:
-#      - --character-set-server=utf8mb4
-#      - --collation-server=utf8mb4_unicode_ci
     networks:
-      - frontend
-#        ipv4_address: 172.22.0.2
+      server_net:
   user-manage:
     build:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      ETCD_ADDR: "172.26.232.134:2379"
+      ETCD_ADDR: "etcd-server:2379"
+      MYSQL_ADDR: "root:123456@tcp(user_manage_mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local"
     ports:
       - "9100:9100"
     depends_on:
       - user_manage_mysql
     restart: always
     networks:
-      - frontend
+      server_net:
 
 networks:
-  frontend:
+  server_net:
     external: true
 
 

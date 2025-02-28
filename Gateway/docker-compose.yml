@@ -14,19 +14,21 @@ services:
       - "ETCD_NAME=node1"
       - "ETCD_DATA_DIR=/opt/bitnami/etcd/data"
     networks:
-      - frontend
+      server_net:
 
   gateway:
     build:
       context: .
       dockerfile: ./Dockerfile
+    environment:
+      ETCD_ADDR: "etcd-server:2379"
     ports:
       - "8080:8080"
     depends_on:
       - etcd-server
     networks:
-      - frontend
+      server_net:
 
 networks:
-  frontend:
+  server_net:
     external: true

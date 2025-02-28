@@ -5,33 +5,24 @@ services:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: ec
       MYSQL_CHARSET: utf8mb4
-      MYSQL_COLLATION: utf8mb4_0900_ai_ci
-#    ports:
-#      - "3306:3306"
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
     networks:
-      priNet:
-        ipv4_address: 172.23.0.2
+      server_net:
   auth-manage:
     build:
       context: .
       dockerfile: ./Dockerfile
+    environment:
+      ETCD_ADDR: "etcd-server:2379"
     ports:
       - "9200:9200"
     depends_on:
       - auth_manage_mysql
-#    networks:
-#      priNet:
-#        ipv4_address: 172.23.0.3
     restart:
       always
+    networks:
+      server_net:
 networks:
-  priNet:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.23.0.0/16
+  server_net:
+    external: true
 
 
