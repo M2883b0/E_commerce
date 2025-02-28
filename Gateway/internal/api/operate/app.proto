@@ -101,13 +101,17 @@ message RecommendContentRsp {
 	repeated Content contents = 2;
 }
 
-message UpdateContentQuantityReq {
+message UpdateQuantityReq {
 	// 商品id
 	int64 id = 1;
-	// 商品库存操作类型
-	int32 is_add = 2;
+	// 商品库存操作类型(True是加，False是减)
+	bool is_add = 2;
 	// 操作的商品数量
 	int32 quantity = 3;
+}
+
+message UpdateContentQuantityReq {
+	repeated UpdateQuantityReq quantity_req = 1;
 }
 message UpdateContentQuantityRsp {
 	bool is_success = 1;

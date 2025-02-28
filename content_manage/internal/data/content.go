@@ -419,7 +419,50 @@ func (c *contentRepo) Find(ctx context.Context, search string, in_page, in_pageS
 
 // 推荐商品：接入Gorse模型
 func (c *contentRepo) Recommend(ctx context.Context, user_id int64, in_page, in_pageSize int32) ([]*biz.Content, int64, error) {
-	return nil, 0, nil
+	var contents []*ContentDetail
+	var total int64
+
+	// 设置默认页大小
+	var page, pageSize = 1, 10
+	if in_page > 0 {
+		page = int(in_page)
+	}
+	if in_pageSize > 0 {
+		pageSize = int(in_pageSize)
+	}
+	offset := (page - 1) * pageSize
+
+	// 获取总数
+	if err := c.data.db.Model(&ContentDetail{}).Count(&total).Error; err != nil {
+		c.log.WithContext(ctx).Errorf("获取商品总数失败: %v", err)
+		return nil, 0, err
+	}
+
+	// 查询商品数据并按ID逆序排序
+	if err := c.data.db.Model(&ContentDetail{}).
+		Order("id DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&contents).Error; err != nil {
+		c.log.WithContext(ctx).Errorf("查询商品失败: %v", err)
+		return nil, 0, err
+	}
+
+	// 将数据库查找的结构，映射到biz.Content定义的结构
+	var bizContents []*biz.Content
+	for _, r := range contents {
+		bizContents = append(bizContents, &biz.Content{
+			ID:          int64(r.ID),
+			Title:       r.Title,
+			Description: r.Description,
+			Picture_url: r.Picture_url,
+			Price:       r.Price,
+			Quantity:    r.Quantity,
+			Categories:  strings.Split(r.Categories, ","), // 字符串转数组
+		})
+	}
+
+	return bizContents, total, nil
 }
 
 //执行db

@@ -35,6 +35,8 @@ func CmsRouter(r *gin.Engine) {
 		cmsGroup.POST("/content/find", cmsApp.ContentFind) //搜索框
 		//路径/api/cms/content/get
 		cmsGroup.POST("/content/get", cmsApp.ContentGet) //id查找商品信息
+		//路径/api/cms/content/recommend
+		cmsGroup.POST("/content/get", cmsApp.ContentRecommend) //首页推荐商品
 
 		// 用户
 		//路径/api/cms/user/create
