@@ -21,7 +21,7 @@ apt-get update
 apt-get install -y \
 ca-certificates  \
     netbase \
-#    netcat-openbsd \
+    netcat-openbsd \
 
 rm -rf /var/lib/apt/lists/
 apt-get autoremove -y
