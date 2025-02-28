@@ -16,6 +16,12 @@ type Content struct {
 	Categories  []string `json:"categories"`
 }
 
+type QuantityDetail struct {
+	ID       int64 `json:"id"`
+	Is_add   bool  `json:"is_add"`
+	Quantity int32 `json:"quantity"`
+}
+
 type ContentRepo interface {
 	Create(context.Context, *Content) error
 	Update(context.Context, int64, *Content) error
@@ -24,7 +30,7 @@ type ContentRepo interface {
 	Find(context.Context, string, int32, int32) ([]*Content, int64, error)
 	Get(context.Context, int64) (*Content, error)
 	Recommend(context.Context, int64, int32, int32) ([]*Content, int64, error)
-	UpdateQuantity(context.Context, int64, int32, int32) (bool, error)
+	UpdateQuantity(context.Context, []*QuantityDetail) (bool, error)
 }
 
 // ContentUsecase is a Content usecase.
@@ -91,9 +97,9 @@ func (uc *ContentUsecase) RecommendContent(ctx context.Context, user_id int64, p
 	return contents, total, nil
 }
 
-func (uc *ContentUsecase) UpdateContentQuantity(ctx context.Context, user_id int64, is_add int32, quantity int32) (bool, error) {
+func (uc *ContentUsecase) UpdateContentQuantity(ctx context.Context, quantity_list []*QuantityDetail) (bool, error) {
 	repo := uc.repo
-	res, err := repo.UpdateQuantity(ctx, user_id, is_add, quantity) //调用data层的Find实现
+	res, err := repo.UpdateQuantity(ctx, quantity_list) //调用data层的Find实现
 	if err != nil {
 		return false, err
 	}

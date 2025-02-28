@@ -18,7 +18,6 @@ type contentRepo struct {
 	log  *log.Helper
 }
 
-// NewGreeterRepo .
 func NewContentRepo(data *Data, logger log.Logger) biz.ContentRepo {
 	return &contentRepo{
 		data: data,
@@ -196,8 +195,8 @@ func (c *contentRepo) Get(ctx context.Context, id int64) (*biz.Content, error) {
 	return content, nil
 }
 
-// 商品库存变动，is_add为1，执行增加，is_add为0，执行减的操作。注意减少，会不会减少为0
-func (c *contentRepo) UpdateQuantity(ctx context.Context, id int64, is_add int32, quantity int32) (bool, error) {
+// 商品库存变动，is_add为True，执行增加，is_add为False，执行减的操作。注意减少，会不会减少为0
+func (c *contentRepo) UpdateQuantity(ctx context.Context, quantity_list []*biz.QuantityDetail) (bool, error) {
 	db := c.data.db
 	// 开启事务
 	tx := db.Begin()
@@ -206,36 +205,41 @@ func (c *contentRepo) UpdateQuantity(ctx context.Context, id int64, is_add int32
 			tx.Rollback()
 		}
 	}()
-
-	var detail ContentDetail
-	if err := tx.Where("id = ?", id).First(&detail).Error; err != nil {
-		tx.Rollback()
-		if err == gorm.ErrRecordNotFound {
-			return false, fmt.Errorf("商品不存在: %v", err)
-		}
-		c.log.WithContext(ctx).Errorf("查询商品失败: %v", err)
-		return false, err
-	}
-
-	if is_add == 1 {
-		// 增加库存
-		detail.Quantity += uint32(quantity)
-	} else if is_add == 0 {
-		// 减少库存，确保不会小于0
-		if detail.Quantity < uint32(quantity) {
+	for _, q := range quantity_list {
+		id := q.ID
+		is_add := q.Is_add
+		quantity := q.Quantity
+		var detail ContentDetail
+		if err := tx.Where("id = ?", id).First(&detail).Error; err != nil {
 			tx.Rollback()
-			return false, fmt.Errorf("库存不足，无法减少: 当前库存=%d, 请求减少=%d", detail.Quantity, quantity)
+			if err == gorm.ErrRecordNotFound {
+				return false, fmt.Errorf("商品不存在: %v", err)
+			}
+			c.log.WithContext(ctx).Errorf("查询商品失败: %v", err)
+			return false, err
 		}
-		detail.Quantity -= uint32(quantity)
-	} else {
-		tx.Rollback()
-		return false, fmt.Errorf("无效的is_add值，1-为增加库存，0-为减少库存: %d", is_add)
-	}
 
-	if err := tx.Save(&detail).Error; err != nil {
-		tx.Rollback()
-		c.log.WithContext(ctx).Errorf("更新库存失败: %v", err)
-		return false, err
+		if is_add == true {
+			// 增加库存
+			detail.Quantity += uint32(quantity)
+		} else if is_add == false {
+			// 减少库存，确保不会小于0
+			if detail.Quantity < uint32(quantity) {
+				tx.Rollback()
+				return false, fmt.Errorf("库存不足，无法减少: 当前库存=%d, 请求减少=%d", detail.Quantity, quantity)
+			}
+			detail.Quantity -= uint32(quantity)
+		} else {
+			tx.Rollback()
+			return false, fmt.Errorf("无效的is_add值，1-为增加库存，0-为减少库存: %d", is_add)
+		}
+
+		if err := tx.Save(&detail).Error; err != nil {
+			tx.Rollback()
+			c.log.WithContext(ctx).Errorf("更新库存失败: %v", err)
+			return false, err
+		}
+
 	}
 
 	// 提交事务
