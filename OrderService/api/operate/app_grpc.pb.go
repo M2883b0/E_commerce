@@ -19,30 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	App_CreateContent_FullMethodName    = "/api.operate.App/CreateContent"
-	App_UpdateContent_FullMethodName    = "/api.operate.App/UpdateContent"
-	App_DeleteContent_FullMethodName    = "/api.operate.App/DeleteContent"
-	App_FindContent_FullMethodName      = "/api.operate.App/FindContent"
-	App_GetContent_FullMethodName       = "/api.operate.App/GetContent"
-	App_RecommendContent_FullMethodName = "/api.operate.App/RecommendContent"
+	App_UpdateContentQuantity_FullMethodName = "/api.operate.App/UpdateContentQuantity"
 )
 
 // AppClient is the client API for App service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AppClient interface {
-	// 创建商品内容
-	CreateContent(ctx context.Context, in *CreateContentReq, opts ...grpc.CallOption) (*CreateContentRsp, error)
-	// 更新商品信息
-	UpdateContent(ctx context.Context, in *UpdateContentReq, opts ...grpc.CallOption) (*UpdateContentRsp, error)
-	// 删除商品
-	DeleteContent(ctx context.Context, in *DeleteContentReq, opts ...grpc.CallOption) (*DeleteContentRsp, error)
-	// 查找-批量查找（搜索框->ES返回索引->Mysql）
-	FindContent(ctx context.Context, in *FindContentReq, opts ...grpc.CallOption) (*FindContentRsp, error)
-	// 查找-单个查找(通过商品id精确查找某条商品的信息)
-	GetContent(ctx context.Context, in *GetContentReq, opts ...grpc.CallOption) (*GetContentRsp, error)
-	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
-	RecommendContent(ctx context.Context, in *RecommendContentReq, opts ...grpc.CallOption) (*RecommendContentRsp, error)
+	// 商品库存更新
+	UpdateContentQuantity(ctx context.Context, in *UpdateContentQuantityReq, opts ...grpc.CallOption) (*UpdateContentQuantityRsp, error)
 }
 
 type appClient struct {
@@ -53,60 +38,10 @@ func NewAppClient(cc grpc.ClientConnInterface) AppClient {
 	return &appClient{cc}
 }
 
-func (c *appClient) CreateContent(ctx context.Context, in *CreateContentReq, opts ...grpc.CallOption) (*CreateContentRsp, error) {
+func (c *appClient) UpdateContentQuantity(ctx context.Context, in *UpdateContentQuantityReq, opts ...grpc.CallOption) (*UpdateContentQuantityRsp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateContentRsp)
-	err := c.cc.Invoke(ctx, App_CreateContent_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appClient) UpdateContent(ctx context.Context, in *UpdateContentReq, opts ...grpc.CallOption) (*UpdateContentRsp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateContentRsp)
-	err := c.cc.Invoke(ctx, App_UpdateContent_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appClient) DeleteContent(ctx context.Context, in *DeleteContentReq, opts ...grpc.CallOption) (*DeleteContentRsp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteContentRsp)
-	err := c.cc.Invoke(ctx, App_DeleteContent_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appClient) FindContent(ctx context.Context, in *FindContentReq, opts ...grpc.CallOption) (*FindContentRsp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(FindContentRsp)
-	err := c.cc.Invoke(ctx, App_FindContent_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appClient) GetContent(ctx context.Context, in *GetContentReq, opts ...grpc.CallOption) (*GetContentRsp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetContentRsp)
-	err := c.cc.Invoke(ctx, App_GetContent_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appClient) RecommendContent(ctx context.Context, in *RecommendContentReq, opts ...grpc.CallOption) (*RecommendContentRsp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecommendContentRsp)
-	err := c.cc.Invoke(ctx, App_RecommendContent_FullMethodName, in, out, cOpts...)
+	out := new(UpdateContentQuantityRsp)
+	err := c.cc.Invoke(ctx, App_UpdateContentQuantity_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,18 +52,8 @@ func (c *appClient) RecommendContent(ctx context.Context, in *RecommendContentRe
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility.
 type AppServer interface {
-	// 创建商品内容
-	CreateContent(context.Context, *CreateContentReq) (*CreateContentRsp, error)
-	// 更新商品信息
-	UpdateContent(context.Context, *UpdateContentReq) (*UpdateContentRsp, error)
-	// 删除商品
-	DeleteContent(context.Context, *DeleteContentReq) (*DeleteContentRsp, error)
-	// 查找-批量查找（搜索框->ES返回索引->Mysql）
-	FindContent(context.Context, *FindContentReq) (*FindContentRsp, error)
-	// 查找-单个查找(通过商品id精确查找某条商品的信息)
-	GetContent(context.Context, *GetContentReq) (*GetContentRsp, error)
-	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
-	RecommendContent(context.Context, *RecommendContentReq) (*RecommendContentRsp, error)
+	// 商品库存更新
+	UpdateContentQuantity(context.Context, *UpdateContentQuantityReq) (*UpdateContentQuantityRsp, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -139,23 +64,8 @@ type AppServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAppServer struct{}
 
-func (UnimplementedAppServer) CreateContent(context.Context, *CreateContentReq) (*CreateContentRsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateContent not implemented")
-}
-func (UnimplementedAppServer) UpdateContent(context.Context, *UpdateContentReq) (*UpdateContentRsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateContent not implemented")
-}
-func (UnimplementedAppServer) DeleteContent(context.Context, *DeleteContentReq) (*DeleteContentRsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteContent not implemented")
-}
-func (UnimplementedAppServer) FindContent(context.Context, *FindContentReq) (*FindContentRsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindContent not implemented")
-}
-func (UnimplementedAppServer) GetContent(context.Context, *GetContentReq) (*GetContentRsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetContent not implemented")
-}
-func (UnimplementedAppServer) RecommendContent(context.Context, *RecommendContentReq) (*RecommendContentRsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RecommendContent not implemented")
+func (UnimplementedAppServer) UpdateContentQuantity(context.Context, *UpdateContentQuantityReq) (*UpdateContentQuantityRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateContentQuantity not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 func (UnimplementedAppServer) testEmbeddedByValue()             {}
@@ -178,110 +88,20 @@ func RegisterAppServer(s grpc.ServiceRegistrar, srv AppServer) {
 	s.RegisterService(&App_ServiceDesc, srv)
 }
 
-func _App_CreateContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateContentReq)
+func _App_UpdateContentQuantity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateContentQuantityReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AppServer).CreateContent(ctx, in)
+		return srv.(AppServer).UpdateContentQuantity(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: App_CreateContent_FullMethodName,
+		FullMethod: App_UpdateContentQuantity_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).CreateContent(ctx, req.(*CreateContentReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _App_UpdateContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateContentReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServer).UpdateContent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: App_UpdateContent_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).UpdateContent(ctx, req.(*UpdateContentReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _App_DeleteContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteContentReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServer).DeleteContent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: App_DeleteContent_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).DeleteContent(ctx, req.(*DeleteContentReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _App_FindContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FindContentReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServer).FindContent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: App_FindContent_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).FindContent(ctx, req.(*FindContentReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _App_GetContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetContentReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServer).GetContent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: App_GetContent_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).GetContent(ctx, req.(*GetContentReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _App_RecommendContent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RecommendContentReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServer).RecommendContent(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: App_RecommendContent_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).RecommendContent(ctx, req.(*RecommendContentReq))
+		return srv.(AppServer).UpdateContentQuantity(ctx, req.(*UpdateContentQuantityReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -294,28 +114,8 @@ var App_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AppServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateContent",
-			Handler:    _App_CreateContent_Handler,
-		},
-		{
-			MethodName: "UpdateContent",
-			Handler:    _App_UpdateContent_Handler,
-		},
-		{
-			MethodName: "DeleteContent",
-			Handler:    _App_DeleteContent_Handler,
-		},
-		{
-			MethodName: "FindContent",
-			Handler:    _App_FindContent_Handler,
-		},
-		{
-			MethodName: "GetContent",
-			Handler:    _App_GetContent_Handler,
-		},
-		{
-			MethodName: "RecommendContent",
-			Handler:    _App_RecommendContent_Handler,
+			MethodName: "UpdateContentQuantity",
+			Handler:    _App_UpdateContentQuantity_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

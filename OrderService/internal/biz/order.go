@@ -31,6 +31,13 @@ type OrderRepo interface {
 	IsExist(context.Context, uint64) (bool, error)
 	Delete(context.Context, uint64) error
 	Find(context.Context, *FindParams) ([]*Order, int64, error)
+	UpdateContentInfo(ctx context.Context, params []*UpdateContentItem) (bool, error)
+}
+
+type UpdateContentItem struct {
+	ProductId int64
+	Quantity  int32
+	IsAdd     bool
 }
 
 // FindParams 查找的参数
@@ -82,6 +89,14 @@ func (uc *OrderUseCase) FindOrder(ctx context.Context, params *FindParams) ([]*O
 		return nil, 0, err
 	}
 	return orders, total, nil
+}
+
+func (uc *OrderUseCase) UpdateContent(ctx context.Context, param []*UpdateContentItem) bool {
+	state, err := uc.repo.UpdateContentInfo(ctx, param)
+	if err != nil {
+		return false
+	}
+	return state
 }
 
 //执行组合逻辑

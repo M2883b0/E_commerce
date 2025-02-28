@@ -1,5 +1,5 @@
 services:
-  user_manage_mysql:
+  content_manage_mysql:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: 123456
@@ -21,7 +21,7 @@ services:
     ports:
       - "9100:9100"
     depends_on:
-      - user_manage_mysql
+      - content_manage_mysql
     restart: always
     networks:
       priNet:

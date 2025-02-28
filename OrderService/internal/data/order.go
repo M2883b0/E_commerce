@@ -166,15 +166,20 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 	return orders, total, nil
 }
 
-func (c *orderRepo) makeContentUpdate(ctx context.Context, params *biz.FindParams) ([]*biz.Order, int64, error) {
-
-	content := operate.Content{
-		Id: 0,
+func (c *orderRepo) UpdateContentInfo(ctx context.Context, params []*biz.UpdateContentItem) (bool, error) {
+	var updateItems []*operate.UpdateProductItem
+	for _, item := range params {
+		updateItems = append(updateItems, &operate.UpdateProductItem{
+			Id:       item.ProductId,
+			IsAdd:    item.IsAdd,
+			Quantity: item.Quantity,
+		})
 	}
-	_, err := c.data.contentClient.UpdateContent(ctx, &operate.UpdateContentReq{Content: &content})
+	response, err := c.data.contentClient.UpdateContentQuantity(context.Background(), &operate.UpdateContentQuantityReq{
+		UpdateProductItem: updateItems,
+	})
 	if err != nil {
-		return nil, 0, err
+		return false, err
 	}
-
-	return nil, 0, nil
+	return response.IsSuccess, nil
 }

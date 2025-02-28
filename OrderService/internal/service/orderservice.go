@@ -20,6 +20,8 @@ func NewOrderServiceService(uc *biz.OrderUseCase) *OrderServiceService {
 func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq) (*pb.PlaceOrderResp, error) {
 
 	var orderItemBiz []*biz.OrderItem
+	var updateItems []*biz.UpdateContentItem
+
 	for _, orderItemReq := range req.GetOrderItems() {
 		orderItemBiz = append(orderItemBiz,
 			&biz.OrderItem{
@@ -27,6 +29,11 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 				ProductId: orderItemReq.GetProductId(),
 				Cost:      orderItemReq.GetCost(),
 			})
+		updateItems = append(updateItems, &biz.UpdateContentItem{
+			ProductId: int64(orderItemReq.GetProductId()),
+			Quantity:  int32(orderItemReq.GetQuantity()),
+			IsAdd:     true,
+		})
 	}
 	order := &biz.Order{
 		UserID:        req.GetUserId(),
@@ -41,6 +48,11 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 
 	err := s.uc.CreateOrder(ctx, order)
 	if err != nil {
+		return nil, err
+	}
+
+	// 告知商品微服务 调整库存
+	if state := s.uc.UpdateContent(ctx, updateItems); state {
 		return nil, err
 	}
 
