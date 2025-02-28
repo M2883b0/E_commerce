@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	App_CreateContent_FullMethodName    = "/api.operate.App/CreateContent"
-	App_UpdateContent_FullMethodName    = "/api.operate.App/UpdateContent"
-	App_DeleteContent_FullMethodName    = "/api.operate.App/DeleteContent"
-	App_FindContent_FullMethodName      = "/api.operate.App/FindContent"
-	App_GetContent_FullMethodName       = "/api.operate.App/GetContent"
-	App_RecommendContent_FullMethodName = "/api.operate.App/RecommendContent"
+	App_CreateContent_FullMethodName         = "/api.operate.App/CreateContent"
+	App_UpdateContent_FullMethodName         = "/api.operate.App/UpdateContent"
+	App_DeleteContent_FullMethodName         = "/api.operate.App/DeleteContent"
+	App_FindContent_FullMethodName           = "/api.operate.App/FindContent"
+	App_GetContent_FullMethodName            = "/api.operate.App/GetContent"
+	App_RecommendContent_FullMethodName      = "/api.operate.App/RecommendContent"
+	App_UpdateContentQuantity_FullMethodName = "/api.operate.App/UpdateContentQuantity"
 )
 
 // AppClient is the client API for App service.
@@ -43,6 +44,8 @@ type AppClient interface {
 	GetContent(ctx context.Context, in *GetContentReq, opts ...grpc.CallOption) (*GetContentRsp, error)
 	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
 	RecommendContent(ctx context.Context, in *RecommendContentReq, opts ...grpc.CallOption) (*RecommendContentRsp, error)
+	// 商品库存更新
+	UpdateContentQuantity(ctx context.Context, in *UpdateContentQuantityReq, opts ...grpc.CallOption) (*UpdateContentQuantityRsp, error)
 }
 
 type appClient struct {
@@ -113,6 +116,16 @@ func (c *appClient) RecommendContent(ctx context.Context, in *RecommendContentRe
 	return out, nil
 }
 
+func (c *appClient) UpdateContentQuantity(ctx context.Context, in *UpdateContentQuantityReq, opts ...grpc.CallOption) (*UpdateContentQuantityRsp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateContentQuantityRsp)
+	err := c.cc.Invoke(ctx, App_UpdateContentQuantity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppServer is the server API for App service.
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility.
@@ -129,6 +142,8 @@ type AppServer interface {
 	GetContent(context.Context, *GetContentReq) (*GetContentRsp, error)
 	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
 	RecommendContent(context.Context, *RecommendContentReq) (*RecommendContentRsp, error)
+	// 商品库存更新
+	UpdateContentQuantity(context.Context, *UpdateContentQuantityReq) (*UpdateContentQuantityRsp, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -156,6 +171,9 @@ func (UnimplementedAppServer) GetContent(context.Context, *GetContentReq) (*GetC
 }
 func (UnimplementedAppServer) RecommendContent(context.Context, *RecommendContentReq) (*RecommendContentRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RecommendContent not implemented")
+}
+func (UnimplementedAppServer) UpdateContentQuantity(context.Context, *UpdateContentQuantityReq) (*UpdateContentQuantityRsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateContentQuantity not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 func (UnimplementedAppServer) testEmbeddedByValue()             {}
@@ -286,6 +304,24 @@ func _App_RecommendContent_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_UpdateContentQuantity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateContentQuantityReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).UpdateContentQuantity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_UpdateContentQuantity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).UpdateContentQuantity(ctx, req.(*UpdateContentQuantityReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // App_ServiceDesc is the grpc.ServiceDesc for App service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,6 +352,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RecommendContent",
 			Handler:    _App_RecommendContent_Handler,
+		},
+		{
+			MethodName: "UpdateContentQuantity",
+			Handler:    _App_UpdateContentQuantity_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

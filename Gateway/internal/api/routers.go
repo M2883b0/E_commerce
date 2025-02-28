@@ -24,8 +24,7 @@ func CmsRouter(r *gin.Engine) {
 	//创建【路由组/cms/】
 	cmsGroup := r.Group(rootPath + "/cms").Use(jwtAuth.Auth) //使用jwt中间件
 	{
-		//路径/api/cms/ping
-		cmsGroup.GET("/ping", cmsApp.Hello)
+		// 商品
 		//路径/api/cms/content/create
 		cmsGroup.POST("/content/create", cmsApp.ContentCreate)
 		//路径/api/cms/content/update
@@ -33,11 +32,12 @@ func CmsRouter(r *gin.Engine) {
 		//路径/api/cms/content/delete
 		cmsGroup.POST("/content/delete", cmsApp.ContentDelete)
 		//路径/api/cms/content/find
-		cmsGroup.POST("/content/find", cmsApp.ContentFind)
+		cmsGroup.POST("/content/find", cmsApp.ContentFind) //搜索框
 		//路径/api/cms/content/get
-		cmsGroup.POST("/content/get", cmsApp.ContentGet)
+		cmsGroup.POST("/content/get", cmsApp.ContentGet) //id查找商品信息
 
-		////路径/api/cms/user/create
+		// 用户
+		//路径/api/cms/user/create
 		//cmsGroup.POST("/user/create", cmsApp.UserCreate)
 		//路径/api/cms/content/update
 		cmsGroup.POST("/user/update", cmsApp.UserUpdate)

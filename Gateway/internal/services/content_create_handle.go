@@ -10,7 +10,7 @@ type ContentCreateReq struct {
 	Title       string   `json:"title" binding:"required"` // 内容标题
 	Description string   `json:"description"`              // 内容描述
 	PictureUrl  string   `json:"picture_url"`
-	Price       uint32   `json:"price"`
+	Price       float32  `json:"price"`
 	Quantity    uint32   `json:"quantity"`
 	Categories  []string `json:"categories"`
 }
