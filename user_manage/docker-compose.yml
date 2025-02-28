@@ -14,8 +14,6 @@ services:
     environment:
       ETCD_ADDR: "etcd-server:2379"
       MYSQL_ADDR: "root:123456@tcp(user_manage_mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local"
-    ports:
-      - "9100:9100"
     depends_on:
       - user_manage_mysql
     restart: always
