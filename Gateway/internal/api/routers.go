@@ -48,7 +48,7 @@ func CmsRouter(r *gin.Engine) {
 
 		// order
 		cmsGroup.POST("/order/place_order", cmsApp.PlaceOrder)
-		cmsGroup.GET("/order/ListOrder", cmsApp.ListOrder)
+		cmsGroup.GET("/order/list_order", cmsApp.ListOrder)
 	}
 	//创建不需要鉴权的【路由组】例如注册、登录
 	noAuthGroup := r.Group(rootPath + "/noauth")
