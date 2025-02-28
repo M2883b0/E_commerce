@@ -44,7 +44,6 @@ func (c *orderRepo) Create(ctx context.Context, order *biz.Order) error {
 	detail := OrderInfo{
 		UserID:        order.UserID,
 		PhoneNumber:   order.PhoneNumber,
-		UserCurrency:  order.UserCurrency,
 		IsPaid:        order.IsPaid,
 		StreetAddress: order.StreetAddress,
 		City:          order.City,
@@ -72,7 +71,6 @@ func (c *orderRepo) Update(ctx context.Context, id uint64, order *biz.Order) err
 	detail := OrderInfo{
 		UserID:        order.UserID,
 		PhoneNumber:   order.PhoneNumber,
-		UserCurrency:  order.UserCurrency,
 		IsPaid:        order.IsPaid,
 		StreetAddress: order.StreetAddress,
 		City:          order.City,
@@ -155,7 +153,6 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 		orders = append(orders, &biz.Order{
 			OrderId:       uint64(r.ID),
 			UserID:        r.UserID,
-			UserCurrency:  r.UserCurrency,
 			PhoneNumber:   r.PhoneNumber,
 			IsPaid:        r.IsPaid,
 			StreetAddress: r.StreetAddress,

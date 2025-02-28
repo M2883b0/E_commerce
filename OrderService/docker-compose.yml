@@ -1,34 +1,28 @@
 services:
-  mysql:
+  order-service-mysql:
     image: mysql:8.0
-    container_name: order_mysql
+    container_name: order-service-mysql
     environment:
       MYSQL_ROOT_PASSWORD: order_service
       MYSQL_DATABASE: order_db
       MYSQL_CHARSET: utf8mb4
-      MYSQL_COLLATION: utf8mb4_0900_ai_ci
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-#    ports:
-#      - "3306:3306"
-    volumes:
-      - ./data/mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     networks:
-      - priNet
+      - server_net
   order-service:
     build:
       context: .
       dockerfile: ./Dockerfile
-    ports:
-      - "9000:9000"
+    environment:
+      ETCD_ADDR: "etcd-server:2379"
+      MYSQL_ADDR: "root:order_service@tcp(order-service-mysql:3306)/order_db?charset=utf8mb4&parseTime=True&loc=Local"
     depends_on:
-      - mysql
+      - order-service-mysql
     networks:
-      - priNet
+      - server_net
 networks:
-  priNet:
-    driver: bridge
-    internal: true
+  server_net:
+    external: true
 
 
