@@ -51,9 +51,12 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	db.SetMaxIdleConns(50)  //最大空闲连接数，一般为最大连接数/2
 
 	// 注册商品微服务 client
-
+	etcdAddr := os.Getenv("ETCD_ADDR")
+	if etcdAddr == "" {
+		etcdAddr = "127.0.0.1:2379" // 测试环境
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{etcdAddr}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
