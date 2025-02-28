@@ -47,7 +47,7 @@ func CmsRouter(r *gin.Engine) {
 		cmsGroup.POST("/user/find", cmsApp.UserFind)
 
 		// order
-		cmsGroup.GET("/order/place_order", cmsApp.PlaceOrder)
+		cmsGroup.POST("/order/place_order", cmsApp.PlaceOrder)
 		cmsGroup.GET("/order/ListOrder", cmsApp.ListOrder)
 	}
 	//创建不需要鉴权的【路由组】例如注册、登录
