@@ -2,8 +2,6 @@ services:
   order-service-mysql:
     image: mysql:8.0
     container_name: order-service-mysql
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: order_service
       MYSQL_DATABASE: order_db
@@ -15,8 +13,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    ports:
-      - "9000:9000"
     environment:
       ETCD_ADDR: "etcd-server:2379"
       MYSQL_ADDR: "root:order_service@tcp(order-service-mysql:3306)/order_db?charset=utf8mb4&parseTime=True&loc=Local"
