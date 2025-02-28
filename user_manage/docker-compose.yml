@@ -18,6 +18,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    environment:
+      ETCD_ADDR: "172.30.48.1:2379"
     ports:
       - "9100:9100"
     depends_on:

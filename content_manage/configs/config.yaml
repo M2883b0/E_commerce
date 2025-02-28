@@ -16,10 +16,10 @@ data:
     addr: 172.30.48.1:2379
     read_timeout: 0.2s
     write_timeout: 0.2s
-  elasticsearch:
-    addresses:
-      - "http://127.0.0.1:9200"  #地址
-    username: "elastic" #用户
-    password: "123456"  #密码
-    timeout: 10s  # 超时时间
+#  elasticsearch:
+#    addresses:
+#      - "http://127.0.0.1:9200"  #地址
+#    username: "elastic" #用户
+#    password: "123456"  #密码
+#    timeout: 10s  # 超时时间
 
