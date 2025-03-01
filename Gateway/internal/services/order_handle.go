@@ -3,6 +3,7 @@ package services
 import (
 	"Gateway/internal/api/order"
 	"github.com/gin-gonic/gin"
+	"github.com/go-kratos/kratos/v2/log"
 	"net/http"
 )
 
@@ -36,18 +37,18 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 	var orderItems []*order.OrderItem
 	for _, item := range req.OrderItems {
 		orderItems = append(orderItems, &order.OrderItem{
-			ProductId: item.ProductId,
-			Quantity:  item.Quantity,
+			ProductId: uint64(item.ProductId),
+			Quantity:  uint32(item.Quantity),
 			Cost:      item.Cost,
 		})
 	}
 	rsp, err := c.orderServiceClient.PlaceOrder(ctx, &order.PlaceOrderReq{
-		UserId: req.UserId,
+		UserId: uint64(req.UserId),
 		Address: &order.Address{
 			StreetAddress: req.Address_.StreetAddress,
 			City:          req.Address_.City,
 			Country:       req.Address_.Country,
-			ZipCode:       req.Address_.ZipCode,
+			ZipCode:       uint32(req.Address_.ZipCode),
 		},
 		PhoneNumber: req.PhoneNumber,
 		OrderItems:  orderItems,
@@ -76,8 +77,34 @@ func (c *CmsAPP) ListOrder(ctx *gin.Context) {
 	}
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.orderServiceClient.ListOrder(ctx, &order.ListOrderReq{
-		UserId: req.UserId,
+		UserId: uint64(req.UserId),
 	})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "ok",
+		"data": rsp,
+	})
+}
+
+type CancelOrderReq struct {
+	UserId  int64 `json:"user_id" binding:"required"`
+	OrderId int64 `json:"order_id" binding:"required"` // 内容标题
+}
+
+func (c *CmsAPP) CancelOrder(ctx *gin.Context) {
+	var req CancelOrderReq
+	userId, _ := ctx.Get("user_id")
+	log.Infof("================================this is user_id %+v==============================================", userId)
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
+	rsp, err := c.orderServiceClient.MarkOrderCancel(ctx, &order.MarkOrderCancelReq{})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

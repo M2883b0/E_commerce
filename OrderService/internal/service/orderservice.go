@@ -38,7 +38,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 	order := &biz.Order{
 		UserID:        req.GetUserId(),
 		PhoneNumber:   req.GetPhoneNumber(),
-		IsPaid:        "waiting",
+		OrderState:    "waiting",
 		StreetAddress: req.GetAddress().GetStreetAddress(),
 		City:          req.GetAddress().GetCity(),
 		Country:       req.GetAddress().GetCountry(),
@@ -64,7 +64,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderReq) (*pb.ListOrderResp, error) {
 	var findParam = &biz.FindParams{
 		ID:          req.GetUserId(),
-		IsPaid:      nil,
+		OrderState:  "",
 		Page:        0,
 		PageSize:    0,
 		PhoneNumber: "",
@@ -95,7 +95,7 @@ func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderRe
 			UserId:      o.UserID,
 			PhoneNumber: o.PhoneNumber,
 			Address:     &address,
-			PayState:    o.IsPaid,
+			OrderState:  o.OrderState,
 			OrderItems:  orderItems,
 		})
 	}
@@ -106,12 +106,24 @@ func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderRe
 }
 func (s *OrderServiceService) MarkOrderPaid(ctx context.Context, req *pb.MarkOrderPaidReq) (*pb.MarkOrderPaidResp, error) {
 	var order = &biz.Order{
-		OrderId: req.GetOrderId(),
-		IsPaid:  "paid",
+		OrderId:    req.GetOrderId(),
+		OrderState: "paid",
 	}
 	err := s.uc.UpdateOrder(ctx, order)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.MarkOrderPaidResp{}, nil
+}
+
+func (s *OrderServiceService) MarkOrderCancel(ctx context.Context, req *pb.MarkOrderCancelReq) (*pb.MarkOrderCancelResp, error) {
+	var order = &biz.Order{
+		OrderId:    req.GetOrderId(),
+		OrderState: "cancel",
+	}
+	err := s.uc.UpdateOrder(ctx, order)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.MarkOrderCancelResp{}, nil
 }

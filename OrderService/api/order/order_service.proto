@@ -10,6 +10,7 @@ service OrderService {
 	rpc PlaceOrder(PlaceOrderReq) returns (PlaceOrderResp) {}
 	rpc ListOrder(ListOrderReq) returns (ListOrderResp) {}
 	rpc MarkOrderPaid(MarkOrderPaidReq) returns (MarkOrderPaidResp) {}
+	rpc MarkOrderCancel(MarkOrderCancelReq) returns (MarkOrderCancelResp) {}
 }
 
 // PlaceOrderReq
@@ -50,7 +51,7 @@ message Order {
 	uint64 user_id = 3;
 	Address address = 5;
 	string phone_number = 6;
-	string pay_state = 7;
+	string order_state = 7;
 }
 
 message ListOrderResp {
@@ -58,8 +59,21 @@ message ListOrderResp {
 	repeated Order orders = 2;
 }
 
+// MarkOrderPaidReq
 message MarkOrderPaidReq {
 	uint64 order_id = 1;
 }
 
 message MarkOrderPaidResp {}
+
+
+// MarkOrderCancelReq
+message MarkOrderCancelReq {
+	uint64 user_id = 1;
+	uint64 order_id = 2;
+}
+
+message MarkOrderCancelResp {
+	bool state = 1;
+}
+
