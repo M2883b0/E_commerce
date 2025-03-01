@@ -49,7 +49,7 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	db.SetMaxOpenConns(100) //最大连接数
 	db.SetMaxIdleConns(50)  //最大空闲连接数，一般为最大连接数/2
 	var EsCfg elasticsearch.Config
-	if os.Getenv("ELASTIC_PASSWORD") == "" {
+	if os.Getenv("ELASTIC_USERNAME") == "" {
 		////ES初始化
 		EsCfg = elasticsearch.Config{
 			Addresses: []string{"https://127.0.0.1:9200"}, // 从配置获取ES地址

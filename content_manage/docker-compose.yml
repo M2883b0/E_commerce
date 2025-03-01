@@ -7,7 +7,7 @@ services:
       MYSQL_CHARSET: utf8mb4
     networks:
       server_net:
-  user-manage:
+  content-manage:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -17,9 +17,9 @@ services:
       JWT_SECRET: "123456"
       ELASTIC_ADDR: "https://elastic-search:9200"
       ELASTIC_USERNAME: "elastic"
-      ELASTIC_PASSWORD: "elastic"
+      ELASTIC_PASSWORD: ""
     ports:
-      - "9100:9100"
+      - "9010:9000"
     depends_on:
       - content_manage_mysql
     restart: always
@@ -29,12 +29,12 @@ services:
     image: elasticsearch:8.11.4
     environment:
       discovery.type: "single-node"
-      xpack.security.enabled: "true"
       ELASTIC_PASSWORD: "elastic"
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
     volumes:
-      - ./esdata:/usr/share/elasticsearch/data
       - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      server_net:
 networks:
   server_net:
     external: true
