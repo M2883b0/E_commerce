@@ -9,10 +9,14 @@ type Auth struct {
 	User_id string
 }
 
+type Verfy struct {
+	Token string
+}
+
 // GreeterRepo is a Greater repo.
 type AuthRepo interface {
 	SetToken(context.Context, *Auth) (string, error)
-	CheckToken(context.Context, *Auth) (bool, string, error)
+	CheckToken(context.Context, *Verfy) (bool, string, string, error)
 }
 
 type AuthUsecase struct {
@@ -27,7 +31,7 @@ func NewAuthUsecase(repo AuthRepo, logger log.Logger) *AuthUsecase {
 func (uc *AuthUsecase) Set_Token(ctx context.Context, a *Auth) (string, error) {
 	return uc.repo.SetToken(ctx, a)
 }
-func (uc *AuthUsecase) Check_Token(ctx context.Context, a *Auth) (bool, string, error) {
+func (uc *AuthUsecase) Check_Token(ctx context.Context, a *Verfy) (bool, string, string, error) {
 	return uc.repo.CheckToken(ctx, a)
 }
 

@@ -4,6 +4,7 @@ import (
 	"Gateway/internal/api/operate"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -49,7 +50,7 @@ func (cms *CmsAPP) Login(c *gin.Context) {
 	}
 	sessionID := ""
 	if rsp.Code == 0 { //如果没报错,登录成功，就生成sessionID
-		jwt_rsp, err := cms.operateAuthClient.DeliverTokenByRPC(c, &operate.DeliverTokenReq{UserId: rsp.User.PhoneNumber})
+		jwt_rsp, err := cms.operateAuthClient.DeliverTokenByRPC(c, &operate.DeliverTokenReq{UserId: strconv.Itoa(int(rsp.User.Id))})
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

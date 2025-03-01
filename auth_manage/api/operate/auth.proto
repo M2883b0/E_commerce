@@ -28,4 +28,5 @@ message DeliveryResp {
 message VerifyResp {
 	bool res = 1;
 	string msg = 2;
+	string user_id = 3;
 }
