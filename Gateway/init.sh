@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 备份原有的 sources.list 文件
-cp /etc/apt/sources.list /etc/apt/sources.list.bak
+rm /etc/apt/sources.list
 
 # 使用阿里云的 Debian 镜像源
 cat > /etc/apt/sources.list <<EOF
