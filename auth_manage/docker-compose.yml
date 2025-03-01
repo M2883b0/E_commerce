@@ -1,12 +1,4 @@
 services:
-  auth_manage_mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: ec
-      MYSQL_CHARSET: utf8mb4
-    networks:
-      server_net:
   auth-manage:
     build:
       context: .
