@@ -10,7 +10,7 @@ import (
 )
 
 type MyClaims struct {
-	Username string `json:"user_name"` //自定义Payload有效载荷字段
+	Username int64 `json:"user_id"` //自定义Payload有效载荷字段
 	//Age      string `json:"age"`
 	jwt.RegisteredClaims //提供标准验证功能,固定写法
 }
@@ -32,7 +32,7 @@ func NewAuthRepo(data *Data, logger log.Logger) biz.AuthRepo {
 }
 
 func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
-	if a.User_id == "" {
+	if a.User_id == 0 {
 		return "", errors.New("user_id不能为空")
 	}
 	SetClaims := MyClaims{
@@ -58,26 +58,26 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 	return token, nil
 }
 
-func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, string, error) {
+func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, int64, error) {
 	if a.Token == "" {
-		return false, "jwt 内容为空", "", nil
+		return false, "jwt 内容为空", 0, nil
 	}
 	//解析、验证并返回token。
 	tokenObj, err := jwt.ParseWithClaims(a.Token, &MyClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(key), nil //key 为自定义的密钥
 	})
 	if err != nil {
-		return false, "jwt 解析错误", "", nil
+		return false, "jwt 解析错误", 0, nil
 	}
 	//类型断言获取Claims
 	claims, ok := tokenObj.Claims.(*MyClaims)
 	if !(ok && tokenObj.Valid) {
-		return false, "jwt 鉴权失败", "", nil
+		return false, "jwt 鉴权失败", 0, nil
 	}
 	//信息鉴权成功
 	//还需要判断token是否过期
 	if time.Now().Unix() > claims.ExpiresAt.Unix() {
-		return false, "jwt 时间过期", "", nil
+		return false, "jwt 时间过期", 0, nil
 	}
 	return true, "jwt 鉴权成功", claims.Username, nil
 }

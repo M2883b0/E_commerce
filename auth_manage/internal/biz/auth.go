@@ -6,7 +6,7 @@ import (
 )
 
 type Auth struct {
-	User_id string
+	User_id int64
 }
 
 type Verfy struct {
@@ -16,7 +16,7 @@ type Verfy struct {
 // GreeterRepo is a Greater repo.
 type AuthRepo interface {
 	SetToken(context.Context, *Auth) (string, error)
-	CheckToken(context.Context, *Verfy) (bool, string, string, error)
+	CheckToken(context.Context, *Verfy) (bool, string, int64, error)
 }
 
 type AuthUsecase struct {
@@ -31,7 +31,7 @@ func NewAuthUsecase(repo AuthRepo, logger log.Logger) *AuthUsecase {
 func (uc *AuthUsecase) Set_Token(ctx context.Context, a *Auth) (string, error) {
 	return uc.repo.SetToken(ctx, a)
 }
-func (uc *AuthUsecase) Check_Token(ctx context.Context, a *Verfy) (bool, string, string, error) {
+func (uc *AuthUsecase) Check_Token(ctx context.Context, a *Verfy) (bool, string, int64, error) {
 	return uc.repo.CheckToken(ctx, a)
 }
 

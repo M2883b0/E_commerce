@@ -14,7 +14,7 @@ service Auth {
 }
 
 message DeliverTokenReq {
-	string  user_id= 1;
+	int64 user_id= 1;
 }
 
 message VerifyTokenReq {
@@ -28,5 +28,5 @@ message DeliveryResp {
 message VerifyResp {
 	bool res = 1;
 	string msg = 2;
-	string user_id = 3;
+	int64 user_id = 3;
 }
