@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package api.cart;
+
+option go_package = "CartService/api/cart;cart";
+option java_multiple_files = true;
+option java_package = "api.cart";
+
+service CartService {
+	rpc AddItem(AddItemReq) returns (AddItemResp) {}
+	rpc UpdateItem(UpdateItemReq) returns (UpdateItemResp) {}
+	rpc GetCart(GetCartReq) returns (GetCartResp) {}
+	rpc EmptyCart(EmptyCartReq) returns (EmptyCartResp) {}
+}
+
+message CartItem {
+	uint32 product_id = 1;
+	int32  quantity = 2;
+
+	string title = 3;
+	// 商品描述
+	string description = 4;
+	// 图片url
+	string picture_url = 5;
+	// 商品价格
+	float price = 6;
+	// 商品库存>=0
+	uint32 stored_quantity = 7;
+	// 商品分类（可多个分类）
+	repeated string categories = 8;
+
+}
+
+// AddItem 接口请求返回结构
+message AddItemReq {
+	uint32 user_id = 1;
+	CartItem item = 2;
+}
+
+message AddItemResp {
+	bool State = 1;
+}
+
+// UpdateItem 接口请求返回结构
+message UpdateItemReq {
+	uint32 user_id = 1;
+	CartItem item = 2;
+}
+
+message UpdateItemResp {
+	bool State = 1;
+}
+
+
+// EmptyCart 接口请求返回结构
+message EmptyCartReq {
+	uint32 user_id = 1;
+}
+message EmptyCartResp {
+	bool State = 1;
+}
+
+// GetCart 接口请求返回结构
+message GetCartReq {
+	uint32 user_id = 1;
+}
+
+message GetCartResp {
+	uint64 total = 1;
+	repeated CartItem items = 2;
+}

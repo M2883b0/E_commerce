@@ -20,7 +20,7 @@ type OrderInfo struct {
 	gorm.Model
 	UserID        uint64         `gorm:"user_id"`
 	PhoneNumber   string         `gorm:"phone_number"`
-	IsPaid        string         `gorm:"is_paid"`
+	OrderState    string         `gorm:"order_state"`
 	StreetAddress string         `gorm:"street_address"`
 	City          string         `gorm:"city"`
 	Country       string         `gorm:"country"`
@@ -45,7 +45,7 @@ func (c *orderRepo) Create(ctx context.Context, order *biz.Order) error {
 	detail := OrderInfo{
 		UserID:        order.UserID,
 		PhoneNumber:   order.PhoneNumber,
-		IsPaid:        order.IsPaid,
+		OrderState:    order.OrderState,
 		StreetAddress: order.StreetAddress,
 		City:          order.City,
 		Country:       order.Country,
@@ -72,7 +72,7 @@ func (c *orderRepo) Update(ctx context.Context, id uint64, order *biz.Order) err
 	detail := OrderInfo{
 		UserID:        order.UserID,
 		PhoneNumber:   order.PhoneNumber,
-		IsPaid:        order.IsPaid,
+		OrderState:    order.OrderState,
 		StreetAddress: order.StreetAddress,
 		City:          order.City,
 		Country:       order.Country,
@@ -122,8 +122,8 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 	if params.PhoneNumber != "" {
 		query = query.Where("phone_number = ?", params.PhoneNumber)
 	}
-	if params.IsPaid != nil {
-		query = query.Where("is_paid = ?", *params.IsPaid)
+	if params.OrderState != "" {
+		query = query.Where("order_state = ?", params.OrderState)
 	}
 	// 总数
 	var total int64
@@ -155,7 +155,7 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 			OrderId:       uint64(r.ID),
 			UserID:        r.UserID,
 			PhoneNumber:   r.PhoneNumber,
-			IsPaid:        r.IsPaid,
+			OrderState:    r.OrderState,
 			StreetAddress: r.StreetAddress,
 			City:          r.City,
 			Country:       r.Country,

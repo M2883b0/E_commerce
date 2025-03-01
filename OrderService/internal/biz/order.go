@@ -11,7 +11,7 @@ type Order struct {
 	OrderId       uint64       `json:"order_id"`
 	UserID        uint64       `json:"user_id"`
 	PhoneNumber   string       `json:"phone_number"`
-	IsPaid        string       `json:"is_paid"`
+	OrderState    string       `json:"order_state"`
 	StreetAddress string       `json:"street_address"`
 	City          string       `json:"city"`
 	Country       string       `json:"country"`
@@ -44,7 +44,7 @@ type UpdateContentItem struct {
 type FindParams struct {
 	ID          uint64
 	PhoneNumber string
-	IsPaid      *bool
+	OrderState  string
 	Page        uint32
 	PageSize    uint32
 }
