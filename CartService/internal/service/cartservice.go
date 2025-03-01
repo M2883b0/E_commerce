@@ -23,7 +23,7 @@ func (s *CartServiceService) AddItem(ctx context.Context, req *pb.AddItemReq) (*
 		Quantity:  uint64(req.GetItem().GetQuantity()),
 	}
 
-	if exist, _ := s.uc.IsExist(ctx, &item); exist {
+	if s.uc.IsExist(ctx, &item) {
 		cartItems, _, err := s.uc.FindCartItem(ctx, &biz.FindParams{
 			UserId:    item.UserID,
 			ProductId: item.ProductID,
@@ -53,6 +53,11 @@ func (s *CartServiceService) UpdateItem(ctx context.Context, req *pb.UpdateItemR
 		UserID:    uint64(req.GetUserId()),
 		ProductID: uint64(req.GetItem().GetProductId()),
 		Quantity:  uint64(req.GetItem().GetQuantity()),
+	}
+	if !s.uc.IsExist(ctx, &item) {
+		return &pb.UpdateItemResp{
+			State: false,
+		}, nil
 	}
 
 	if item.Quantity == 0 {
@@ -90,9 +95,19 @@ func (s *CartServiceService) GetCart(ctx context.Context, req *pb.GetCartReq) (*
 
 	var cartItemsResp []*pb.CartItem
 	for _, cartItem := range cartItems {
+		contentInfo, e := s.uc.GetContentInfoById(ctx, cartItem.ProductID)
+		if e != nil {
+			contentInfo = &biz.ContentInfo{}
+		}
 		cartItemsResp = append(cartItemsResp, &pb.CartItem{
-			ProductId: uint32(cartItem.ProductID),
-			Quantity:  int32(cartItem.Quantity),
+			ProductId:      uint32(cartItem.ProductID),
+			Quantity:       int32(cartItem.Quantity),
+			Title:          contentInfo.Title,
+			Description:    contentInfo.Description,
+			PictureUrl:     contentInfo.PictureUrl,
+			Price:          contentInfo.Price,
+			StoredQuantity: contentInfo.ServerQuantity,
+			Categories:     contentInfo.Categories,
 		})
 	}
 	log.Infof("GetCart: %+v", cartItemsResp[0])

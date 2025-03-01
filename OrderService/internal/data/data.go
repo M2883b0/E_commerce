@@ -82,7 +82,6 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 		panic(err)
 	}
 	contentClient := operate.NewAppClient(conn)
-
 	return &Data{
 		db:            mysqlDB,
 		contentClient: contentClient,

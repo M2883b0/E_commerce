@@ -1,8 +1,7 @@
 package server
 
 import (
-	cart2 "CartService/api/cart"
-	v1 "CartService/api/helloworld/v1"
+	v1 "CartService/api/cart"
 	"CartService/internal/conf"
 	"CartService/internal/service"
 
@@ -12,7 +11,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, cart *service.CartServiceService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, cart *service.CartServiceService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,7 +27,7 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, cart *servic
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterGreeterServer(srv, greeter)
-	cart2.RegisterCartServiceServer(srv, cart)
+
+	v1.RegisterCartServiceServer(srv, cart)
 	return srv
 }

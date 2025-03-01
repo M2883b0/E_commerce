@@ -1,6 +1,7 @@
 package data
 
 import (
+	"CartService/api/operate"
 	"CartService/internal/biz"
 	"context"
 	"errors"
@@ -56,18 +57,18 @@ func (c *cartRepo) Update(ctx context.Context, cartItem *biz.CartItem) error {
 	return nil
 }
 
-func (c *cartRepo) IsExist(ctx context.Context, cartItem *biz.CartItem) (bool, error) {
+func (c *cartRepo) IsExist(ctx context.Context, cartItem *biz.CartItem) bool {
 	db := c.data.db
 	var detail CartInfo
 	err := db.Where("user_id = ? and product_id = ?", cartItem.UserID, cartItem.ProductID).First(&detail).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
+		return false
 	}
 	if err != nil {
 		c.log.WithContext(ctx).Infof("Order isExist = [%v]", err)
-		return false, err
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (c *cartRepo) Delete(ctx context.Context, cartItem *biz.CartItem) error {
@@ -120,4 +121,22 @@ func (c *cartRepo) FindCartByUserId(ctx context.Context, params *biz.FindParams)
 		})
 	}
 	return cartItems, total, nil
+}
+
+func (c *cartRepo) GetContentInfoById(ctx context.Context, id uint64) (*biz.ContentInfo, error) {
+	response, err := c.data.contentClient.GetContent(ctx, &operate.GetContentReq{Id: int64(id)})
+	if err != nil {
+		return nil, err
+	}
+	var contentInfo = biz.ContentInfo{
+		Id:             response.Contents.Id,
+		Title:          response.Contents.Title,
+		Description:    response.Contents.Description,
+		PictureUrl:     response.Contents.PictureUrl,
+		Price:          response.Contents.Price,
+		ServerQuantity: response.Contents.Quantity,
+		Categories:     response.Contents.GetCategories(),
+	}
+
+	return &contentInfo, nil
 }

@@ -16,6 +16,19 @@ service CartService {
 message CartItem {
 	uint32 product_id = 1;
 	int32  quantity = 2;
+
+	string title = 3;
+	// 商品描述
+	string description = 4;
+	// 图片url
+	string picture_url = 5;
+	// 商品价格
+	float price = 6;
+	// 商品库存>=0
+	uint32 stored_quantity = 7;
+	// 商品分类（可多个分类）
+	repeated string categories = 8;
+
 }
 
 // AddItem 接口请求返回结构

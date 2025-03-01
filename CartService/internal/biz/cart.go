@@ -13,12 +13,23 @@ type CartItem struct {
 	Quantity  uint64
 }
 
+type ContentInfo struct {
+	Id             int64
+	Title          string
+	Description    string
+	PictureUrl     string
+	Price          float32
+	ServerQuantity uint32
+	Categories     []string
+}
+
 type CartRepo interface {
 	Create(context.Context, *CartItem) error
 	Update(context.Context, *CartItem) error
-	IsExist(context.Context, *CartItem) (bool, error)
+	IsExist(context.Context, *CartItem) bool
 	Delete(context.Context, *CartItem) error
 	FindCartByUserId(context.Context, *FindParams) ([]*CartItem, int64, error)
+	GetContentInfoById(context.Context, uint64) (*ContentInfo, error)
 }
 
 type UpdateContentItem struct {
@@ -36,14 +47,14 @@ func NewCartUseCase(repo CartRepo, logger log.Logger) *CartUseCase {
 	return &CartUseCase{repo: repo, log: log.NewHelper(logger)}
 }
 
-func (uc *CartUseCase) IsExist(ctx context.Context, g *CartItem) (bool, error) {
+func (uc *CartUseCase) IsExist(ctx context.Context, g *CartItem) bool {
 	fmt.Print(ctx, g)
 	return uc.repo.IsExist(ctx, g)
 }
 
 func (uc *CartUseCase) CreateCartItem(ctx context.Context, g *CartItem) error {
 	uc.log.WithContext(ctx).Infof("CreateCartItem: %+v", g)
-	if exist, _ := uc.repo.IsExist(ctx, g); exist {
+	if uc.repo.IsExist(ctx, g) {
 		return uc.UpdateCartItem(ctx, g)
 	}
 	return uc.repo.Create(ctx, g)
@@ -55,10 +66,7 @@ func (uc *CartUseCase) UpdateCartItem(ctx context.Context, g *CartItem) error {
 }
 
 func (uc *CartUseCase) DeleteCartItem(ctx context.Context, g *CartItem) error {
-	ok, err := uc.repo.IsExist(ctx, g)
-	if err != nil {
-		return err
-	}
+	ok := uc.repo.IsExist(ctx, g)
 	if !ok {
 		return errors.New("cart item no exist")
 	}
@@ -99,6 +107,10 @@ func (uc *CartUseCase) FindCartItem(ctx context.Context, param *FindParams) ([]*
 		return nil, 0, err
 	}
 	return cartItems, total, nil
+}
+
+func (uc *CartUseCase) GetContentInfoById(ctx context.Context, id uint64) (*ContentInfo, error) {
+	return uc.repo.GetContentInfoById(ctx, id)
 }
 
 //执行组合逻辑

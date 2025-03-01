@@ -17,13 +17,13 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo, NewCartRepo)
+var ProviderSet = wire.NewSet(NewData, NewCartRepo)
 
 // Data .
 type Data struct {
 	// TODO wrapped database client
 	db            *gorm.DB
-	contentClient *operate.AppClient
+	contentClient operate.AppClient
 }
 
 // NewData .
@@ -85,6 +85,6 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 
 	return &Data{
 		db:            mysqlDB,
-		contentClient: &contentClient,
+		contentClient: contentClient,
 	}, cleanup, nil
 }
