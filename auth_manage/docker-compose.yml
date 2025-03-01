@@ -5,8 +5,6 @@ services:
       dockerfile: ./Dockerfile
     environment:
       ETCD_ADDR: "etcd-server:2379"
-    depends_on:
-      - auth_manage_mysql
     restart:
       always
     networks:

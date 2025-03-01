@@ -17,8 +17,8 @@ services:
       ETCD_ADDR: "etcd-server:2379"
 #      MYSQL_ADDR: "root:123456@tcp(order-service-mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local"
       MYSQL_ADDR: "root:123456@tcp(user_manage_mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local"
-    depends_on:
-      - order-service-mysql
+#    depends_on:
+#      - order-service-mysql
     restart: always
     networks:
       - server_net
