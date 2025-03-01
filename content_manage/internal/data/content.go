@@ -104,6 +104,8 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 		c.log.Errorf("content create error = %v", err)
 		return err
 	}
+	//立马更新商品的图片url名字，为ID.jpg
+	db.Model(&detail).Where("id = ?", detail.ID).Update("picture_url", fmt.Sprintf("%d.jpg", detail.ID))
 	return nil
 }
 
