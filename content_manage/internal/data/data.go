@@ -47,28 +47,14 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	db.SetMaxOpenConns(100) //最大连接数
 	db.SetMaxIdleConns(50)  //最大空闲连接数，一般为最大连接数/2
 	var EsCfg elasticsearch.Config
-	if os.Getenv("ELASTIC_USERNAME") == "" {
+	if os.Getenv("ELASTIC_ADDR") == "" {
 		////ES初始化
 		EsCfg = elasticsearch.Config{
 			Addresses: []string{"http://127.0.0.1:9200"}, // 从配置获取ES地址
-			//Username:  "elastic",
-			//Password:  "6yrXKjLlSXY4V_lCnMss",
-			//Transport: &http.Transport{
-			//	TLSClientConfig: &tls.Config{
-			//		InsecureSkipVerify: true, // 禁用TLS验证
-			//	},
-			//},
 		}
 	} else {
 		EsCfg = elasticsearch.Config{
 			Addresses: []string{os.Getenv("ELASTIC_ADDR")}, // 从配置获取ES地址
-			//Username:  os.Getenv("ELASTIC_USERNAME"),
-			//Password:  os.Getenv("ELASTIC_PASSWORD"),
-			//Transport: &http.Transport{
-			//	TLSClientConfig: &tls.Config{
-			//		InsecureSkipVerify: true, // 禁用TLS验证
-			//	},
-			//},
 		}
 	}
 

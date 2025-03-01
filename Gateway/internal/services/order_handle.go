@@ -56,6 +56,7 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "ok",
