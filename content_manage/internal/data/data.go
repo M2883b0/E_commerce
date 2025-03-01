@@ -3,7 +3,6 @@ package data
 import (
 	"content_manage/internal/conf"
 	"context"
-	"crypto/tls"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
@@ -11,7 +10,6 @@ import (
 	"github.com/google/wire"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -52,25 +50,25 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	if os.Getenv("ELASTIC_USERNAME") == "" {
 		////ES初始化
 		EsCfg = elasticsearch.Config{
-			Addresses: []string{"https://127.0.0.1:9200"}, // 从配置获取ES地址
-			Username:  "elastic",
-			Password:  "6yrXKjLlSXY4V_lCnMss",
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true, // 禁用TLS验证
-				},
-			},
+			Addresses: []string{"http://127.0.0.1:9200"}, // 从配置获取ES地址
+			//Username:  "elastic",
+			//Password:  "6yrXKjLlSXY4V_lCnMss",
+			//Transport: &http.Transport{
+			//	TLSClientConfig: &tls.Config{
+			//		InsecureSkipVerify: true, // 禁用TLS验证
+			//	},
+			//},
 		}
 	} else {
 		EsCfg = elasticsearch.Config{
 			Addresses: []string{os.Getenv("ELASTIC_ADDR")}, // 从配置获取ES地址
-			Username:  os.Getenv("ELASTIC_USERNAME"),
-			Password:  os.Getenv("ELASTIC_PASSWORD"),
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true, // 禁用TLS验证
-				},
-			},
+			//Username:  os.Getenv("ELASTIC_USERNAME"),
+			//Password:  os.Getenv("ELASTIC_PASSWORD"),
+			//Transport: &http.Transport{
+			//	TLSClientConfig: &tls.Config{
+			//		InsecureSkipVerify: true, // 禁用TLS验证
+			//	},
+			//},
 		}
 	}
 
