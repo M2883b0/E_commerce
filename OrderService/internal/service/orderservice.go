@@ -53,7 +53,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 
 	// 告知商品微服务 调整库存
 	if state := s.uc.UpdateContent(ctx, updateItems); state {
-		return nil, err
+		return nil, nil
 	}
 
 	fmt.Print("OrderInfo Create order", order.OrderId)

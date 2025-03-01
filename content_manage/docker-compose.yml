@@ -14,12 +14,9 @@ services:
     environment:
       ETCD_ADDR: "etcd-server:2379"
       MYSQL_ADDR: "root:123456@tcp(content_manage_mysql:3306)/goods?charset=utf8mb4&parseTime=True&loc=Local"
-      JWT_SECRET: "123456"
-      ELASTIC_ADDR: "https://elastic-search:9200"
-      ELASTIC_USERNAME: "elastic"
-      ELASTIC_PASSWORD: ""
-    ports:
-      - "9010:9000"
+      ELASTIC_ADDR: "http://elastic-search:9200"
+#    ports:
+#      - "9010:9000"
     depends_on:
       - content_manage_mysql
     restart: always
