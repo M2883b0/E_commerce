@@ -35,7 +35,7 @@ func (s *JWT) Auth(c *gin.Context) {
 	if !rsp.Res {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, rsp.Msg)
 	}
-	c.Set("user_id", "this is test")
+	c.Set("user_id", rsp.GetUserId())
 	c.Next()
 }
 
