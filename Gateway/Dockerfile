@@ -13,7 +13,7 @@ COPY --from=builder /src/init.sh /
 
 WORKDIR /app
 
-RUN sudo /init.sh
+RUN /init.sh
 
 CMD ["./server"]
 #CMD ["nc", "-lvp", "9000"]
