@@ -86,7 +86,8 @@ func (d *Data) SyncToElasticsearch(ctx context.Context) error {
 
 	res, err := existsReq.Do(ctx, d.es)
 	if err != nil {
-		return fmt.Errorf("检查索引存在失败: %v", err)
+		fmt.Errorf("检查索引存在失败: %v", err)
+		panic(err)
 	}
 	defer res.Body.Close()
 
@@ -121,12 +122,14 @@ func (d *Data) SyncToElasticsearch(ctx context.Context) error {
 
 	createRes, err := createReq.Do(ctx, d.es)
 	if err != nil {
-		return fmt.Errorf("创建索引失败: %v", err)
+		fmt.Errorf("创建索引失败: %v", err)
+		panic(err)
 	}
 	defer createRes.Body.Close()
 
 	if createRes.IsError() {
-		return fmt.Errorf("索引创建错误: %s", createRes.String())
+		fmt.Errorf("索引创建错误: %s", createRes.String())
+		panic(err)
 	}
 	fmt.Printf("Index创建成功，Es初始化完成\n")
 
