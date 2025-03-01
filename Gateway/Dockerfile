@@ -9,11 +9,11 @@ RUN mkdir -p bin/ && GOPROXY=https://goproxy.cn go build -ldflags "-X main.Versi
 FROM debian:stable-slim
 
 COPY --from=builder /src/bin /app
-COPY --from=builder /src/init.sh /
+COPY --chmod=755 --from=builder /src/init.sh /
 
 WORKDIR /app
 
-RUN /init.sh
+RUN chmod +x /init.sh && /init.sh
 
 CMD ["./server"]
 #CMD ["nc", "-lvp", "9000"]
