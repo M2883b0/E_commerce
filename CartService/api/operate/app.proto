@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package api.operate;
+
+option go_package = "content_manage/api/operate;operate";
+option java_multiple_files = true;
+option java_package = "api.operate";
+
+service App {
+	// 查找-单个查找(通过商品id精确查找某条商品的信息)
+	rpc GetContent (GetContentReq) returns (GetContentRsp);
+}
+//数据格式
+message Content {
+	// 商品唯一ID
+	int64 id = 1;
+	// 商品标题
+	string title = 2;
+	// 商品描述
+	string description = 3;
+	// 图片url
+	string picture_url = 4;
+	// 商品价格
+	float price = 5;
+	// 商品库存>=0
+	uint32 quantity = 6;
+	// 商品分类（可多个分类）
+	repeated string categories = 7;
+
+}
+
+//精确查找，单个内容
+message GetContentReq {
+	// 商品id
+	int64 id = 1;
+}
+message GetContentRsp {
+	// 内容
+	Content contents = 1;
+}
+
+
