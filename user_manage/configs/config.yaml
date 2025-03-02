@@ -3,12 +3,12 @@ server:
     addr: 0.0.0.0:0
     timeout: 1s
   grpc:
-    addr: 0.0.0.0:9000    #随机端口，不是9000
+    addr: 0.0.0.0:9001    #随机端口，不是9000
     timeout: 1s
 data:
   database:
     driver: mysql
-    source: root:123456@tcp(user_manage_mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local
+    source: root:123456@tcp(127.0.0.1:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local
   redis:
     addr: 10.1.8.10:2379
     read_timeout: 0.2s

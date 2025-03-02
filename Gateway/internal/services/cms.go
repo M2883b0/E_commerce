@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"os"
 )
 
 type CmsAPP struct {
@@ -31,8 +32,12 @@ func NewCmsApp() *CmsAPP {
 
 func connOperateAppClient(app *CmsAPP) {
 	// new etcd client
+	ETCD_ADDRR := os.Getenv("ETCD_ADDR")
+	if ETCD_ADDRR == "" {
+		ETCD_ADDRR = "127.0.0.1:2379"
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{ETCD_ADDRR}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
@@ -63,8 +68,12 @@ func connOperateAppClient(app *CmsAPP) {
 
 func connOperateUserClient(app *CmsAPP) {
 	// new etcd client
+	ETCD_ADDRR := os.Getenv("ETCD_ADDR")
+	if ETCD_ADDRR == "" {
+		ETCD_ADDRR = "127.0.0.1:2379"
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{ETCD_ADDRR}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
@@ -95,8 +104,12 @@ func connOperateUserClient(app *CmsAPP) {
 
 func connOperateAuthClient(app *CmsAPP) {
 	// new etcd client
+	ETCD_ADDRR := os.Getenv("ETCD_ADDR")
+	if ETCD_ADDRR == "" {
+		ETCD_ADDRR = "127.0.0.1:2379"
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{ETCD_ADDRR}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
@@ -127,8 +140,12 @@ func connOperateAuthClient(app *CmsAPP) {
 
 func connOrderServiceClient(app *CmsAPP) {
 	// new etcd client
+	ETCD_ADDRR := os.Getenv("ETCD_ADDR")
+	if ETCD_ADDRR == "" {
+		ETCD_ADDRR = "127.0.0.1:2379"
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{ETCD_ADDRR}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
@@ -159,8 +176,12 @@ func connOrderServiceClient(app *CmsAPP) {
 
 func connCartServiceClient(app *CmsAPP) {
 	// new etcd client
+	ETCD_ADDRR := os.Getenv("ETCD_ADDR")
+	if ETCD_ADDRR == "" {
+		ETCD_ADDRR = "127.0.0.1:2379"
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"etcd-server:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{ETCD_ADDRR}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)

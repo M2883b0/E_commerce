@@ -34,11 +34,14 @@ func init() {
 }
 
 func newApp(c *conf.Data, logger log.Logger, gs *grpc.Server) *kratos.App {
-	var etcdAddr = os.Getenv("ETCD_ADDR")
-	log.Infof("the etcd config is %+v ===================", etcdAddr)
+	ETCD_ADDRR := os.Getenv("ETCD_ADDR")
+	if ETCD_ADDRR == "" {
+		ETCD_ADDRR = "127.0.0.1:2379"
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{etcdAddr}, //本地的etcd服务
+		Endpoints: []string{ETCD_ADDRR}, //从etcd中，服务的发现
 	})
+	log.Infof("the etcd config is %+v ===================", ETCD_ADDRR)
 	if err != nil {
 		return nil
 	}
