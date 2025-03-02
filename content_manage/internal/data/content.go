@@ -67,12 +67,12 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 		Categories:  categoriesStr,
 	}
 	//立马更新商品的图片url名字，为ID.jpg
-	tx.Model(&detail).Where("id = ?", detail.ID).Update("picture_url", fmt.Sprintf("%d.jpg", detail.ID))
 	if err := tx.Create(&detail).Error; err != nil {
 		tx.Rollback()
 		c.log.Errorf("Mysql content create error = %v", err)
 		return err
 	}
+	tx.Model(&detail).Where("id = ?", detail.ID).Update("picture_url", fmt.Sprintf("%d.jpg", detail.ID))
 	//双写，写入数据库的同时，同步到ElasticSearch
 	var esdetail []*EsDetail
 	esdetail = append(esdetail, &EsDetail{
@@ -114,7 +114,13 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 // 暂时不考虑，商品内容更新后，Es的变更
 func (c *contentRepo) Update(ctx context.Context, id int64, content *biz.Content) error {
 	c.log.Infof("商品更新请求 = %+v", id)
-	db := c.data.db
+
+	tx := c.data.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 	//把字符串数组，转成字符串
 	categoriesStr := strings.Join(content.Categories, ",")
 	detail := ContentDetail{
@@ -125,12 +131,36 @@ func (c *contentRepo) Update(ctx context.Context, id int64, content *biz.Content
 		Quantity:    content.Quantity,
 		Categories:  categoriesStr,
 	}
-	if err := db.Where("id = ?", id).
+	if err := tx.Where("id = ?", id).
 		Updates(&detail).Error; err != nil {
 		c.log.Infof("商品更新错误 = %+v", err)
+		tx.Rollback()
 		return err
 	}
-	return nil
+	//如果Title、Description、categoriesStr，有更新, 则更新Es
+	if detail.Description != "" || detail.Title != "" || detail.Categories != "" {
+		var spdetail *ContentDetail
+		if err := tx.Where("id = ?", id).First(&spdetail).Error; err != nil {
+			c.log.Infof("商品不存在错误 = %+v", err)
+			tx.Rollback()
+			return err
+		}
+		var esdetail []*EsDetail
+		esdetail = append(esdetail, &EsDetail{
+			Id:          int64(spdetail.ID),
+			Title:       spdetail.Title,
+			Description: spdetail.Description,
+			Categories:  spdetail.Categories,
+		})
+		err := c.BatchUpSertToEs(ctx, esdetail) //调用UpSet方法（没有就创建，有就更新）
+		if err != nil {
+			tx.Rollback() //Es失败时，回滚Mysql数据库
+			c.log.Errorf("Es content create %v error = %v", esdetail, err)
+			return err
+		}
+
+	}
+	return tx.Commit().Error
 }
 
 // Es批量更新或插入
@@ -171,6 +201,26 @@ func (c *contentRepo) BatchUpSertToEs(ctx context.Context, data []*EsDetail) err
 	return bi.Close(ctx)
 }
 
+// DeleteFromEs 删除指定ID的文档
+func (c *contentRepo) DeleteFromEs(ctx context.Context, id int64) error {
+	req := esapi.DeleteRequest{
+		Index:      "products",
+		DocumentID: fmt.Sprintf("%d", id),
+	}
+
+	res, err := req.Do(ctx, c.data.es)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("ES删除错误: %s", res.String())
+	}
+
+	return nil
+}
+
 func (c *contentRepo) IsExist(ctx context.Context, id int64) (bool, error) {
 	db := c.data.db
 	var detail ContentDetail
@@ -182,20 +232,33 @@ func (c *contentRepo) IsExist(ctx context.Context, id int64) (bool, error) {
 		c.log.Infof("商品不存在错误 = %+v", err)
 		return false, err
 	}
+
 	return true, nil
 }
 
 // 不考虑删除商品信息，Es的同步问题
 func (c *contentRepo) Delete(ctx context.Context, id int64) error {
 	c.log.Infof("商品删除请求 = %+v", id)
-	db := c.data.db
+	tx := c.data.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 	// 删除索引信息
-	err := db.Where("id = ?", id).Delete(&ContentDetail{}).Error
+	err := tx.Where("id = ?", id).Delete(&ContentDetail{}).Error
 	if err != nil {
 		c.log.Infof("商品删除错误 = %+v", err)
+		tx.Rollback()
 		return err
 	}
-	return nil
+	// 删除Elasticsearch中的文档
+	if err := c.DeleteFromEs(ctx, id); err != nil {
+		c.log.Errorf("Elasticsearch删除错误 = %+v", err)
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
 }
 
 func (c *contentRepo) Get(ctx context.Context, ids []int64) ([]*biz.Content, error) {
