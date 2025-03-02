@@ -8,6 +8,6 @@ for dir in */; do
 done
 
 for folder in "${folders[@]}"; do
-    screen -dmS $1 "cd $1 && $cmd"
+    screen -dmS "$folder" bash -c "cd \"$folder\" && $cmd"
 done
 
