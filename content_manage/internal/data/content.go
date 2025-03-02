@@ -188,8 +188,7 @@ func (c *contentRepo) Delete(ctx context.Context, id int64) error {
 	c.log.Infof("商品删除请求 = %+v", id)
 	db := c.data.db
 	// 删除索引信息
-	err := db.Where("id = ?", id).
-		Delete(&ContentDetail{}).Error
+	err := db.Where("id = ?", id).Delete(&ContentDetail{}).Error
 	if err != nil {
 		c.log.Infof("商品删除错误 = %+v", err)
 		return err
@@ -197,25 +196,28 @@ func (c *contentRepo) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *contentRepo) Get(ctx context.Context, id int64) (*biz.Content, error) {
-	c.log.Infof("商品查询请求 = %+v", id)
+func (c *contentRepo) Get(ctx context.Context, ids []int64) ([]*biz.Content, error) {
+	c.log.Infof("商品查询请求 = %+v", ids)
 	db := c.data.db
-	var detail ContentDetail
-	err := db.Where("id = ?", id).First(&detail).Error
-	if err != nil {
+	var details []*ContentDetail
+	//根据ids列表，一次查询全部的商品信息
+	if err := db.Where("id in ?", ids).Find(&details).Error; err != nil {
 		c.log.Infof("商品查询错误 = %+v", err)
 		return nil, err
 	}
-	content := &biz.Content{
-		ID:          int64(detail.ID),
-		Title:       detail.Title,
-		Description: detail.Description,
-		Picture_url: detail.Picture_url,
-		Price:       detail.Price,
-		Quantity:    detail.Quantity,
-		Categories:  strings.Split(detail.Categories, ","),
+	var contents []*biz.Content
+	for _, detail := range details {
+		contents = append(contents, &biz.Content{
+			ID:          int64(detail.ID),
+			Title:       detail.Title,
+			Description: detail.Description,
+			Picture_url: detail.Picture_url,
+			Price:       detail.Price,
+			Quantity:    detail.Quantity,
+			Categories:  strings.Split(detail.Categories, ","),
+		})
 	}
-	return content, nil
+	return contents, nil
 }
 
 // 商品库存变动，is_add为True，执行增加，is_add为False，执行减的操作。注意减少，会不会减少为0

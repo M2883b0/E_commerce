@@ -38,9 +38,9 @@ type AppClient interface {
 	UpdateContent(ctx context.Context, in *UpdateContentReq, opts ...grpc.CallOption) (*UpdateContentRsp, error)
 	// 删除商品
 	DeleteContent(ctx context.Context, in *DeleteContentReq, opts ...grpc.CallOption) (*DeleteContentRsp, error)
-	// 查找-批量查找（搜索框->ES返回索引->Mysql）
+	// 查找-搜索框批量查找（搜索框->ES返回索引->Mysql）
 	FindContent(ctx context.Context, in *FindContentReq, opts ...grpc.CallOption) (*FindContentRsp, error)
-	// 查找-单个查找(通过商品id精确查找某条商品的信息)
+	// 查找-id批量查找(通过商品id列表批量查找某条商品的信息)
 	GetContent(ctx context.Context, in *GetContentReq, opts ...grpc.CallOption) (*GetContentRsp, error)
 	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
 	RecommendContent(ctx context.Context, in *RecommendContentReq, opts ...grpc.CallOption) (*RecommendContentRsp, error)
@@ -136,9 +136,9 @@ type AppServer interface {
 	UpdateContent(context.Context, *UpdateContentReq) (*UpdateContentRsp, error)
 	// 删除商品
 	DeleteContent(context.Context, *DeleteContentReq) (*DeleteContentRsp, error)
-	// 查找-批量查找（搜索框->ES返回索引->Mysql）
+	// 查找-搜索框批量查找（搜索框->ES返回索引->Mysql）
 	FindContent(context.Context, *FindContentReq) (*FindContentRsp, error)
-	// 查找-单个查找(通过商品id精确查找某条商品的信息)
+	// 查找-id批量查找(通过商品id列表批量查找某条商品的信息)
 	GetContent(context.Context, *GetContentReq) (*GetContentRsp, error)
 	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
 	RecommendContent(context.Context, *RecommendContentReq) (*RecommendContentRsp, error)

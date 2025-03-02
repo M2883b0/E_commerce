@@ -13,9 +13,9 @@ service App {
 	rpc UpdateContent (UpdateContentReq) returns (UpdateContentRsp);
 	// 删除商品
 	rpc DeleteContent (DeleteContentReq) returns (DeleteContentRsp);
-	// 查找-批量查找（搜索框->ES返回索引->Mysql）
+	// 查找-搜索框批量查找（搜索框->ES返回索引->Mysql）
 	rpc FindContent (FindContentReq) returns (FindContentRsp);
-	// 查找-单个查找(通过商品id精确查找某条商品的信息)
+	// 查找-id批量查找(通过商品id列表批量查找某条商品的信息)
 	rpc GetContent (GetContentReq) returns (GetContentRsp);
 	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
 	rpc RecommendContent (RecommendContentReq) returns (RecommendContentRsp);
@@ -86,14 +86,14 @@ message FindContentRsp {
 	string msg = 4;
 }
 
-//精确查找，单个内容
+//id批量查找，多个内容
 message GetContentReq {
 	// 商品id
-	int64 id = 1;
+	repeated int64 id = 1;
 }
 message GetContentRsp {
 	// 内容
-	Content contents = 1;
+	repeated Content contents = 1;
 	int32 code = 2;
 	string msg = 3;
 }

@@ -8,7 +8,7 @@ import (
 
 // 前端的请求数据结构
 type ContentGetReq struct {
-	ID int64 `json:"id"` // 内容ID
+	ID []int64 `json:"id"` // 内容ID
 }
 
 func (c *CmsAPP) ContentGet(ctx *gin.Context) {
