@@ -44,9 +44,9 @@ func CmsRouter(r *gin.Engine) {
 		//路径/api/cms/content/update
 		cmsGroup.POST("/user/update", cmsApp.UserUpdate)
 		//路径/api/cms/content/delete
-		cmsGroup.POST("/user/delete", cmsApp.UserDelete)
+		cmsGroup.GET("/user/delete", cmsApp.UserDelete)
 		//路径/api/cms/content/find
-		cmsGroup.POST("/user/find", cmsApp.UserFind)
+		cmsGroup.GET("/user/find", cmsApp.UserFind)
 
 		// order
 		cmsGroup.POST("/order/place", cmsApp.PlaceOrder)
