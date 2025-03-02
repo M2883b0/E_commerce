@@ -14,7 +14,7 @@ type CartItm struct {
 }
 
 type CheckoutReq struct {
-	CartItems []CartItm `json:"cart_item"`
+	CartItems []*CartItm `json:"cart_item"`
 }
 
 func (c *CmsAPP) Checkout(ctx *gin.Context) {
@@ -39,6 +39,7 @@ func (c *CmsAPP) Checkout(ctx *gin.Context) {
 			Quantity:  uint32(item.Quantity),
 		}
 	}
+	log.Infof("结算微服务请求 %+v", cartItems)
 	rsp, err := c.checkoutServiceClient.Checkout(ctx, &checkout.CheckoutReq{
 		CartItems: cartItems,
 	})
