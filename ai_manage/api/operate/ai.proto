@@ -6,25 +6,16 @@ option go_package = "ai_manage/api/operate;operate";
 option java_multiple_files = true;
 option java_package = "api.operate";
 
-service Ai {
-	rpc CreateAi (CreateAiRequest) returns (CreateAiReply);
-	rpc UpdateAi (UpdateAiRequest) returns (UpdateAiReply);
-	rpc DeleteAi (DeleteAiRequest) returns (DeleteAiReply);
-	rpc GetAi (GetAiRequest) returns (GetAiReply);
-	rpc ListAi (ListAiRequest) returns (ListAiReply);
+service AI {
+	rpc ChatAI (ChatAIRequest) returns (ChatAIReply); //创建AI对话
 }
 
-message CreateAiRequest {}
-message CreateAiReply {}
-
-message UpdateAiRequest {}
-message UpdateAiReply {}
-
-message DeleteAiRequest {}
-message DeleteAiReply {}
-
-message GetAiRequest {}
-message GetAiReply {}
-
-message ListAiRequest {}
-message ListAiReply {}
+message ChatAIRequest {
+	int64 User_id = 1;
+	string Query = 2;   //用户输入的请求
+}
+message ChatAIReply {
+	string Reply = 1;   //AI的回复
+	int32 Code =2;
+	string Msg =3;
+}

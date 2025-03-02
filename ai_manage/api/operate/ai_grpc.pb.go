@@ -19,253 +19,101 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Ai_CreateAi_FullMethodName = "/api.operate.Ai/CreateAi"
-	Ai_UpdateAi_FullMethodName = "/api.operate.Ai/UpdateAi"
-	Ai_DeleteAi_FullMethodName = "/api.operate.Ai/DeleteAi"
-	Ai_GetAi_FullMethodName    = "/api.operate.Ai/GetAi"
-	Ai_ListAi_FullMethodName   = "/api.operate.Ai/ListAi"
+	AI_ChatAI_FullMethodName = "/api.operate.AI/ChatAI"
 )
 
-// AiClient is the client API for Ai service.
+// AIClient is the client API for AI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type AiClient interface {
-	CreateAi(ctx context.Context, in *CreateAiRequest, opts ...grpc.CallOption) (*CreateAiReply, error)
-	UpdateAi(ctx context.Context, in *UpdateAiRequest, opts ...grpc.CallOption) (*UpdateAiReply, error)
-	DeleteAi(ctx context.Context, in *DeleteAiRequest, opts ...grpc.CallOption) (*DeleteAiReply, error)
-	GetAi(ctx context.Context, in *GetAiRequest, opts ...grpc.CallOption) (*GetAiReply, error)
-	ListAi(ctx context.Context, in *ListAiRequest, opts ...grpc.CallOption) (*ListAiReply, error)
+type AIClient interface {
+	ChatAI(ctx context.Context, in *ChatAIRequest, opts ...grpc.CallOption) (*ChatAIReply, error)
 }
 
-type aiClient struct {
+type aIClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewAiClient(cc grpc.ClientConnInterface) AiClient {
-	return &aiClient{cc}
+func NewAIClient(cc grpc.ClientConnInterface) AIClient {
+	return &aIClient{cc}
 }
 
-func (c *aiClient) CreateAi(ctx context.Context, in *CreateAiRequest, opts ...grpc.CallOption) (*CreateAiReply, error) {
+func (c *aIClient) ChatAI(ctx context.Context, in *ChatAIRequest, opts ...grpc.CallOption) (*ChatAIReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateAiReply)
-	err := c.cc.Invoke(ctx, Ai_CreateAi_FullMethodName, in, out, cOpts...)
+	out := new(ChatAIReply)
+	err := c.cc.Invoke(ctx, AI_ChatAI_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *aiClient) UpdateAi(ctx context.Context, in *UpdateAiRequest, opts ...grpc.CallOption) (*UpdateAiReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateAiReply)
-	err := c.cc.Invoke(ctx, Ai_UpdateAi_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *aiClient) DeleteAi(ctx context.Context, in *DeleteAiRequest, opts ...grpc.CallOption) (*DeleteAiReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteAiReply)
-	err := c.cc.Invoke(ctx, Ai_DeleteAi_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *aiClient) GetAi(ctx context.Context, in *GetAiRequest, opts ...grpc.CallOption) (*GetAiReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetAiReply)
-	err := c.cc.Invoke(ctx, Ai_GetAi_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *aiClient) ListAi(ctx context.Context, in *ListAiRequest, opts ...grpc.CallOption) (*ListAiReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListAiReply)
-	err := c.cc.Invoke(ctx, Ai_ListAi_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// AiServer is the server API for Ai service.
-// All implementations must embed UnimplementedAiServer
+// AIServer is the server API for AI service.
+// All implementations must embed UnimplementedAIServer
 // for forward compatibility.
-type AiServer interface {
-	CreateAi(context.Context, *CreateAiRequest) (*CreateAiReply, error)
-	UpdateAi(context.Context, *UpdateAiRequest) (*UpdateAiReply, error)
-	DeleteAi(context.Context, *DeleteAiRequest) (*DeleteAiReply, error)
-	GetAi(context.Context, *GetAiRequest) (*GetAiReply, error)
-	ListAi(context.Context, *ListAiRequest) (*ListAiReply, error)
-	mustEmbedUnimplementedAiServer()
+type AIServer interface {
+	ChatAI(context.Context, *ChatAIRequest) (*ChatAIReply, error)
+	mustEmbedUnimplementedAIServer()
 }
 
-// UnimplementedAiServer must be embedded to have
+// UnimplementedAIServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedAiServer struct{}
+type UnimplementedAIServer struct{}
 
-func (UnimplementedAiServer) CreateAi(context.Context, *CreateAiRequest) (*CreateAiReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateAi not implemented")
+func (UnimplementedAIServer) ChatAI(context.Context, *ChatAIRequest) (*ChatAIReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChatAI not implemented")
 }
-func (UnimplementedAiServer) UpdateAi(context.Context, *UpdateAiRequest) (*UpdateAiReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateAi not implemented")
-}
-func (UnimplementedAiServer) DeleteAi(context.Context, *DeleteAiRequest) (*DeleteAiReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteAi not implemented")
-}
-func (UnimplementedAiServer) GetAi(context.Context, *GetAiRequest) (*GetAiReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAi not implemented")
-}
-func (UnimplementedAiServer) ListAi(context.Context, *ListAiRequest) (*ListAiReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListAi not implemented")
-}
-func (UnimplementedAiServer) mustEmbedUnimplementedAiServer() {}
-func (UnimplementedAiServer) testEmbeddedByValue()            {}
+func (UnimplementedAIServer) mustEmbedUnimplementedAIServer() {}
+func (UnimplementedAIServer) testEmbeddedByValue()            {}
 
-// UnsafeAiServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to AiServer will
+// UnsafeAIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AIServer will
 // result in compilation errors.
-type UnsafeAiServer interface {
-	mustEmbedUnimplementedAiServer()
+type UnsafeAIServer interface {
+	mustEmbedUnimplementedAIServer()
 }
 
-func RegisterAiServer(s grpc.ServiceRegistrar, srv AiServer) {
-	// If the following call pancis, it indicates UnimplementedAiServer was
+func RegisterAIServer(s grpc.ServiceRegistrar, srv AIServer) {
+	// If the following call pancis, it indicates UnimplementedAIServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&Ai_ServiceDesc, srv)
+	s.RegisterService(&AI_ServiceDesc, srv)
 }
 
-func _Ai_CreateAi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateAiRequest)
+func _AI_ChatAI_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChatAIRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AiServer).CreateAi(ctx, in)
+		return srv.(AIServer).ChatAI(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Ai_CreateAi_FullMethodName,
+		FullMethod: AI_ChatAI_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AiServer).CreateAi(ctx, req.(*CreateAiRequest))
+		return srv.(AIServer).ChatAI(ctx, req.(*ChatAIRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Ai_UpdateAi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateAiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AiServer).UpdateAi(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Ai_UpdateAi_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AiServer).UpdateAi(ctx, req.(*UpdateAiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Ai_DeleteAi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteAiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AiServer).DeleteAi(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Ai_DeleteAi_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AiServer).DeleteAi(ctx, req.(*DeleteAiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Ai_GetAi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AiServer).GetAi(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Ai_GetAi_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AiServer).GetAi(ctx, req.(*GetAiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Ai_ListAi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListAiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AiServer).ListAi(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Ai_ListAi_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AiServer).ListAi(ctx, req.(*ListAiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Ai_ServiceDesc is the grpc.ServiceDesc for Ai service.
+// AI_ServiceDesc is the grpc.ServiceDesc for AI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Ai_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.operate.Ai",
-	HandlerType: (*AiServer)(nil),
+var AI_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.operate.AI",
+	HandlerType: (*AIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateAi",
-			Handler:    _Ai_CreateAi_Handler,
-		},
-		{
-			MethodName: "UpdateAi",
-			Handler:    _Ai_UpdateAi_Handler,
-		},
-		{
-			MethodName: "DeleteAi",
-			Handler:    _Ai_DeleteAi_Handler,
-		},
-		{
-			MethodName: "GetAi",
-			Handler:    _Ai_GetAi_Handler,
-		},
-		{
-			MethodName: "ListAi",
-			Handler:    _Ai_ListAi_Handler,
+			MethodName: "ChatAI",
+			Handler:    _AI_ChatAI_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
