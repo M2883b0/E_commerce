@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"os"
 
 	"checkout_system/internal/conf"
@@ -31,6 +33,19 @@ func init() {
 }
 
 func newApp(logger log.Logger, gs *grpc.Server) *kratos.App {
+	etcdAddr := os.Getenv("ETCD_ADDR")
+	if etcdAddr == "" {
+		etcdAddr = "127.0.0.1:2379" // 测试环境
+	}
+	log.Infof("the etcd addr is %+v", etcdAddr)
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints: []string{etcdAddr}, //本地的etcd服务
+	})
+	reg := etcd.New(client)
+
+	if err != nil {
+		panic(err)
+	}
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -39,8 +54,8 @@ func newApp(logger log.Logger, gs *grpc.Server) *kratos.App {
 		kratos.Logger(logger),
 		kratos.Server(
 			gs,
-			//hs,
 		),
+		kratos.Registrar(reg),
 	)
 }
 

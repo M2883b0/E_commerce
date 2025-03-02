@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/google/wire"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"os"
 )
 
 // ProviderSet is data providers.
@@ -43,8 +44,12 @@ func NewProductClient(c *conf.Data, logger log.Logger) (*ProductClient, func(), 
 		log.NewHelper(logger).Info("closing the data resources")
 	}
 	// new etcd client
+	etcdAddr := os.Getenv("ETCD_ADDR")
+	if etcdAddr == "" {
+		etcdAddr = "127.0.0.1:2379" // 测试环境
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{etcdAddr}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)

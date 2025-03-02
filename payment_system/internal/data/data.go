@@ -71,8 +71,12 @@ func NewOrderClient(c *conf.Data, logger log.Logger) (*OrderClient, func(), erro
 		log.NewHelper(logger).Info("closing the data resources")
 	}
 	// new etcd orderClient
+	etcdAddr := os.Getenv("ETCD_ADDR")
+	if etcdAddr == "" {
+		etcdAddr = "127.0.0.1:2379" // 测试环境
+	}
 	client, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"}, //从etcd中，服务的发现
+		Endpoints: []string{etcdAddr}, //从etcd中，服务的发现
 	})
 	if err != nil {
 		panic(err)
