@@ -7,11 +7,15 @@ import (
 )
 
 func (a *UserService) GetUser(ctx context.Context, req *operate.GetUserRequest) (*operate.GetUserReply, error) {
-	users, err := a.uc.FindUser(ctx, &biz.FindParams{
+	users, code, msg, err := a.uc.FindUser(ctx, &biz.FindParams{
 		ID: req.GetId(),
 	})
 	if err != nil {
-		return nil, err
+		return &operate.GetUserReply{
+			User: nil,
+			Code: code,
+			Msg:  msg,
+		}, nil
 	}
 	var usersInfo *operate.UserInfo
 	usersInfo = &operate.UserInfo{
@@ -25,6 +29,8 @@ func (a *UserService) GetUser(ctx context.Context, req *operate.GetUserRequest) 
 	}
 	return &operate.GetUserReply{
 		User: usersInfo,
+		Code: code,
+		Msg:  msg,
 	}, nil
 
 }

@@ -38,10 +38,10 @@ type LoginRsp struct {
 
 type UserRepo interface {
 	Create(context.Context, *User) error
-	Update(context.Context, int64, *User) error
+	Update(context.Context, int64, *User) (int32, string, error)
 	IsExist(context.Context, int64) (bool, error)
-	Delete(context.Context, int64) error
-	Find(context.Context, *FindParams) (*User, error)
+	Delete(context.Context, int64) (int32, string, error)
+	Find(context.Context, *FindParams) (*User, int32, string, error)
 	Register(context.Context, *Register) error
 	Login(context.Context, *Login) (*User, error)
 	IsExistbyPhone(context.Context, string) (bool, error)
@@ -62,12 +62,10 @@ func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
 }
 
 func (uc *UserUsecase) CreateUser(ctx context.Context, g *User) error {
-	uc.log.WithContext(ctx).Infof("CreateUser: %+v", g)
 	return uc.repo.Create(ctx, g)
 }
 
 func (uc *UserUsecase) RegisterUser(ctx context.Context, g *Register) (*RegisterRsp, error) {
-	uc.log.WithContext(ctx).Infof("RegisterUser: %+v", g)
 	//先判断改账号，是否已经被注册了
 	ok, err := uc.repo.IsExistbyPhone(ctx, g.Phone_number)
 	if err != nil {
@@ -96,7 +94,6 @@ func (uc *UserUsecase) RegisterUser(ctx context.Context, g *Register) (*Register
 
 }
 func (uc *UserUsecase) LoginUser(ctx context.Context, g *Login) (*LoginRsp, error) {
-	uc.log.WithContext(ctx).Infof("LoginUser: %+v", g)
 	//先判断是否存在该用户
 	ok, err := uc.repo.IsExistbyPhone(ctx, g.Phone_number)
 	if err != nil {
@@ -143,31 +140,25 @@ func (uc *UserUsecase) LoginUser(ctx context.Context, g *Login) (*LoginRsp, erro
 	}, nil
 }
 
-func (uc *UserUsecase) UpdateUser(ctx context.Context, g *User) error {
-	uc.log.WithContext(ctx).Infof("UpdateUser: %+v", g)
+func (uc *UserUsecase) UpdateUser(ctx context.Context, g *User) (int32, string, error) {
 	return uc.repo.Update(ctx, int64(g.ID), g)
 }
 
-func (uc *UserUsecase) DeleteUser(ctx context.Context, id int64) error {
-	uc.log.WithContext(ctx).Infof("DeleteUser: %+v", id)
+func (uc *UserUsecase) DeleteUser(ctx context.Context, id int64) (int32, string, error) {
 	//复合操作，现判断该用户是否存在，再执行删除操作
 	ok, err := uc.repo.IsExist(ctx, id)
 	if err != nil {
-		return err
+		return 400, "服务器错误，请重试", err
 	}
 	if !ok {
-		return errors.New("User no exist")
+		return 400, "User no exist", errors.New("User no exist")
 	}
 	//用户存在的情况,执行删除操作
 	return uc.repo.Delete(ctx, id)
 }
 
-func (uc *UserUsecase) FindUser(ctx context.Context, params *FindParams) (*User, error) {
-	users, err := uc.repo.Find(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
+func (uc *UserUsecase) FindUser(ctx context.Context, params *FindParams) (*User, int32, string, error) {
+	return uc.repo.Find(ctx, params)
 }
 
 //执行组合逻辑

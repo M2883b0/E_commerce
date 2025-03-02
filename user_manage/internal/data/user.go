@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -38,11 +37,11 @@ func (UserDetail) TableName() string {
 }
 
 func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
-	c.log.Infof("userRepo Create user = %+v", user)
+	c.log.Infof("内部用户创建 = %+v", user)
 	//密码加密
 	hashedPassword, err := encryptPassword(user.Password)
 	if err != nil {
-		c.log.Errorf("password encrypt error = %v", err)
+		c.log.Errorf("密码加密错误 = %v", err)
 		return err
 	}
 	detail := UserDetail{
@@ -56,7 +55,7 @@ func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
 	}
 	db := c.data.db
 	if err := db.Create(&detail).Error; err != nil {
-		c.log.Errorf("user create error = %v", err)
+		c.log.Errorf("内部用户创建错误 = %v", err)
 		return err
 	}
 
@@ -64,11 +63,11 @@ func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
 }
 
 func (c *userRepo) Register(ctx context.Context, user *biz.Register) error {
-	c.log.Infof("userRepo Register user = %+v", user)
+	c.log.Infof("注册用户 = %+v", user)
 	//密码加密
 	hashedPassword, err := encryptPassword(user.Password)
 	if err != nil {
-		c.log.Errorf("password encrypt error = %v", err)
+		c.log.Errorf("密码加密错误 = %v", err)
 		return err
 	}
 	detail := UserDetail{
@@ -82,7 +81,7 @@ func (c *userRepo) Register(ctx context.Context, user *biz.Register) error {
 	}
 	db := c.data.db
 	if err := db.Create(&detail).Error; err != nil {
-		c.log.WithContext(ctx).Errorf("user create error = %v", err)
+		c.log.Errorf("登录错误 = %v", err)
 		return err
 	}
 	return nil
@@ -112,13 +111,13 @@ func (c *userRepo) Login(ctx context.Context, user *biz.Login) (*biz.User, error
 	return users, nil
 }
 
-func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) error {
-	c.log.Infof("userRepo Update user = %+v", user)
+func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) (int32, string, error) {
+	c.log.Infof("用户请求更新信息 = %+v", user)
 	//密码加密
 	hashedPassword, err := encryptPassword(user.Password)
 	if err != nil {
-		c.log.Errorf("password encrypt error = %v", err)
-		return err
+		c.log.Errorf("密码加密错误 = %v", err)
+		return 400, "服务器错误，密码加密失败", err
 	}
 	if user.Password == "" { //如果不更新密码
 		hashedPassword = "" //加密后，强行置为空
@@ -134,13 +133,14 @@ func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) error {
 	}
 	db := c.data.db
 	if err := db.Where("id = ?", id).Updates(&detail).Error; err != nil {
-		c.log.WithContext(ctx).Errorf("user update error = %v", err)
-		return err
+		c.log.Infof("用户更新错误 = %v", err)
+		return 400, "服务器错误，用户信息更新失败", err
 	}
-	return nil
+	return 0, "更新成功", nil
 }
 
 func (c *userRepo) IsExist(ctx context.Context, id int64) (bool, error) {
+	c.log.Infof("用户请求注销账号 = %+v", id)
 	db := c.data.db
 	var detail UserDetail
 	err := db.Where("id = ?", id).First(&detail).Error
@@ -148,7 +148,7 @@ func (c *userRepo) IsExist(ctx context.Context, id int64) (bool, error) {
 		return false, nil
 	}
 	if err != nil {
-		c.log.WithContext(ctx).Errorf("User isExist = [%v]", err)
+		c.log.Infof("用户不存在 = %v", err)
 		return false, err
 	}
 	return true, nil
@@ -162,25 +162,25 @@ func (c *userRepo) IsExistbyPhone(ctx context.Context, phone_number string) (boo
 		return false, nil
 	}
 	if err != nil {
-		c.log.WithContext(ctx).Errorf("User isExist = [%v]", err)
+		c.log.Infof("用户不存在 = %v", err)
 		return false, err
 	}
 	return true, nil
 }
 
-func (c *userRepo) Delete(ctx context.Context, id int64) error {
+func (c *userRepo) Delete(ctx context.Context, id int64) (int32, string, error) {
 	db := c.data.db
 	// 删除索引信息
 	err := db.Where("id = ?", id).
 		Delete(&UserDetail{}).Error
 	if err != nil {
-		c.log.WithContext(ctx).Errorf("user delete error = %v", err)
-		return err
+		c.log.Infof("用户删除错误 = %v", err)
+		return 400, "服务器错误，用户信息删除失败", err
 	}
-	return nil
+	return 0, "删除成功", nil
 }
 
-func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) (*biz.User, error) {
+func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) (*biz.User, int32, string, error) {
 	query := c.data.db.Model(&UserDetail{})
 	// 构造查询条件
 	if params.ID != 0 {
@@ -188,8 +188,8 @@ func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) (*biz.User,
 	}
 	var results *UserDetail
 	if err := query.Find(&results).Error; err != nil {
-		c.log.WithContext(ctx).Errorf("user find error = %v", err)
-		return nil, err
+		c.log.Infof("用户查询错误 = %v", params)
+		return nil, 400, "服务器错误，查询失败", err
 	}
 	var users *biz.User
 	users = &biz.User{
@@ -201,13 +201,13 @@ func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) (*biz.User,
 		Description:  results.Description,
 		Address:      results.Address,
 	}
-	return users, nil
+	return users, 0, "查询成功", nil
 }
 
 func encryptPassword(password string) (string, error) {
 	hashedPassword, error := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if error != nil {
-		fmt.Println("Error hashing password:", error)
+		log.Infof("密码加密错误: %v", error)
 		return "", error
 	}
 	return string(hashedPassword), nil
