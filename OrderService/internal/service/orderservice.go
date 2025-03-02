@@ -4,7 +4,6 @@ import (
 	pb "OrderService/api/order"
 	"OrderService/internal/biz"
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -19,8 +18,10 @@ func NewOrderServiceService(uc *biz.OrderUseCase) *OrderServiceService {
 
 func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq) (*pb.PlaceOrderResp, error) {
 
-	var orderItemBiz []*biz.OrderItem        // 商品信息
-	var updateItems []*biz.UpdateContentItem // 更新商品信息item
+	var orderItemBiz []*biz.OrderItem           // 商品信息
+	var updateItemsSub []*biz.UpdateContentItem // 更新商品信息item
+	var updateItemsAdd []*biz.UpdateContentItem // 更新商品信息item
+	var checkoutItems []*biz.CheckoutOrderItem  // 结算商品信息item
 
 	for _, orderItemReq := range req.GetOrderItems() {
 		orderItemBiz = append(orderItemBiz,
@@ -29,24 +30,55 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 				ProductId: orderItemReq.GetProductId(),
 				Cost:      orderItemReq.GetCost(),
 			})
-		updateItems = append(updateItems, &biz.UpdateContentItem{
+		updateItemsSub = append(updateItemsSub, &biz.UpdateContentItem{
 			ProductId: orderItemReq.GetProductId(),
 			Quantity:  int32(orderItemReq.GetQuantity()),
 			IsAdd:     false,
 		})
-	}
-	order := &biz.Order{
-		UserID:        req.GetUserId(),
-		PhoneNumber:   req.GetPhoneNumber(),
-		OrderState:    "waiting",
-		StreetAddress: req.GetAddress().GetStreetAddress(),
-		City:          req.GetAddress().GetCity(),
-		Country:       req.GetAddress().GetCountry(),
-		ZipCode:       req.GetAddress().GetZipCode(),
-		OrderItems:    orderItemBiz,
+		updateItemsAdd = append(updateItemsAdd, &biz.UpdateContentItem{
+			ProductId: orderItemReq.GetProductId(),
+			Quantity:  int32(orderItemReq.GetQuantity()),
+			IsAdd:     true,
+		})
+		checkoutItems = append(checkoutItems, &biz.CheckoutOrderItem{
+			ProductId: orderItemReq.GetProductId(),
+			Price:     orderItemReq.GetCost(),
+			Quantity:  int32(orderItemReq.GetQuantity()),
+		})
 	}
 
-	err := s.uc.CreateOrder(ctx, order)
+	// 告知商品微服务 调整库存
+	if !s.uc.UpdateContent(ctx, updateItemsSub) {
+		log.Infof("调整库存失败")
+		return nil, nil
+	}
+
+	// 结算，如果结算失败，需要再次告诉商品微服务，库存回滚
+	checkoutRsp, err := s.uc.CheckoutOrder(ctx, checkoutItems)
+	if err != nil || checkoutRsp.HasChanged {
+		if !s.uc.UpdateContent(ctx, updateItemsAdd) {
+			log.Infof("回滚库存失败")
+		}
+		return nil, nil
+	}
+
+	// 数据库创建订单
+	order := &biz.Order{
+		UserID:         req.GetUserId(),
+		PhoneNumber:    req.GetPhoneNumber(),
+		ActualPayment:  checkoutRsp.ActualPrice,
+		OriginalCharge: checkoutRsp.TotalPrice,
+		IsFreeShipping: checkoutRsp.IsFreeShipping,
+		ShippingFee:    checkoutRsp.ShippingFee,
+		OrderState:     "waiting",
+		StreetAddress:  req.GetAddress().GetStreetAddress(),
+		City:           req.GetAddress().GetCity(),
+		Country:        req.GetAddress().GetCountry(),
+		ZipCode:        req.GetAddress().GetZipCode(),
+		OrderItems:     orderItemBiz,
+	}
+
+	err = s.uc.CreateOrder(ctx, order)
 	if err != nil {
 		log.Infof("数据库创建订单失败")
 		return &pb.PlaceOrderResp{
@@ -54,19 +86,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 		}, nil
 	}
 
-	// 告知商品微服务 调整库存
-	if !s.uc.UpdateContent(ctx, updateItems) {
-		log.Infof("调整库存失败")
-		return &pb.PlaceOrderResp{
-			OrderId: 0,
-		}, nil
-	}
-
-	// 结算，如果结算失败，需要再次告诉商品微服务，库存回滚
-	// 。。。。 待完善
-	// 列出订单有bug
-
-	fmt.Print("OrderInfo Create order", order.OrderId)
+	log.Infof("成功创建订单 订单号为 %+v", order.OrderId)
 	return &pb.PlaceOrderResp{
 		OrderId: order.OrderId,
 	}, nil
@@ -76,11 +96,13 @@ func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderRe
 		ID:          req.GetUserId(),
 		OrderState:  "",
 		Page:        0,
-		PageSize:    0,
+		PageSize:    10,
 		PhoneNumber: "",
 	}
 
 	dbOrders, total, err := s.uc.FindOrder(ctx, findParam)
+	findParam.PageSize = uint32(total)
+	dbOrders, total, err = s.uc.FindOrder(ctx, findParam)
 	if err != nil {
 		return nil, err
 	}
@@ -122,9 +144,13 @@ func (s *OrderServiceService) MarkOrderPaid(ctx context.Context, req *pb.MarkOrd
 	}
 	err := s.uc.UpdateOrder(ctx, order)
 	if err != nil {
-		return nil, err
+		return &pb.MarkOrderPaidResp{
+			State: false,
+		}, nil
 	}
-	return &pb.MarkOrderPaidResp{}, nil
+	return &pb.MarkOrderPaidResp{
+		State: true,
+	}, nil
 }
 
 func (s *OrderServiceService) MarkOrderCancel(ctx context.Context, req *pb.MarkOrderCancelReq) (*pb.MarkOrderCancelResp, error) {
@@ -135,7 +161,11 @@ func (s *OrderServiceService) MarkOrderCancel(ctx context.Context, req *pb.MarkO
 	}
 	err := s.uc.UpdateOrder(ctx, order)
 	if err != nil {
-		return nil, err
+		return &pb.MarkOrderCancelResp{
+			State: false,
+		}, nil
 	}
-	return &pb.MarkOrderCancelResp{}, nil
+	return &pb.MarkOrderCancelResp{
+		State: true,
+	}, nil
 }

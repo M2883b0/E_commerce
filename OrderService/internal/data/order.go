@@ -1,6 +1,7 @@
 package data
 
 import (
+	"OrderService/api/checkout"
 	"OrderService/api/operate"
 	"OrderService/internal/biz"
 	"context"
@@ -18,14 +19,18 @@ type orderRepo struct {
 
 type OrderInfo struct {
 	gorm.Model
-	UserID        int64          `gorm:"user_id"`
-	PhoneNumber   string         `gorm:"phone_number"`
-	OrderState    string         `gorm:"order_state"`
-	StreetAddress string         `gorm:"street_address"`
-	City          string         `gorm:"city"`
-	Country       string         `gorm:"country"`
-	ZipCode       uint32         `gorm:"zip_code"`
-	OrderItems    datatypes.JSON `gorm:"type:json"`
+	UserID         int64          `gorm:"user_id"`
+	OriginalCharge float32        `gorm:"original_charge"`
+	ActualPayment  float32        `gorm:"actual_payment"`
+	IsFreeShipping bool           `gorm:"is_free_shipping"`
+	ShippingFee    float32        `gorm:"shipping_fee"`
+	PhoneNumber    string         `gorm:"phone_number"`
+	OrderState     string         `gorm:"order_state"`
+	StreetAddress  string         `gorm:"street_address"`
+	City           string         `gorm:"city"`
+	Country        string         `gorm:"country"`
+	ZipCode        uint32         `gorm:"zip_code"`
+	OrderItems     datatypes.JSON `gorm:"type:json"`
 }
 
 // NewOrderRepo .
@@ -43,14 +48,18 @@ func (c *orderRepo) Create(ctx context.Context, order *biz.Order) error {
 		return errors.Unwrap(err)
 	}
 	detail := OrderInfo{
-		UserID:        order.UserID,
-		PhoneNumber:   order.PhoneNumber,
-		OrderState:    order.OrderState,
-		StreetAddress: order.StreetAddress,
-		City:          order.City,
-		Country:       order.Country,
-		ZipCode:       order.ZipCode,
-		OrderItems:    datatypes.JSON(itemJSON),
+		UserID:         order.UserID,
+		PhoneNumber:    order.PhoneNumber,
+		OriginalCharge: order.OriginalCharge,
+		ActualPayment:  order.ActualPayment,
+		IsFreeShipping: order.IsFreeShipping,
+		ShippingFee:    order.ShippingFee,
+		OrderState:     order.OrderState,
+		StreetAddress:  order.StreetAddress,
+		City:           order.City,
+		Country:        order.Country,
+		ZipCode:        order.ZipCode,
+		OrderItems:     datatypes.JSON(itemJSON),
 	}
 
 	db := c.data.db
@@ -70,14 +79,18 @@ func (c *orderRepo) Update(ctx context.Context, id int64, order *biz.Order) erro
 	}
 	c.log.Infof("OrderInfo Update order = %+v", order)
 	detail := OrderInfo{
-		UserID:        order.UserID,
-		PhoneNumber:   order.PhoneNumber,
-		OrderState:    order.OrderState,
-		StreetAddress: order.StreetAddress,
-		City:          order.City,
-		Country:       order.Country,
-		ZipCode:       order.ZipCode,
-		OrderItems:    datatypes.JSON(itemsJSON),
+		UserID:         order.UserID,
+		PhoneNumber:    order.PhoneNumber,
+		OriginalCharge: order.OriginalCharge,
+		ActualPayment:  order.ActualPayment,
+		IsFreeShipping: order.IsFreeShipping,
+		ShippingFee:    order.ShippingFee,
+		OrderState:     order.OrderState,
+		StreetAddress:  order.StreetAddress,
+		City:           order.City,
+		Country:        order.Country,
+		ZipCode:        order.ZipCode,
+		OrderItems:     datatypes.JSON(itemsJSON),
 	}
 	db := c.data.db
 	if err := db.Where("id = ?", id).Updates(&detail).Error; err != nil {
@@ -152,15 +165,19 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 			return nil, total, errors.Unwrap(err)
 		}
 		orders = append(orders, &biz.Order{
-			OrderId:       int64(r.ID),
-			UserID:        r.UserID,
-			PhoneNumber:   r.PhoneNumber,
-			OrderState:    r.OrderState,
-			StreetAddress: r.StreetAddress,
-			City:          r.City,
-			Country:       r.Country,
-			ZipCode:       r.ZipCode,
-			OrderItems:    items,
+			OrderId:        int64(r.ID),
+			UserID:         r.UserID,
+			PhoneNumber:    r.PhoneNumber,
+			OriginalCharge: r.OriginalCharge,
+			ActualPayment:  r.ActualPayment,
+			IsFreeShipping: r.IsFreeShipping,
+			ShippingFee:    r.ShippingFee,
+			OrderState:     r.OrderState,
+			StreetAddress:  r.StreetAddress,
+			City:           r.City,
+			Country:        r.Country,
+			ZipCode:        r.ZipCode,
+			OrderItems:     items,
 		})
 	}
 	return orders, total, nil
@@ -184,4 +201,30 @@ func (c *orderRepo) UpdateContentInfo(ctx context.Context, params []*biz.UpdateC
 	}
 	c.log.WithContext(ctx).Errorf("content service response.is_success = %v", response.IsSuccess)
 	return response.IsSuccess, nil
+}
+
+func (c *orderRepo) CheckoutOrder(ctx context.Context, params []*biz.CheckoutOrderItem) (*biz.CheckoutResp, error) {
+	var checkoutItems []*checkout.CartItem
+	for _, item := range params {
+		checkoutItems = append(checkoutItems, &checkout.CartItem{
+			ProductId: uint64(item.ProductId),
+			Price:     item.Price,
+			Quantity:  uint32(item.Quantity),
+		})
+	}
+	response, err := c.data.checkoutClient.Checkout(context.Background(), &checkout.CheckoutReq{CartItems: checkoutItems})
+	if err != nil {
+		c.log.WithContext(ctx).Errorf("连接结算微服务失败 = %v", err)
+		return &biz.CheckoutResp{
+			HasChanged: true,
+		}, err
+	}
+	c.log.WithContext(ctx).Errorf("结算微服务返回 = %v", response)
+	return &biz.CheckoutResp{
+		TotalPrice:     response.TotalPrice,
+		ShippingFee:    response.ShippingFee,
+		ActualPrice:    response.ActualPrice,
+		IsFreeShipping: response.IsFreeShipping,
+		HasChanged:     response.HasChanged,
+	}, nil
 }

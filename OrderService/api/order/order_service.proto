@@ -64,7 +64,9 @@ message MarkOrderPaidReq {
 	int64 order_id = 1;
 }
 
-message MarkOrderPaidResp {}
+message MarkOrderPaidResp {
+	bool state = 1;
+}
 
 
 // MarkOrderCancelReq

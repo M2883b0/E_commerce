@@ -7,15 +7,19 @@ import (
 )
 
 type Order struct {
-	OrderId       int64        `json:"order_id"`
-	UserID        int64        `json:"user_id"`
-	PhoneNumber   string       `json:"phone_number"`
-	OrderState    string       `json:"order_state"`
-	StreetAddress string       `json:"street_address"`
-	City          string       `json:"city"`
-	Country       string       `json:"country"`
-	ZipCode       uint32       `json:"zip_code"`
-	OrderItems    []*OrderItem `json:"order_items"`
+	OrderId        int64        `json:"order_id"`
+	UserID         int64        `json:"user_id"`
+	OriginalCharge float32      `json:"original_charge"`
+	ActualPayment  float32      `json:"actual_payment"`
+	IsFreeShipping bool         `json:"is_free_shipping"`
+	ShippingFee    float32      `json:"shipping_fee"`
+	PhoneNumber    string       `json:"phone_number"`
+	OrderState     string       `json:"order_state"`
+	StreetAddress  string       `json:"street_address"`
+	City           string       `json:"city"`
+	Country        string       `json:"country"`
+	ZipCode        uint32       `json:"zip_code"`
+	OrderItems     []*OrderItem `json:"order_items"`
 }
 
 type OrderItem struct {
@@ -31,12 +35,29 @@ type OrderRepo interface {
 	Delete(context.Context, int64) error
 	Find(context.Context, *FindParams) ([]*Order, int64, error)
 	UpdateContentInfo(ctx context.Context, params []*UpdateContentItem) (bool, error)
+	CheckoutOrder(ctx context.Context, params []*CheckoutOrderItem) (*CheckoutResp, error)
 }
 
+// 更新商品微服务的参数
 type UpdateContentItem struct {
 	ProductId int64
 	Quantity  int32
 	IsAdd     bool
+}
+
+// 调用结算微服务的参数
+type CheckoutOrderItem struct {
+	ProductId int64
+	Price     float32
+	Quantity  int32
+}
+
+type CheckoutResp struct {
+	ActualPrice    float32
+	TotalPrice     float32
+	IsFreeShipping bool
+	ShippingFee    float32
+	HasChanged     bool
 }
 
 // FindParams 查找的参数
@@ -96,6 +117,10 @@ func (uc *OrderUseCase) UpdateContent(ctx context.Context, param []*UpdateConten
 		return false
 	}
 	return state
+}
+
+func (uc *OrderUseCase) CheckoutOrder(ctx context.Context, param []*CheckoutOrderItem) (*CheckoutResp, error) {
+	return uc.repo.CheckoutOrder(ctx, param)
 }
 
 //执行组合逻辑
