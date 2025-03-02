@@ -89,7 +89,7 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 	//return tx.Commit().Error
 
 	//只mysql操作，使用Canal检测mysql数据的变动
-	c.log.Infof("contentRepo Create context = %+v", content)
+	c.log.Infof("新增商品请求 = %+v", content)
 	categoriesStr := strings.Join(content.Categories, ",")
 	detail := ContentDetail{
 		Title:       content.Title,
@@ -101,7 +101,7 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 	}
 	db := c.data.db
 	if err := db.Create(&detail).Error; err != nil {
-		c.log.Errorf("content create error = %v", err)
+		c.log.Infof("商品新增错误 = %+v", err)
 		return err
 	}
 	//立马更新商品的图片url名字，为ID.jpg
@@ -111,6 +111,7 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 
 // 暂时不考虑，商品内容更新后，Es的变更
 func (c *contentRepo) Update(ctx context.Context, id int64, content *biz.Content) error {
+	c.log.Infof("商品更新请求 = %+v", id)
 	db := c.data.db
 	//把字符串数组，转成字符串
 	categoriesStr := strings.Join(content.Categories, ",")
@@ -124,7 +125,7 @@ func (c *contentRepo) Update(ctx context.Context, id int64, content *biz.Content
 	}
 	if err := db.Where("id = ?", id).
 		Updates(&detail).Error; err != nil {
-		c.log.WithContext(ctx).Errorf("content update error = %v", err)
+		c.log.Infof("商品更新错误 = %+v", err)
 		return err
 	}
 	return nil
@@ -176,7 +177,7 @@ func (c *contentRepo) IsExist(ctx context.Context, id int64) (bool, error) {
 		return false, nil
 	}
 	if err != nil {
-		c.log.WithContext(ctx).Errorf("ContentDao isExist = [%v]", err)
+		c.log.Infof("商品不存在错误 = %+v", err)
 		return false, err
 	}
 	return true, nil
@@ -184,23 +185,25 @@ func (c *contentRepo) IsExist(ctx context.Context, id int64) (bool, error) {
 
 // 不考虑删除商品信息，Es的同步问题
 func (c *contentRepo) Delete(ctx context.Context, id int64) error {
+	c.log.Infof("商品删除请求 = %+v", id)
 	db := c.data.db
 	// 删除索引信息
 	err := db.Where("id = ?", id).
 		Delete(&ContentDetail{}).Error
 	if err != nil {
-		c.log.WithContext(ctx).Errorf("content delete error = %v", err)
+		c.log.Infof("商品删除错误 = %+v", err)
 		return err
 	}
 	return nil
 }
 
 func (c *contentRepo) Get(ctx context.Context, id int64) (*biz.Content, error) {
+	c.log.Infof("商品查询请求 = %+v", id)
 	db := c.data.db
 	var detail ContentDetail
 	err := db.Where("id = ?", id).First(&detail).Error
 	if err != nil {
-		c.log.WithContext(ctx).Errorf("content get error = %v", err)
+		c.log.Infof("商品查询错误 = %+v", err)
 		return nil, err
 	}
 	content := &biz.Content{
@@ -273,6 +276,8 @@ func (c *contentRepo) UpdateQuantity(ctx context.Context, quantity_list []*biz.Q
 
 // 搜索框，搜索商品，接入ElasticSearch + Kibana（查找）
 func (c *contentRepo) Find(ctx context.Context, search string, in_page, in_pageSize int32) ([]*biz.Content, int64, error) {
+	c.log.Infof("商品搜索请求 = %+v", search)
+
 	// 构造模糊查询条件
 	//query := c.data.db.Model(&ContentDetail{})
 	//query = query.Where("title = %?%", search)
@@ -363,7 +368,7 @@ func (c *contentRepo) Find(ctx context.Context, search string, in_page, in_pageS
 		Body:  strings.NewReader(string(queryBody)),
 	}.Do(ctx, c.data.es)
 	if err != nil {
-		c.log.WithContext(ctx).Errorf("Elasticsearch search error: %v", err)
+		c.log.Infof("Es商品搜索错误 = %+v", err)
 		return nil, 0, err
 	}
 	defer res.Body.Close()
@@ -395,17 +400,15 @@ func (c *contentRepo) Find(ctx context.Context, search string, in_page, in_pageS
 	}
 	total := esResponse.Hits.Total.Value
 	if len(ids) == 0 {
-		fmt.Println("Es中没有找到匹配的商品")
 		return []*biz.Content{}, total, nil
 	}
-	fmt.Printf("ES返回的商品ID列表是%+v", ids)
 
 	// 2. 查询MySQL获取完整数据
 	var dbResults []*ContentDetail
 	if err := c.data.db.Model(&ContentDetail{}).
 		Where("id IN ?", ids).
 		Find(&dbResults).Error; err != nil {
-		c.log.WithContext(ctx).Errorf("MySQL query failed: %v", err)
+		c.log.Infof("Mysql商品搜索错误 = %+v", err)
 		return nil, 0, err
 	}
 	// 按ES返回顺序排序
@@ -431,8 +434,6 @@ func (c *contentRepo) Find(ctx context.Context, search string, in_page, in_pageS
 			Categories:  strings.Split(r.Categories, ","), //字符串转数组
 		})
 	}
-	fmt.Printf("contents返回的商品列表是%+v", contents)
-	fmt.Printf("contents返回的商品列表数量是%+v", total)
 
 	return contents, total, nil
 }
@@ -454,7 +455,7 @@ func (c *contentRepo) Recommend(ctx context.Context, user_id int64, in_page, in_
 
 	// 获取总数
 	if err := c.data.db.Model(&ContentDetail{}).Count(&total).Error; err != nil {
-		c.log.WithContext(ctx).Errorf("获取商品总数失败: %v", err)
+		c.log.Infof("Recommend获取商品总数错误")
 		return nil, 0, err
 	}
 
@@ -464,7 +465,7 @@ func (c *contentRepo) Recommend(ctx context.Context, user_id int64, in_page, in_
 		Offset(offset).
 		Limit(pageSize).
 		Find(&contents).Error; err != nil {
-		c.log.WithContext(ctx).Errorf("查询商品失败: %v", err)
+		c.log.Infof("Recommend获取商品信息错误")
 		return nil, 0, err
 	}
 

@@ -19,5 +19,9 @@ func (a *AppService) GetContent(ctx context.Context, req *operate.GetContentReq)
 		Quantity:    content.Quantity,
 		Categories:  content.Categories,
 	}
-	return &operate.GetContentRsp{Contents: contentInfo}, nil
+	return &operate.GetContentRsp{
+		Contents: contentInfo,
+		Msg:      "执行成功",
+		Code:     0,
+	}, nil
 }

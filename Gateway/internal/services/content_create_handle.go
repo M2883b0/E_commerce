@@ -37,7 +37,11 @@ func (c *CmsAPP) ContentCreate(ctx *gin.Context) {
 		},
 	})
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code": 400,
+			"msg":  err.Error(),
+			"data": rsp,
+		})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{

@@ -12,5 +12,8 @@ func (a *AppService) DeleteContent(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	return &operate.DeleteContentRsp{}, nil
+	return &operate.DeleteContentRsp{
+		Code: 0,
+		Msg:  "执行成功",
+	}, nil
 }

@@ -46,13 +46,11 @@ func NewContentUsecase(repo ContentRepo, logger log.Logger) *ContentUsecase {
 
 // CreateContent creates a Content, and returns the new Content.
 func (uc *ContentUsecase) CreateContent(ctx context.Context, c *Content) error {
-	uc.log.WithContext(ctx).Infof("CreateContent: %v", c)
 	return uc.repo.Create(ctx, c)
 }
 
 // UpdateContent update a Content.
 func (uc *ContentUsecase) UpdateContent(ctx context.Context, c *Content) error {
-	uc.log.WithContext(ctx).Infof("UpdateContent: %+v", c)
 	return uc.repo.Update(ctx, c.ID, c)
 }
 

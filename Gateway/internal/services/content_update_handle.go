@@ -40,8 +40,12 @@ func (c *CmsAPP) ContentUpdate(ctx *gin.Context) {
 			Categories:  req.Categories,
 		},
 	})
-	if err != nil { //出现错误
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code": 400,
+			"msg":  err.Error(),
+			"data": rsp,
+		})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{

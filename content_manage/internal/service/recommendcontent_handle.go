@@ -25,5 +25,7 @@ func (a *AppService) RecommendContent(ctx context.Context, req *operate.Recommen
 	return &operate.RecommendContentRsp{
 		Total:    total,
 		Contents: contents,
+		Msg:      "执行成功",
+		Code:     0,
 	}, nil
 }

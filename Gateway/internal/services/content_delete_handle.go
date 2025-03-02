@@ -25,7 +25,11 @@ func (c *CmsAPP) ContentDelete(ctx *gin.Context) {
 	//下面不走，直接db的方法，走的是grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateAppClient.DeleteContent(ctx, &operate.DeleteContentReq{Id: req.ID})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"IsExist error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code": 400,
+			"msg":  err.Error(),
+			"data": rsp,
+		})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{

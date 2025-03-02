@@ -13,9 +13,9 @@ func (a *UserService) GetUser(ctx context.Context, req *operate.GetUserRequest) 
 	if err != nil {
 		return &operate.GetUserReply{
 			User: nil,
-			Code: code,
+			Code: 400,
 			Msg:  msg,
-		}, nil
+		}, err
 	}
 	var usersInfo *operate.UserInfo
 	usersInfo = &operate.UserInfo{

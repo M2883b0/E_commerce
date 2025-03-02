@@ -22,5 +22,8 @@ func (a *AppService) UpdateContent(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	return &operate.UpdateContentRsp{}, nil
+	return &operate.UpdateContentRsp{
+		Msg:  "执行成功",
+		Code: 0,
+	}, nil
 }

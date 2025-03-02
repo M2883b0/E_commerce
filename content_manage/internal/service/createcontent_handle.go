@@ -21,5 +21,8 @@ func (a *AppService) CreateContent(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	return &operate.CreateContentRsp{}, nil
+	return &operate.CreateContentRsp{
+		Code: 0,
+		Msg:  "执行成功",
+	}, nil
 }

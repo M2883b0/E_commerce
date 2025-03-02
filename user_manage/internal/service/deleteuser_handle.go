@@ -6,7 +6,13 @@ import (
 )
 
 func (a *UserService) DeleteUser(ctx context.Context, req *operate.DeleteUserRequest) (*operate.DeleteUserReply, error) {
-	code, msg, _ := a.uc.DeleteUser(ctx, req.GetId())
+	code, msg, err := a.uc.DeleteUser(ctx, req.GetId())
+	if err != nil {
+		return &operate.DeleteUserReply{
+			Code: 400,
+			Msg:  msg,
+		}, err
+	}
 	return &operate.DeleteUserReply{
 		Code: code,
 		Msg:  msg,

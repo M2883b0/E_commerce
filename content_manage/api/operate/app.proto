@@ -45,19 +45,28 @@ message Content {
 message CreateContentReq {
 	Content  content = 1;
 }
-message CreateContentRsp {}
+message CreateContentRsp {
+	int32 code = 1;
+	string msg = 2;
+}
 
 //更新的前端后端返回的数据格式
 message UpdateContentReq {
 	Content  content = 1;
 }
-message UpdateContentRsp {}
+message UpdateContentRsp {
+	int32 code = 1;
+	string msg = 2;
+}
 
 //删除的前端后端返回的数据格式
 message DeleteContentReq{
 	int64 id = 1;
 }
-message DeleteContentRsp{}
+message DeleteContentRsp{
+	int32 code = 1;
+	string msg = 2;
+}
 
 //批量查找的前端后端返回的数据格式
 message FindContentReq {
@@ -73,6 +82,8 @@ message FindContentRsp {
 	int64 total = 1;
 	// 内容列表
 	repeated Content contents = 2;
+	int32 code = 3;
+	string msg = 4;
 }
 
 //精确查找，单个内容
@@ -83,6 +94,8 @@ message GetContentReq {
 message GetContentRsp {
 	// 内容
 	Content contents = 1;
+	int32 code = 2;
+	string msg = 3;
 }
 
 //商品推送
@@ -99,6 +112,8 @@ message RecommendContentRsp {
 	int64 total = 1;
 	// 内容列表
 	repeated Content contents = 2;
+	int32 code = 3;
+	string msg = 4;
 }
 
 message UpdateQuantityReq {

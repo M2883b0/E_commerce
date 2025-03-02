@@ -30,6 +30,8 @@ func (a *AppService) FindContent(ctx context.Context,
 	rsp := &operate.FindContentRsp{ //api的app.proto里面，定义了FindContentRsp结构需要两个内容，total和Contents
 		Total:    total,
 		Contents: contents,
+		Msg:      "执行成功",
+		Code:     0,
 	}
 	return rsp, nil
 }

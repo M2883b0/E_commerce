@@ -8,7 +8,7 @@ import (
 
 func (a *UserService) UpdateUser(ctx context.Context, req *operate.UpdateUserRequest) (*operate.UpdateUserReply, error) {
 	user := req.GetUser()
-	code, msg, _ := a.uc.UpdateUser(ctx, &biz.User{
+	code, msg, err := a.uc.UpdateUser(ctx, &biz.User{
 		ID:           user.Id,
 		Phone_number: user.GetPhoneNumber(),
 		Password:     user.GetPassword(),
@@ -18,6 +18,12 @@ func (a *UserService) UpdateUser(ctx context.Context, req *operate.UpdateUserReq
 		Description:  user.GetDescription(),
 		Address:      user.GetAddress(),
 	})
+	if err != nil {
+		return &operate.UpdateUserReply{
+			Code: 400,
+			Msg:  msg,
+		}, err
+	}
 	return &operate.UpdateUserReply{
 		Code: code,
 		Msg:  msg,
