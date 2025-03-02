@@ -12,11 +12,16 @@ type CartItem struct {
 }
 
 type AddItemReq struct {
-	UserId   int64    `json:"user_id"`
 	CartItem CartItem `json:"cart_item"`
 }
 
 func (c *CmsAPP) AddItem(ctx *gin.Context) {
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(uint32)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
+	}
 	var req AddItemReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -28,7 +33,7 @@ func (c *CmsAPP) AddItem(ctx *gin.Context) {
 		Quantity:  req.CartItem.Quantity,
 	}
 	rsp, err := c.cartServiceClient.AddItem(ctx, &cart.AddItemReq{
-		UserId: uint32(req.UserId),
+		UserId: userId,
 		Item:   &cartItem,
 	})
 	if err != nil {
@@ -50,20 +55,16 @@ func (c *CmsAPP) AddItem(ctx *gin.Context) {
 
 }
 
-// GetCartReq get cart 接口。获取购物车信息
-type GetCartReq struct {
-	UserId int64 `json:"user_id" binding:"required"` // 内容标题
-}
-
 func (c *CmsAPP) GetCart(ctx *gin.Context) {
-	var req GetCartReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(uint32)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
 	}
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.cartServiceClient.GetCart(ctx, &cart.GetCartReq{
-		UserId: uint32(req.UserId),
+		UserId: userId,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -83,19 +84,16 @@ func (c *CmsAPP) GetCart(ctx *gin.Context) {
 	}
 }
 
-type EmptyCartReq struct {
-	UserId int64 `json:"user_id" binding:"required"` // 内容标题
-}
-
 func (c *CmsAPP) EmptyCart(ctx *gin.Context) {
-	var req EmptyCartReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(uint32)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
 	}
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.cartServiceClient.EmptyCart(ctx, &cart.EmptyCartReq{
-		UserId: uint32(req.UserId),
+		UserId: userId,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

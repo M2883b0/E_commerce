@@ -167,19 +167,21 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 }
 
 func (c *orderRepo) UpdateContentInfo(ctx context.Context, params []*biz.UpdateContentItem) (bool, error) {
-	var updateItems []*operate.UpdateProductItem
+	var updateItems []*operate.UpdateQuantityReq
 	for _, item := range params {
-		updateItems = append(updateItems, &operate.UpdateProductItem{
+		updateItems = append(updateItems, &operate.UpdateQuantityReq{
 			Id:       item.ProductId,
 			IsAdd:    item.IsAdd,
 			Quantity: item.Quantity,
 		})
 	}
 	response, err := c.data.contentClient.UpdateContentQuantity(context.Background(), &operate.UpdateContentQuantityReq{
-		UpdateProductItem: updateItems,
+		QuantityReq: updateItems,
 	})
 	if err != nil {
+		c.log.WithContext(ctx).Errorf("connect to content server error = %v", err)
 		return false, err
 	}
+	c.log.WithContext(ctx).Errorf("content service response.is_success = %v", response.IsSuccess)
 	return response.IsSuccess, nil
 }

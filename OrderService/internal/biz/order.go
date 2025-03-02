@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -59,7 +58,6 @@ func NewOrderUseCase(repo OrderRepo, logger log.Logger) *OrderUseCase {
 }
 
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, g *Order) error {
-	fmt.Print(ctx, g)
 	uc.log.WithContext(ctx).Infof("CreateOrder: %+v", g)
 	return uc.repo.Create(ctx, g)
 }
@@ -84,6 +82,7 @@ func (uc *OrderUseCase) DeleteOrder(ctx context.Context, id uint64) error {
 }
 
 func (uc *OrderUseCase) FindOrder(ctx context.Context, params *FindParams) ([]*Order, int64, error) {
+	uc.log.WithContext(ctx).Infof("FindOrder: %+v", params)
 	orders, total, err := uc.repo.Find(ctx, params)
 	if err != nil {
 		return nil, 0, err

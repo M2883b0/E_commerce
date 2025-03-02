@@ -4,6 +4,7 @@ import (
 	"OrderService/internal/biz"
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 
 	pb "OrderService/api/order"
 )
@@ -19,8 +20,8 @@ func NewOrderServiceService(uc *biz.OrderUseCase) *OrderServiceService {
 
 func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq) (*pb.PlaceOrderResp, error) {
 
-	var orderItemBiz []*biz.OrderItem
-	var updateItems []*biz.UpdateContentItem
+	var orderItemBiz []*biz.OrderItem        // 商品信息
+	var updateItems []*biz.UpdateContentItem // 更新商品信息item
 
 	for _, orderItemReq := range req.GetOrderItems() {
 		orderItemBiz = append(orderItemBiz,
@@ -32,7 +33,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 		updateItems = append(updateItems, &biz.UpdateContentItem{
 			ProductId: int64(orderItemReq.GetProductId()),
 			Quantity:  int32(orderItemReq.GetQuantity()),
-			IsAdd:     true,
+			IsAdd:     false,
 		})
 	}
 	order := &biz.Order{
@@ -48,13 +49,23 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 
 	err := s.uc.CreateOrder(ctx, order)
 	if err != nil {
-		return nil, err
+		log.Infof("数据库创建订单失败")
+		return &pb.PlaceOrderResp{
+			OrderId: 0,
+		}, nil
 	}
 
 	// 告知商品微服务 调整库存
-	if state := s.uc.UpdateContent(ctx, updateItems); state {
-		return nil, nil
+	if !s.uc.UpdateContent(ctx, updateItems) {
+		log.Infof("调整库存失败")
+		return &pb.PlaceOrderResp{
+			OrderId: 0,
+		}, nil
 	}
+
+	// 结算，如果结算失败，需要再次告诉商品微服务，库存回滚
+	// 。。。。 待完善
+	// 列出订单有bug
 
 	fmt.Print("OrderInfo Create order", order.OrderId)
 	return &pb.PlaceOrderResp{

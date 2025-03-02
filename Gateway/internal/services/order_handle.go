@@ -3,12 +3,10 @@ package services
 import (
 	"Gateway/internal/api/order"
 	"github.com/gin-gonic/gin"
-	"github.com/go-kratos/kratos/v2/log"
 	"net/http"
 )
 
 type PlaceOrderReq struct {
-	UserId      int64        `json:"user_id" binding:"required"`
 	PhoneNumber string       `json:"phone_number"`
 	Address_    Address      `json:"address"`
 	OrderItems  []*OrderItem `json:"order_items"`
@@ -29,6 +27,12 @@ type OrderItem struct {
 
 func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 	var req PlaceOrderReq
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(uint64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
+	}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -43,7 +47,7 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 		})
 	}
 	rsp, err := c.orderServiceClient.PlaceOrder(ctx, &order.PlaceOrderReq{
-		UserId: uint64(req.UserId),
+		UserId: userId,
 		Address: &order.Address{
 			StreetAddress: req.Address_.StreetAddress,
 			City:          req.Address_.City,
@@ -65,19 +69,16 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 	})
 }
 
-type ListOrderReq struct {
-	UserId int64 `json:"user_id" binding:"required"` // 内容标题
-}
-
 func (c *CmsAPP) ListOrder(ctx *gin.Context) {
-	var req ListOrderReq
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(uint64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
 	}
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.orderServiceClient.ListOrder(ctx, &order.ListOrderReq{
-		UserId: uint64(req.UserId),
+		UserId: userId,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -91,20 +92,27 @@ func (c *CmsAPP) ListOrder(ctx *gin.Context) {
 }
 
 type CancelOrderReq struct {
-	UserId  int64 `json:"user_id" binding:"required"`
 	OrderId int64 `json:"order_id" binding:"required"` // 内容标题
 }
 
 func (c *CmsAPP) CancelOrder(ctx *gin.Context) {
 	var req CancelOrderReq
-	userId, _ := ctx.Get("user_id")
-	log.Infof("================================this is user_id %+v==============================================", userId)
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(uint64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
+	}
+	//log.Infof("================================this is user_id %+v==============================================", userId)
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
-	rsp, err := c.orderServiceClient.MarkOrderCancel(ctx, &order.MarkOrderCancelReq{})
+	rsp, err := c.orderServiceClient.MarkOrderCancel(ctx, &order.MarkOrderCancelReq{
+		UserId:  userId,
+		OrderId: uint64(req.OrderId),
+	})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
