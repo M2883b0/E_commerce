@@ -66,6 +66,8 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 		Quantity:    content.Quantity,
 		Categories:  categoriesStr,
 	}
+	//立马更新商品的图片url名字，为ID.jpg
+	tx.Model(&detail).Where("id = ?", detail.ID).Update("picture_url", fmt.Sprintf("%d.jpg", detail.ID))
 	if err := tx.Create(&detail).Error; err != nil {
 		tx.Rollback()
 		c.log.Errorf("Mysql content create error = %v", err)
