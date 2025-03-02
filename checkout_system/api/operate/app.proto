@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package api.operate;
+
+option go_package = "content_manage/api/operate;operate";
+option java_multiple_files = true;
+option java_package = "api.operate";
+
+service App {
+	// 创建商品内容
+	rpc CreateContent (CreateContentReq) returns (CreateContentRsp);
+	// 更新商品信息
+	rpc UpdateContent (UpdateContentReq) returns (UpdateContentRsp);
+	// 删除商品
+	rpc DeleteContent (DeleteContentReq) returns (DeleteContentRsp);
+	// 查找-搜索框批量查找（搜索框->ES返回索引->Mysql）
+	rpc FindContent (FindContentReq) returns (FindContentRsp);
+	// 查找-id批量查找(通过商品id列表批量查找某条商品的信息)
+	rpc GetContent (GetContentReq) returns (GetContentRsp);
+	// 商品推送(Gorse推荐算法，推荐内容，供首页展示)
+	rpc RecommendContent (RecommendContentReq) returns (RecommendContentRsp);
+	// 商品库存更新
+	rpc UpdateContentQuantity (UpdateContentQuantityReq) returns (UpdateContentQuantityRsp);
+}
+//数据格式
+message Content {
+	// 商品唯一ID
+	int64 id = 1;
+	// 商品标题
+	string title = 2;
+	// 商品描述
+	string description = 3;
+	// 图片url
+	string picture_url = 4;
+	// 商品价格
+	float price = 5;
+	// 商品库存>=0
+	uint32 quantity = 6;
+	// 商品分类（可多个分类）
+	repeated string categories = 7;
+
+}
+
+//增加的前端后端返回的数据格式
+message CreateContentReq {
+	Content  content = 1;
+}
+message CreateContentRsp {
+	int32 code = 1;
+	string msg = 2;
+}
+
+//更新的前端后端返回的数据格式
+message UpdateContentReq {
+	Content  content = 1;
+}
+message UpdateContentRsp {
+	int32 code = 1;
+	string msg = 2;
+}
+
+//删除的前端后端返回的数据格式
+message DeleteContentReq{
+	int64 id = 1;
+}
+message DeleteContentRsp{
+	int32 code = 1;
+	string msg = 2;
+}
+
+//批量查找的前端后端返回的数据格式
+message FindContentReq {
+	// 搜索内容
+	string query = 1;
+	// 页
+	int32 page = 2;
+	// 页大小
+	int32 page_size = 3;
+}
+message FindContentRsp {
+	// 内容总数
+	int64 total = 1;
+	// 内容列表
+	repeated Content contents = 2;
+	int32 code = 3;
+	string msg = 4;
+}
+
+//id批量查找，多个内容
+message GetContentReq {
+	// 商品id
+	repeated int64 id = 1;
+}
+message GetContentRsp {
+	// 内容
+	repeated Content contents = 1;
+	int32 code = 2;
+	string msg = 3;
+}
+
+//商品推送
+message RecommendContentReq {
+	// 用户id
+	int64 user_id = 1;
+	// 页
+	int32 page = 2;
+	// 页大小
+	int32 page_size = 3;
+}
+message RecommendContentRsp {
+	// 内容总数
+	int64 total = 1;
+	// 内容列表
+	repeated Content contents = 2;
+	int32 code = 3;
+	string msg = 4;
+}
+
+message UpdateQuantityReq {
+	// 商品id
+	int64 id = 1;
+	// 商品库存操作类型(True是加，False是减)
+	bool is_add = 2;
+	// 操作的商品数量
+	int32 quantity = 3;
+}
+
+message UpdateContentQuantityReq {
+	repeated UpdateQuantityReq quantity_req = 1;
+}
+message UpdateContentQuantityRsp {
+	bool is_success = 1;
+}

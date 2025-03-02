@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package api.payment;
+
+option go_package = "payment_system/api/payment;payment";
+service PaymentService {
+  // 支付请求（支持幂等性）
+  rpc Charge(ChargeReq) returns (ChargeResp) {}
+  // 获取支付结果
+  rpc QueryOrderStatus(QueryOrderStatusReq) returns (QueryOrderStatusResp) {}
+  // 取消支付
+  rpc Cancel(CancelReq) returns (CancelResp) {}
+}
+
+// 支付方式枚举
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  CREDIT_CARD = 1;     // 信用卡
+  ALIPAY = 2;          // 支付宝
+  WECHAT_PAY = 3;      // 微信支付
+}
+
+message ChargeReq {
+  string order_id = 1;      // 关联订单  Todo订单id必须在64位内
+  string subject = 2;        // 订单标题
+  string PaymentMethod = 3;     // 支付方式
+  string idempotency_key = 4; // 幂等键（客户端生成唯一值）
+
+}
+
+message ChargeResp {
+  string qr_url = 1;     // 支付二维码ID,qr_code
+  int64 order_id = 2;
+}
+
+message QueryOrderStatusReq {
+  int64 order_id = 1;
+}
+
+message QueryOrderStatusResp {
+  int64 order_id = 1;
+  string status = 2;
+}
+
+message CancelReq {
+  int64 order_id = 1;
+}
+
+message CancelResp {
+  int64 order_id = 1;
+  // 返回取消支付结果
+  string msg = 2;
+  string code = 3;
+}
+
