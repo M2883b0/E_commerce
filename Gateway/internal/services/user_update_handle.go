@@ -29,20 +29,20 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新操作，需要指定更新的ID"})
 	}
 
-	//密码加密
-	hashedPassword, err := encryptPassword(req.Password)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-	if req.Password == "" { //如果不更新密码
-		hashedPassword = "" //加密后，强行置为空
-	}
+	////密码加密
+	//hashedPassword, err := encryptPassword(req.Password)
+	//if err != nil {
+	//	ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//}
+	//if req.Password == "" { //如果不更新密码
+	//	hashedPassword = "" //加密后，强行置为空
+	//}
 	//下面不走，直接db的方法，走的是grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateUserClient.UpdateUser(ctx, &operate.UpdateUserRequest{
 		User: &operate.UserInfo{
 			Id:          req.ID,
 			PhoneNumber: req.Phone_number,
-			Password:    hashedPassword,
+			Password:    req.Password,
 			UserName:    req.User_name,
 			UserType:    req.User_type,
 			ImgUrl:      req.Img_url,

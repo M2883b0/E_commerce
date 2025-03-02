@@ -23,15 +23,15 @@ func (c *CmsAPP) UserCreate(ctx *gin.Context) {
 		return
 	}
 	//密码加密
-	hashedPassword, err := encryptPassword(req.Password)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
+	//hashedPassword, err := encryptPassword(req.Password)
+	//if err != nil {
+	//	ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//}
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateUserClient.CreateUser(ctx, &operate.CreateUserRequest{
 		User: &operate.UserInfo{
 			PhoneNumber: req.Description,
-			Password:    hashedPassword,
+			Password:    req.Password,
 			UserName:    req.User_name,
 			UserType:    req.User_type,
 			ImgUrl:      req.Img_url,

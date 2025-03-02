@@ -2,7 +2,9 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"user_manage/internal/biz"
 )
@@ -37,9 +39,15 @@ func (UserDetail) TableName() string {
 
 func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
 	c.log.Infof("userRepo Create user = %+v", user)
+	//密码加密
+	hashedPassword, err := encryptPassword(user.Password)
+	if err != nil {
+		c.log.Errorf("password encrypt error = %v", err)
+		return err
+	}
 	detail := UserDetail{
 		Phone_number: user.Phone_number,
-		Password:     user.Password,
+		Password:     hashedPassword,
 		User_name:    user.User_name,
 		User_type:    user.User_type,
 		Img_url:      user.Img_url,
@@ -57,14 +65,20 @@ func (c *userRepo) Create(ctx context.Context, user *biz.User) error {
 
 func (c *userRepo) Register(ctx context.Context, user *biz.Register) error {
 	c.log.Infof("userRepo Register user = %+v", user)
+	//密码加密
+	hashedPassword, err := encryptPassword(user.Password)
+	if err != nil {
+		c.log.Errorf("password encrypt error = %v", err)
+		return err
+	}
 	detail := UserDetail{
 		Phone_number: user.Phone_number,
-		Password:     user.Password,
+		Password:     hashedPassword,
 		User_name:    user.User_name,
 		User_type:    1,
 		Img_url:      "default.jpg",
 		Description:  "Hello World",
-		Address:      "GZHU",
+		Address:      "",
 	}
 	db := c.data.db
 	if err := db.Create(&detail).Error; err != nil {
@@ -100,9 +114,18 @@ func (c *userRepo) Login(ctx context.Context, user *biz.Login) (*biz.User, error
 
 func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) error {
 	c.log.Infof("userRepo Update user = %+v", user)
+	//密码加密
+	hashedPassword, err := encryptPassword(user.Password)
+	if err != nil {
+		c.log.Errorf("password encrypt error = %v", err)
+		return err
+	}
+	if user.Password == "" { //如果不更新密码
+		hashedPassword = "" //加密后，强行置为空
+	}
 	detail := UserDetail{
 		Phone_number: user.Phone_number,
-		Password:     user.Password,
+		Password:     hashedPassword,
 		User_name:    user.User_name,
 		User_type:    user.User_type,
 		Img_url:      user.Img_url,
@@ -179,6 +202,15 @@ func (c *userRepo) Find(ctx context.Context, params *biz.FindParams) (*biz.User,
 		Address:      results.Address,
 	}
 	return users, nil
+}
+
+func encryptPassword(password string) (string, error) {
+	hashedPassword, error := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if error != nil {
+		fmt.Println("Error hashing password:", error)
+		return "", error
+	}
+	return string(hashedPassword), nil
 }
 
 //操作db

@@ -2,9 +2,7 @@ package services
 
 import (
 	"Gateway/internal/api/operate"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -34,15 +32,15 @@ func (cms *CmsAPP) Register(c *gin.Context) {
 	//如果前端正确发送请求，则执行下面的程序，返回响应数据
 	//fmt.Printf("register info = %+v \n", req) //%v是只打印【值】，%+v是打印【字段+值】
 
-	//实现密码加密
-	hashedPassword, err := encryptPassword(req.Password)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
+	////实现密码加密
+	//hashedPassword, err := encryptPassword(req.Password)
+	//if err != nil {
+	//	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//}
 	rsp, err := cms.operateUserClient.Register(c, &operate.RegisterRequest{
 		Register: &operate.RegisterInfo{
 			PhoneNumber: req.Phone_number,
-			Password:    hashedPassword,
+			Password:    req.Password,
 			UserName:    req.User_name,
 		},
 	})
@@ -57,11 +55,11 @@ func (cms *CmsAPP) Register(c *gin.Context) {
 }
 
 // 密码加密函数
-func encryptPassword(password string) (string, error) {
-	hashedPassword, error := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if error != nil {
-		fmt.Println("Error hashing password:", error)
-		return "", error
-	}
-	return string(hashedPassword), nil
-}
+//func encryptPassword(password string) (string, error) {
+//	hashedPassword, error := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+//	if error != nil {
+//		fmt.Println("Error hashing password:", error)
+//		return "", error
+//	}
+//	return string(hashedPassword), nil
+//}
