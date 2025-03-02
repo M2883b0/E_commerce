@@ -121,6 +121,7 @@ func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderRe
 				ProductId: oi.ProductId,
 				Quantity:  oi.Quantity,
 			})
+
 		}
 		orders = append(orders, &pb.Order{
 			OrderId:     o.OrderId,
