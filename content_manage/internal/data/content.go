@@ -47,49 +47,16 @@ type EsDetail struct {
 }
 
 func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
-	//// 开启事务
-	//tx := c.data.db.Begin()
-	//defer func() {
-	//	if r := recover(); r != nil {
-	//		tx.Rollback()
-	//	}
-	//}()
-	//
-	//c.log.Infof("contentRepo Create context = %+v", content)
-	////把字符串数组，转成字符串
-	//categoriesStr := strings.Join(content.Categories, ",")
-	//detail := ContentDetail{
-	//	Title:       content.Title,
-	//	Description: content.Description,
-	//	Picture_url: content.Picture_url,
-	//	Price:       content.Price,
-	//	Quantity:    content.Quantity,
-	//	Categories:  categoriesStr,
-	//}
-	//if err := tx.Create(&detail).Error; err != nil {
-	//	tx.Rollback()
-	//	c.log.Errorf("Mysql content create error = %v", err)
-	//	return err
-	//}
-	////双写，写入数据库的同时，同步到ElasticSearch
-	//var esdetail []*EsDetail
-	//esdetail = append(esdetail, &EsDetail{
-	//	Id:          int64(detail.ID),
-	//	Title:       detail.Title,
-	//	Description: detail.Description,
-	//	Categories:  detail.Categories,
-	//})
-	//err := c.BatchUpSertToEs(ctx, esdetail) //调用UpSet方法（没有就创建，有就更新）
-	//if err != nil {
-	//	tx.Rollback() //Es失败时，回滚Mysql数据库
-	//	c.log.Errorf("Es content create %v error = %v", esdetail, err)
-	//	return err
-	//}
-	//// 提交事务
-	//return tx.Commit().Error
+	// 开启事务
+	tx := c.data.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
-	//只mysql操作，使用Canal检测mysql数据的变动
-	c.log.Infof("新增商品请求 = %+v", content)
+	c.log.Infof("contentRepo Create context = %+v", content)
+	//把字符串数组，转成字符串
 	categoriesStr := strings.Join(content.Categories, ",")
 	detail := ContentDetail{
 		Title:       content.Title,
@@ -99,14 +66,47 @@ func (c *contentRepo) Create(ctx context.Context, content *biz.Content) error {
 		Quantity:    content.Quantity,
 		Categories:  categoriesStr,
 	}
-	db := c.data.db
-	if err := db.Create(&detail).Error; err != nil {
-		c.log.Infof("商品新增错误 = %+v", err)
+	if err := tx.Create(&detail).Error; err != nil {
+		tx.Rollback()
+		c.log.Errorf("Mysql content create error = %v", err)
 		return err
 	}
-	//立马更新商品的图片url名字，为ID.jpg
-	db.Model(&detail).Where("id = ?", detail.ID).Update("picture_url", fmt.Sprintf("%d.jpg", detail.ID))
-	return nil
+	//双写，写入数据库的同时，同步到ElasticSearch
+	var esdetail []*EsDetail
+	esdetail = append(esdetail, &EsDetail{
+		Id:          int64(detail.ID),
+		Title:       detail.Title,
+		Description: detail.Description,
+		Categories:  detail.Categories,
+	})
+	err := c.BatchUpSertToEs(ctx, esdetail) //调用UpSet方法（没有就创建，有就更新）
+	if err != nil {
+		tx.Rollback() //Es失败时，回滚Mysql数据库
+		c.log.Errorf("Es content create %v error = %v", esdetail, err)
+		return err
+	}
+	// 提交事务
+	return tx.Commit().Error
+
+	////只mysql操作，使用Canal检测mysql数据的变动
+	//c.log.Infof("新增商品请求 = %+v", content)
+	//categoriesStr := strings.Join(content.Categories, ",")
+	//detail := ContentDetail{
+	//	Title:       content.Title,
+	//	Description: content.Description,
+	//	Picture_url: content.Picture_url,
+	//	Price:       content.Price,
+	//	Quantity:    content.Quantity,
+	//	Categories:  categoriesStr,
+	//}
+	//db := c.data.db
+	//if err := db.Create(&detail).Error; err != nil {
+	//	c.log.Infof("商品新增错误 = %+v", err)
+	//	return err
+	//}
+	////立马更新商品的图片url名字，为ID.jpg
+	//db.Model(&detail).Where("id = ?", detail.ID).Update("picture_url", fmt.Sprintf("%d.jpg", detail.ID))
+	//return nil
 }
 
 // 暂时不考虑，商品内容更新后，Es的变更
