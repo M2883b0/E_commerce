@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package api.operate;
+
+option go_package = "ai_manage/api/operate;operate";
+option java_multiple_files = true;
+option java_package = "api.operate";
+
+service Ai {
+	rpc CreateAi (CreateAiRequest) returns (CreateAiReply);
+	rpc UpdateAi (UpdateAiRequest) returns (UpdateAiReply);
+	rpc DeleteAi (DeleteAiRequest) returns (DeleteAiReply);
+	rpc GetAi (GetAiRequest) returns (GetAiReply);
+	rpc ListAi (ListAiRequest) returns (ListAiReply);
+}
+
+message CreateAiRequest {}
+message CreateAiReply {}
+
+message UpdateAiRequest {}
+message UpdateAiReply {}
+
+message DeleteAiRequest {}
+message DeleteAiReply {}
+
+message GetAiRequest {}
+message GetAiReply {}
+
+message ListAiRequest {}
+message ListAiReply {}
