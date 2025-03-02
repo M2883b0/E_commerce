@@ -8,12 +8,18 @@ import (
 
 // 前端的请求数据结构
 type ContentRecommendReq struct {
-	User_id  int64 `json:"user_id"`   // 用户id
+	//User_id  int64 `json:"user_id"`   // 用户id
 	Page     int32 `json:"page"`      // 页
 	PageSize int32 `json:"page_size"` // 页大小
 }
 
 func (c *CmsAPP) ContentRecommend(ctx *gin.Context) {
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(int64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
+	}
 	var req ContentRecommendReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -21,7 +27,7 @@ func (c *CmsAPP) ContentRecommend(ctx *gin.Context) {
 	}
 	//下面不走，直接db的方法，走的是grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateAppClient.RecommendContent(ctx, &operate.RecommendContentReq{
-		UserId:   req.User_id,
+		UserId:   userId,
 		Page:     req.Page,
 		PageSize: req.PageSize,
 	})
