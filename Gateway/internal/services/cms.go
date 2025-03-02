@@ -232,7 +232,7 @@ func connCheckoutServiceClient(app *CmsAPP) {
 	dis := etcd.New(client)
 
 	//endpoint := "discovery:///provider"
-	endpoint := "discovery:///cart_service" //把etcd的Name标识符拿过来，找到对应的服务ip
+	endpoint := "discovery:///checkout_service" //把etcd的Name标识符拿过来，找到对应的服务ip
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		//grpc.WithEndpoint("127.0.0.1:9000"),
@@ -268,7 +268,7 @@ func connPaymentServiceClient(app *CmsAPP) {
 	dis := etcd.New(client)
 
 	//endpoint := "discovery:///provider"
-	endpoint := "discovery:///cart_service" //把etcd的Name标识符拿过来，找到对应的服务ip
+	endpoint := "discovery:///payment_service" //把etcd的Name标识符拿过来，找到对应的服务ip
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		//grpc.WithEndpoint("127.0.0.1:9000"),

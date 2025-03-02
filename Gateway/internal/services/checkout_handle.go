@@ -3,6 +3,7 @@ package services
 import (
 	"Gateway/internal/api/checkout"
 	"github.com/gin-gonic/gin"
+	"github.com/go-kratos/kratos/v2/log"
 	"net/http"
 )
 
@@ -24,6 +25,7 @@ func (c *CmsAPP) Checkout(ctx *gin.Context) {
 	//	return
 	//}
 	var req CheckoutReq
+	log.Infof("收到结算请求 %+v", req)
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
