@@ -28,7 +28,7 @@ type ContentRepo interface {
 	IsExist(context.Context, int64) (bool, error)
 	Delete(context.Context, int64) error
 	Find(context.Context, string, int32, int32) ([]*Content, int64, error)
-	Get(context.Context, int64) (*Content, error)
+	Get(context.Context, []int64) ([]*Content, error)
 	Recommend(context.Context, int64, int32, int32) ([]*Content, int64, error)
 	UpdateQuantity(context.Context, []*QuantityDetail) (bool, error)
 }
@@ -77,9 +77,9 @@ func (uc *ContentUsecase) FindContent(ctx context.Context, query string, page, p
 	return contents, total, nil
 }
 
-func (uc *ContentUsecase) GetContent(ctx context.Context, id int64) (*Content, error) {
+func (uc *ContentUsecase) GetContent(ctx context.Context, ids []int64) ([]*Content, error) {
 	repo := uc.repo
-	contents, err := repo.Get(ctx, id) //调用data层的Find实现
+	contents, err := repo.Get(ctx, ids) //调用data层的Find实现
 	if err != nil {
 		return nil, err
 	}
