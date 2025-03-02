@@ -60,13 +60,11 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code": 400,
 			"msg":  err.Error(),
-			"data": rsp,
 		})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": rsp,
+		"code": rsp.Code,
+		"msg":  rsp.Msg,
 	})
 }

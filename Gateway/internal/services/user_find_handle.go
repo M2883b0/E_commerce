@@ -26,18 +26,22 @@ func (c *CmsAPP) UserFind(ctx *gin.Context) {
 	//下面不走，直接db的方法，走的是grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateUserClient.GetUser(ctx, &operate.GetUserRequest{Id: userId})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code": 400,
+			"msg":  err.Error(),
+			"data": rsp,
+		})
 		return
 	}
-	code := 0
-	msg := "ok"
-	if rsp == nil || rsp.User.Id == 0 {
-		code = 400
-		msg = "用户不存在"
-	}
+	//code := 0
+	//msg := "ok"
+	//if rsp == nil || rsp.User.Id == 0 {
+	//	code = 400
+	//	msg = "用户不存在"
+	//}
 	ctx.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  msg,
+		"code": rsp.Code,
+		"msg":  rsp.Msg,
 		"data": rsp,
 	})
 }

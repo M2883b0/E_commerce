@@ -60,16 +60,24 @@ message LoginReply {
 message UpdateUserRequest {
 	UserInfo user = 1;
 }
-message UpdateUserReply {}
+message UpdateUserReply {
+	int32 code = 1;
+	string msg = 2;
+}
 
 message DeleteUserRequest {
 	int64 id = 1;
 }
-message DeleteUserReply {}
+message DeleteUserReply {
+	int32 code = 1;
+	string msg = 2;
+}
 
 message GetUserRequest {
 	int64 id = 1;
 }
 message GetUserReply {
 	UserInfo user = 1;
+	int32 code = 2;
+	string msg = 3;
 }

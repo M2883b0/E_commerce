@@ -24,13 +24,11 @@ func (c *CmsAPP) UserDelete(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code": 400,
 			"msg":  err.Error(),
-			"data": rsp,
 		})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "删除成功",
-		"data": rsp,
+		"code": rsp.Code,
+		"msg":  rsp.Msg,
 	})
 }
