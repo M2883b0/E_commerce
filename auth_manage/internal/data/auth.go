@@ -6,11 +6,12 @@ import (
 	"errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/golang-jwt/jwt/v5"
+	"strconv"
 	"time"
 )
 
 type MyClaims struct {
-	Username int64 `json:"user_id"` //自定义Payload有效载荷字段
+	Username string `json:"user_id"` //自定义Payload有效载荷字段
 	//Age      string `json:"age"`
 	jwt.RegisteredClaims //提供标准验证功能,固定写法
 }
@@ -36,7 +37,7 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 		return "", errors.New("user_id不能为空")
 	}
 	SetClaims := MyClaims{
-		Username: a.User_id,
+		Username: strconv.Itoa(int(a.User_id)),
 		//Password: password,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Hour)), //有效时间(过期时间)，持续5个小时
@@ -79,7 +80,11 @@ func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, 
 	if time.Now().Unix() > claims.ExpiresAt.Unix() {
 		return false, "jwt 时间过期", 0, nil
 	}
-	return true, "jwt 鉴权成功", claims.Username, nil
+	num, err := strconv.Atoi(claims.Username)
+	if err != nil {
+		return false, "jwt 转型失败", 0, nil
+	}
+	return true, "jwt 鉴权成功", int64(num), nil
 }
 
 //实际操作（rdb，操作redis   |   jwt生成）
