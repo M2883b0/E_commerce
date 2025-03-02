@@ -17,7 +17,7 @@ type AddItemReq struct {
 
 func (c *CmsAPP) AddItem(ctx *gin.Context) {
 	tmp, state := ctx.Get("user_id")
-	var userId = tmp.(uint32)
+	var userId = tmp.(int64)
 	if !state {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
@@ -57,7 +57,7 @@ func (c *CmsAPP) AddItem(ctx *gin.Context) {
 
 func (c *CmsAPP) GetCart(ctx *gin.Context) {
 	tmp, state := ctx.Get("user_id")
-	var userId = tmp.(uint32)
+	var userId = tmp.(int64)
 	if !state {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
@@ -86,7 +86,7 @@ func (c *CmsAPP) GetCart(ctx *gin.Context) {
 
 func (c *CmsAPP) EmptyCart(ctx *gin.Context) {
 	tmp, state := ctx.Get("user_id")
-	var userId = tmp.(uint32)
+	var userId = tmp.(int64)
 	if !state {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return

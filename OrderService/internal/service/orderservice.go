@@ -1,12 +1,11 @@
 package service
 
 import (
+	pb "OrderService/api/order"
 	"OrderService/internal/biz"
 	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
-
-	pb "OrderService/api/order"
 )
 
 type OrderServiceService struct {
@@ -31,7 +30,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 				Cost:      orderItemReq.GetCost(),
 			})
 		updateItems = append(updateItems, &biz.UpdateContentItem{
-			ProductId: int64(orderItemReq.GetProductId()),
+			ProductId: orderItemReq.GetProductId(),
 			Quantity:  int32(orderItemReq.GetQuantity()),
 			IsAdd:     false,
 		})
@@ -116,6 +115,7 @@ func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderRe
 	}, nil
 }
 func (s *OrderServiceService) MarkOrderPaid(ctx context.Context, req *pb.MarkOrderPaidReq) (*pb.MarkOrderPaidResp, error) {
+	log.Infof("mark order paid. order id is %+v", req.OrderId)
 	var order = &biz.Order{
 		OrderId:    req.GetOrderId(),
 		OrderState: "paid",
@@ -128,6 +128,7 @@ func (s *OrderServiceService) MarkOrderPaid(ctx context.Context, req *pb.MarkOrd
 }
 
 func (s *OrderServiceService) MarkOrderCancel(ctx context.Context, req *pb.MarkOrderCancelReq) (*pb.MarkOrderCancelResp, error) {
+	log.Infof("mark order cancel. order id is %+v, user id is %+v", req.OrderId, req.OrderId)
 	var order = &biz.Order{
 		OrderId:    req.GetOrderId(),
 		OrderState: "cancel",

@@ -28,7 +28,7 @@ type OrderItem struct {
 func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 	var req PlaceOrderReq
 	tmp, state := ctx.Get("user_id")
-	var userId = tmp.(uint64)
+	var userId = tmp.(int64)
 	if !state {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
@@ -41,7 +41,7 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 	var orderItems []*order.OrderItem
 	for _, item := range req.OrderItems {
 		orderItems = append(orderItems, &order.OrderItem{
-			ProductId: uint64(item.ProductId),
+			ProductId: item.ProductId,
 			Quantity:  uint32(item.Quantity),
 			Cost:      item.Cost,
 		})
@@ -71,7 +71,7 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 
 func (c *CmsAPP) ListOrder(ctx *gin.Context) {
 	tmp, state := ctx.Get("user_id")
-	var userId = tmp.(uint64)
+	var userId = tmp.(int64)
 	if !state {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
@@ -98,7 +98,7 @@ type CancelOrderReq struct {
 func (c *CmsAPP) CancelOrder(ctx *gin.Context) {
 	var req CancelOrderReq
 	tmp, state := ctx.Get("user_id")
-	var userId = tmp.(uint64)
+	var userId = tmp.(int64)
 	if !state {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
 		return
@@ -111,7 +111,7 @@ func (c *CmsAPP) CancelOrder(ctx *gin.Context) {
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.orderServiceClient.MarkOrderCancel(ctx, &order.MarkOrderCancelReq{
 		UserId:  userId,
-		OrderId: uint64(req.OrderId),
+		OrderId: req.OrderId,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

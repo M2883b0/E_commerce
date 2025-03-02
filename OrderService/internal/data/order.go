@@ -18,7 +18,7 @@ type orderRepo struct {
 
 type OrderInfo struct {
 	gorm.Model
-	UserID        uint64         `gorm:"user_id"`
+	UserID        int64          `gorm:"user_id"`
 	PhoneNumber   string         `gorm:"phone_number"`
 	OrderState    string         `gorm:"order_state"`
 	StreetAddress string         `gorm:"street_address"`
@@ -58,12 +58,12 @@ func (c *orderRepo) Create(ctx context.Context, order *biz.Order) error {
 		c.log.Errorf("order create error = %v", err)
 		return err
 	}
-	order.OrderId = uint64(detail.ID)
+	order.OrderId = int64(detail.ID)
 	c.log.Infof("===================%+v", order.OrderId)
 	return nil
 }
 
-func (c *orderRepo) Update(ctx context.Context, id uint64, order *biz.Order) error {
+func (c *orderRepo) Update(ctx context.Context, id int64, order *biz.Order) error {
 	itemsJSON, err := json.Marshal(order.OrderItems)
 	if err != nil {
 		return errors.Unwrap(err)
@@ -87,7 +87,7 @@ func (c *orderRepo) Update(ctx context.Context, id uint64, order *biz.Order) err
 	return nil
 }
 
-func (c *orderRepo) IsExist(ctx context.Context, id uint64) (bool, error) {
+func (c *orderRepo) IsExist(ctx context.Context, id int64) (bool, error) {
 	db := c.data.db
 	var detail OrderInfo
 	err := db.Where("id = ?", id).First(&detail).Error
@@ -101,7 +101,7 @@ func (c *orderRepo) IsExist(ctx context.Context, id uint64) (bool, error) {
 	return true, nil
 }
 
-func (c *orderRepo) Delete(ctx context.Context, id uint64) error {
+func (c *orderRepo) Delete(ctx context.Context, id int64) error {
 	db := c.data.db
 	// 删除索引信息
 	err := db.Where("id = ?", id).
@@ -152,7 +152,7 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 			return nil, total, errors.Unwrap(err)
 		}
 		orders = append(orders, &biz.Order{
-			OrderId:       uint64(r.ID),
+			OrderId:       int64(r.ID),
 			UserID:        r.UserID,
 			PhoneNumber:   r.PhoneNumber,
 			OrderState:    r.OrderState,

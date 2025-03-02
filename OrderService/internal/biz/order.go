@@ -7,8 +7,8 @@ import (
 )
 
 type Order struct {
-	OrderId       uint64       `json:"order_id"`
-	UserID        uint64       `json:"user_id"`
+	OrderId       int64        `json:"order_id"`
+	UserID        int64        `json:"user_id"`
 	PhoneNumber   string       `json:"phone_number"`
 	OrderState    string       `json:"order_state"`
 	StreetAddress string       `json:"street_address"`
@@ -19,16 +19,16 @@ type Order struct {
 }
 
 type OrderItem struct {
-	ProductId uint64
+	ProductId int64
 	Quantity  uint32
 	Cost      float32
 }
 
 type OrderRepo interface {
 	Create(context.Context, *Order) error
-	Update(context.Context, uint64, *Order) error
-	IsExist(context.Context, uint64) (bool, error)
-	Delete(context.Context, uint64) error
+	Update(context.Context, int64, *Order) error
+	IsExist(context.Context, int64) (bool, error)
+	Delete(context.Context, int64) error
 	Find(context.Context, *FindParams) ([]*Order, int64, error)
 	UpdateContentInfo(ctx context.Context, params []*UpdateContentItem) (bool, error)
 }
@@ -41,7 +41,7 @@ type UpdateContentItem struct {
 
 // FindParams 查找的参数
 type FindParams struct {
-	ID          uint64
+	ID          int64
 	PhoneNumber string
 	OrderState  string
 	Page        uint32
@@ -67,7 +67,7 @@ func (uc *OrderUseCase) UpdateOrder(ctx context.Context, g *Order) error {
 	return uc.repo.Update(ctx, g.OrderId, g)
 }
 
-func (uc *OrderUseCase) DeleteOrder(ctx context.Context, id uint64) error {
+func (uc *OrderUseCase) DeleteOrder(ctx context.Context, id int64) error {
 	uc.log.WithContext(ctx).Infof("DeleteOrder: %+v", id)
 	//复合操作，现判断该用户是否存在，再执行删除操作
 	ok, err := uc.repo.IsExist(ctx, id)

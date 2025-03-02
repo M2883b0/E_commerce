@@ -33,7 +33,7 @@ message CartItem {
 
 // AddItem 接口请求返回结构
 message AddItemReq {
-	uint32 user_id = 1;
+	int64 user_id = 1;
 	CartItem item = 2;
 }
 
@@ -43,7 +43,7 @@ message AddItemResp {
 
 // UpdateItem 接口请求返回结构
 message UpdateItemReq {
-	uint32 user_id = 1;
+	int64 user_id = 1;
 	CartItem item = 2;
 }
 
@@ -54,7 +54,7 @@ message UpdateItemResp {
 
 // EmptyCart 接口请求返回结构
 message EmptyCartReq {
-	uint32 user_id = 1;
+	int64 user_id = 1;
 }
 message EmptyCartResp {
 	bool State = 1;
@@ -62,7 +62,7 @@ message EmptyCartResp {
 
 // GetCart 接口请求返回结构
 message GetCartReq {
-	uint32 user_id = 1;
+	int64 user_id = 1;
 }
 
 message GetCartResp {
