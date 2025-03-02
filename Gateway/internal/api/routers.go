@@ -52,6 +52,8 @@ func CmsRouter(r *gin.Engine) {
 		cmsGroup.POST("/order/place", cmsApp.PlaceOrder)
 		cmsGroup.GET("/order/list", cmsApp.ListOrder)
 		cmsGroup.POST("/order/cancel", cmsApp.CancelOrder)
+		cmsGroup.POST("/order/getOrderByOrderId", cmsApp.GetOrderById)
+		cmsGroup.POST("/order/delOrderByOrderId", cmsApp.DelOrderById)
 
 		// cart
 		cmsGroup.GET("/cart/getAll", cmsApp.GetCart)

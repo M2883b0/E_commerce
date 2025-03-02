@@ -62,7 +62,8 @@ type CheckoutResp struct {
 
 // FindParams 查找的参数
 type FindParams struct {
-	ID          int64
+	UserID      int64
+	OrderId     int64
 	PhoneNumber string
 	OrderState  string
 	Page        uint32
@@ -102,13 +103,36 @@ func (uc *OrderUseCase) DeleteOrder(ctx context.Context, id int64) error {
 	return uc.repo.Delete(ctx, id)
 }
 
-func (uc *OrderUseCase) FindOrder(ctx context.Context, params *FindParams) ([]*Order, int64, error) {
-	uc.log.WithContext(ctx).Infof("FindOrder: %+v", params)
-	orders, total, err := uc.repo.Find(ctx, params)
+func (uc *OrderUseCase) FindOrderByUserId(ctx context.Context, UserId int64) ([]*Order, int64) {
+	uc.log.WithContext(ctx).Infof("FindOrder: %+v", UserId)
+	orders, total, err := uc.repo.Find(ctx, &FindParams{
+		UserID:      UserId,
+		OrderId:     0,
+		PhoneNumber: "",
+		OrderState:  "",
+		Page:        0,
+		PageSize:    9999999,
+	})
 	if err != nil {
-		return nil, 0, err
+		return nil, 0
 	}
-	return orders, total, nil
+	return orders, total
+}
+
+func (uc *OrderUseCase) FindOrderById(ctx context.Context, UserId int64, OrderId int64) Order {
+	uc.log.WithContext(ctx).Infof("FindOrderById: userId %+v, OrderId %+v", UserId, OrderId)
+	orders, _, err := uc.repo.Find(ctx, &FindParams{
+		UserID:      UserId,
+		OrderId:     OrderId,
+		PhoneNumber: "",
+		OrderState:  "",
+		Page:        0,
+		PageSize:    0,
+	})
+	if err != nil {
+		return Order{UserID: -1}
+	}
+	return *orders[0]
 }
 
 func (uc *OrderUseCase) UpdateContent(ctx context.Context, param []*UpdateContentItem) bool {

@@ -9,6 +9,8 @@ option java_package = "api.order";
 service OrderService {
 	rpc PlaceOrder(PlaceOrderReq) returns (PlaceOrderResp) {}
 	rpc ListOrder(ListOrderReq) returns (ListOrderResp) {}
+	rpc GetOrderById(GetOrderByIdReq) returns (GetOrderByIdResp) {}
+	rpc	DelOrderById(DelOrderByIdReq) returns (DelOrderByIdResp) {}
 	rpc MarkOrderPaid(MarkOrderPaidReq) returns (MarkOrderPaidResp) {}
 	rpc MarkOrderCancel(MarkOrderCancelReq) returns (MarkOrderCancelResp) {}
 }
@@ -49,9 +51,13 @@ message Order {
 	repeated OrderItem order_items = 1;
 	int64 order_id = 2;
 	int64 user_id = 3;
-	Address address = 5;
-	string phone_number = 6;
-	string order_state = 7;
+	float OriginalCharge = 4;
+	float ActualPayment = 5;
+	bool IsFreeShipping = 6;
+	float ShippingFee = 7;
+	Address address = 8;
+	string phone_number = 9;
+	string order_state = 10;
 }
 
 message ListOrderResp {
@@ -59,12 +65,34 @@ message ListOrderResp {
 	repeated Order orders = 2;
 }
 
+// GetOrderById
+message GetOrderByIdReq {
+	int64 user_id = 1;
+	int64 order_id = 2;
+}
+
+message GetOrderByIdResp {
+	Order order = 1;
+}
+
+// DelOrderById
+message DelOrderByIdReq {
+	int64 user_id = 1;
+	int64 order_id = 2;
+}
+
+message DelOrderByIdResp {
+	bool state=1;
+}
+
 // MarkOrderPaidReq
 message MarkOrderPaidReq {
 	int64 order_id = 1;
 }
 
-message MarkOrderPaidResp {}
+message MarkOrderPaidResp {
+	bool state = 1;
+}
 
 
 // MarkOrderCancelReq

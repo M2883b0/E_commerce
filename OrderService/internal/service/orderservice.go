@@ -92,20 +92,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 	}, nil
 }
 func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderReq) (*pb.ListOrderResp, error) {
-	var findParam = &biz.FindParams{
-		ID:          req.GetUserId(),
-		OrderState:  "",
-		Page:        0,
-		PageSize:    10,
-		PhoneNumber: "",
-	}
-
-	dbOrders, total, err := s.uc.FindOrder(ctx, findParam)
-	findParam.PageSize = uint32(total)
-	dbOrders, total, err = s.uc.FindOrder(ctx, findParam)
-	if err != nil {
-		return nil, err
-	}
+	dbOrders, total := s.uc.FindOrderByUserId(ctx, req.GetUserId())
 	var orders []*pb.Order
 	for _, o := range dbOrders {
 		var address = pb.Address{
@@ -124,17 +111,76 @@ func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderRe
 
 		}
 		orders = append(orders, &pb.Order{
-			OrderId:     o.OrderId,
-			UserId:      o.UserID,
-			PhoneNumber: o.PhoneNumber,
-			Address:     &address,
-			OrderState:  o.OrderState,
-			OrderItems:  orderItems,
+			OrderId:        o.OrderId,
+			UserId:         o.UserID,
+			OriginalCharge: o.OriginalCharge,
+			ActualPayment:  o.ActualPayment,
+			IsFreeShipping: o.IsFreeShipping,
+			ShippingFee:    o.ShippingFee,
+			PhoneNumber:    o.PhoneNumber,
+			Address:        &address,
+			OrderState:     o.OrderState,
+			OrderItems:     orderItems,
 		})
 	}
 	return &pb.ListOrderResp{
 		Total:  total,
 		Orders: orders,
+	}, nil
+}
+
+func (s *OrderServiceService) GetOrderById(ctx context.Context, req *pb.GetOrderByIdReq) (*pb.GetOrderByIdResp, error) {
+	dbOrders := s.uc.FindOrderById(ctx, req.GetUserId(), req.GetOrderId())
+	var address = pb.Address{
+		City:          dbOrders.City,
+		Country:       dbOrders.Country,
+		StreetAddress: dbOrders.StreetAddress,
+		ZipCode:       dbOrders.ZipCode,
+	}
+	var orderItems []*pb.OrderItem
+	for _, oi := range dbOrders.OrderItems {
+		orderItems = append(orderItems, &pb.OrderItem{
+			Cost:      oi.Cost,
+			ProductId: oi.ProductId,
+			Quantity:  oi.Quantity,
+		})
+
+	}
+	order := pb.Order{
+		OrderId:        dbOrders.OrderId,
+		UserId:         dbOrders.UserID,
+		OriginalCharge: dbOrders.OriginalCharge,
+		ActualPayment:  dbOrders.ActualPayment,
+		IsFreeShipping: dbOrders.IsFreeShipping,
+		ShippingFee:    dbOrders.ShippingFee,
+		PhoneNumber:    dbOrders.PhoneNumber,
+		Address:        &address,
+		OrderState:     dbOrders.OrderState,
+		OrderItems:     orderItems,
+	}
+
+	return &pb.GetOrderByIdResp{
+		Order: &order,
+	}, nil
+}
+
+func (s *OrderServiceService) DelOrderById(ctx context.Context, req *pb.DelOrderByIdReq) (*pb.DelOrderByIdResp, error) {
+	dbOrder := s.uc.FindOrderById(ctx, req.GetUserId(), req.GetOrderId())
+	if dbOrder.OrderId == -1 {
+		return &pb.DelOrderByIdResp{
+			State: false,
+		}, nil
+	}
+
+	err := s.uc.DeleteOrder(ctx, req.GetOrderId())
+	if err != nil {
+		return &pb.DelOrderByIdResp{
+			State: false,
+		}, nil
+	}
+
+	return &pb.DelOrderByIdResp{
+		State: true,
 	}, nil
 }
 func (s *OrderServiceService) MarkOrderPaid(ctx context.Context, req *pb.MarkOrderPaidReq) (*pb.MarkOrderPaidResp, error) {

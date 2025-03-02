@@ -123,3 +123,69 @@ func (c *CmsAPP) CancelOrder(ctx *gin.Context) {
 		"data": rsp,
 	})
 }
+
+type GetOrderByIdReq struct {
+	OrderId int64 `json:"order_id" binding:"required"` // 内容标题
+}
+
+func (c *CmsAPP) GetOrderById(ctx *gin.Context) {
+	var req GetOrderByIdReq
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(int64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
+	}
+	//log.Infof("================================this is user_id %+v==============================================", userId)
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
+	rsp, err := c.orderServiceClient.GetOrderById(ctx, &order.GetOrderByIdReq{
+		UserId:  userId,
+		OrderId: req.OrderId,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "ok",
+		"data": rsp,
+	})
+}
+
+type DelOrderByIdReq struct {
+	OrderId int64 `json:"order_id" binding:"required"` // 内容标题
+}
+
+func (c *CmsAPP) DelOrderById(ctx *gin.Context) {
+	var req DelOrderByIdReq
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(int64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
+	}
+	//log.Infof("================================this is user_id %+v==============================================", userId)
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
+	rsp, err := c.orderServiceClient.DelOrderById(ctx, &order.DelOrderByIdReq{
+		UserId:  userId,
+		OrderId: req.OrderId,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "ok",
+		"data": rsp,
+	})
+}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -36,6 +37,8 @@ func (s *JWT) Auth(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, rsp.Msg)
 	}
 	c.Set("user_id", rsp.GetUserId())
+	userId, _ := c.Get("user_id")
+	log.Infof("user_id : %+v, get : %+v", rsp.GetUserId(), userId)
 	c.Next()
 }
 
