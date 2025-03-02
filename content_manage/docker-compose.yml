@@ -35,12 +35,16 @@ services:
     networks:
       server_net:
 
-  Canal-server:
-    image: canal/canal-server:v1.1.8
-
 
   kibana:
     image: canal/canal-server:v8.11.4
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: "http://elastic-search:9200"
+    networks:
+      server_net:
+
 
 networks:
   server_net:
