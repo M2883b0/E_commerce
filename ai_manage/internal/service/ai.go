@@ -1,12 +1,12 @@
 package service
 
 import (
-	v1 "ai_manage/api/helloworld/v1"
+	"ai_manage/api/operate"
 	"ai_manage/internal/biz"
 )
 
 type AiService struct {
-	v1.UnimplementedAiServer
+	operate.UnimplementedAiServer
 
 	uc *biz.AiUsecase
 }
