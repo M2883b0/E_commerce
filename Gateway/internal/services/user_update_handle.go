@@ -8,7 +8,7 @@ import (
 
 // 前端更新，需要传的内容结构。id是必须传的，需要知道对哪条内容进行更新操作
 type UserUpdateReq struct {
-	ID           int64  `json:"id"`
+	//ID           int64  `json:"id"`
 	Phone_number string `json:"phone_number"`
 	Password     string `json:"password"`
 	User_name    string `json:"user_name"`
@@ -24,10 +24,16 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	if req.ID == 0 {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新操作，需要指定更新的ID"})
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(int64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
 	}
+
+	//if req.ID == 0 {
+	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新操作，需要指定更新的ID"})
+	//}
 
 	////密码加密
 	//hashedPassword, err := encryptPassword(req.Password)
@@ -40,7 +46,7 @@ func (c *CmsAPP) UserUpdate(ctx *gin.Context) {
 	//下面不走，直接db的方法，走的是grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
 	rsp, err := c.operateUserClient.UpdateUser(ctx, &operate.UpdateUserRequest{
 		User: &operate.UserInfo{
-			Id:          req.ID,
+			Id:          userId,
 			PhoneNumber: req.Phone_number,
 			Password:    req.Password,
 			UserName:    req.User_name,
