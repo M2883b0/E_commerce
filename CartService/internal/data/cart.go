@@ -123,20 +123,23 @@ func (c *cartRepo) FindCartByUserId(ctx context.Context, params *biz.FindParams)
 	return cartItems, total, nil
 }
 
-func (c *cartRepo) GetContentInfoById(ctx context.Context, id uint64) (*biz.ContentInfo, error) {
-	response, err := c.data.contentClient.GetContent(ctx, &operate.GetContentReq{Id: int64(id)})
+func (c *cartRepo) GetContentInfoByIds(ctx context.Context, ids []int64) ([]*biz.ContentInfo, error) {
+	response, err := c.data.contentClient.GetContent(ctx, &operate.GetContentReq{Id: ids})
 	if err != nil {
 		return nil, err
 	}
-	var contentInfo = biz.ContentInfo{
-		Id:             response.Contents.Id,
-		Title:          response.Contents.Title,
-		Description:    response.Contents.Description,
-		PictureUrl:     response.Contents.PictureUrl,
-		Price:          response.Contents.Price,
-		ServerQuantity: response.Contents.Quantity,
-		Categories:     response.Contents.GetCategories(),
+	var contentInfos []*biz.ContentInfo
+	for _, content := range response.Contents {
+		var contentInfo = biz.ContentInfo{
+			Id:             content.Id,
+			Title:          content.Title,
+			Description:    content.Description,
+			PictureUrl:     content.PictureUrl,
+			Price:          content.Price,
+			ServerQuantity: content.Quantity,
+			Categories:     content.GetCategories(),
+		}
+		contentInfos = append(contentInfos, &contentInfo)
 	}
-
-	return &contentInfo, nil
+	return contentInfos, nil
 }

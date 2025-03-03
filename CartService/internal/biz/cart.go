@@ -29,7 +29,7 @@ type CartRepo interface {
 	IsExist(context.Context, *CartItem) bool
 	Delete(context.Context, *CartItem) error
 	FindCartByUserId(context.Context, *FindParams) ([]*CartItem, int64, error)
-	GetContentInfoById(context.Context, uint64) (*ContentInfo, error)
+	GetContentInfoByIds(context.Context, []int64) ([]*ContentInfo, error)
 }
 
 type UpdateContentItem struct {
@@ -109,8 +109,8 @@ func (uc *CartUseCase) FindCartItem(ctx context.Context, param *FindParams) ([]*
 	return cartItems, total, nil
 }
 
-func (uc *CartUseCase) GetContentInfoById(ctx context.Context, id uint64) (*ContentInfo, error) {
-	return uc.repo.GetContentInfoById(ctx, id)
+func (uc *CartUseCase) GetContentInfoByIds(ctx context.Context, ids []int64) ([]*ContentInfo, error) {
+	return uc.repo.GetContentInfoByIds(ctx, ids)
 }
 
 //执行组合逻辑

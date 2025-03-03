@@ -92,16 +92,22 @@ func (s *CartServiceService) GetCart(ctx context.Context, req *pb.GetCartReq) (*
 			Total: 0,
 		}, nil
 	}
+	var ids []int64
+	for _, id := range cartItems {
+		ids = append(ids, int64(id.ProductID))
+	}
+	contentInfos, err := s.uc.GetContentInfoByIds(ctx, ids)
+	if err != nil {
+		return &pb.GetCartResp{
+			Total: 0,
+		}, nil
+	}
 
 	var cartItemsResp []*pb.CartItem
-	for _, cartItem := range cartItems {
-		contentInfo, e := s.uc.GetContentInfoById(ctx, cartItem.ProductID)
-		if e != nil {
-			contentInfo = &biz.ContentInfo{}
-		}
+	for i, contentInfo := range contentInfos {
 		cartItemsResp = append(cartItemsResp, &pb.CartItem{
-			ProductId:      uint32(cartItem.ProductID),
-			Quantity:       int32(cartItem.Quantity),
+			ProductId:      uint32(contentInfo.Id),
+			Quantity:       int32(cartItems[i].Quantity),
 			Title:          contentInfo.Title,
 			Description:    contentInfo.Description,
 			PictureUrl:     contentInfo.PictureUrl,

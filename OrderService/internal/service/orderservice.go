@@ -59,7 +59,8 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 		if !s.uc.UpdateContent(ctx, updateItemsAdd) {
 			log.Infof("回滚库存失败")
 		}
-		return nil, nil
+		// TODO 记得注释回来
+		//return nil, nil
 	}
 
 	// 数据库创建订单

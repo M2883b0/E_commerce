@@ -29,14 +29,16 @@ message Content {
 
 }
 
-//精确查找，单个内容
+//id批量查找，多个内容
 message GetContentReq {
 	// 商品id
-	int64 id = 1;
+	repeated int64 id = 1;
 }
 message GetContentRsp {
 	// 内容
-	Content contents = 1;
+	repeated Content contents = 1;
+	int32 code = 2;
+	string msg = 3;
 }
 
 
