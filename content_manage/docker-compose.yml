@@ -5,7 +5,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       ETCD_ADDR: "etcd-server:2379"
-      MYSQL_ADDR: "root:123456@tcp(user_manage_mysql:3306)/goods?charset=utf8mb4&parseTime=True&loc=Local"
+      MYSQL_ADDR: "root:123456@tcp(user_manage_mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local"
       ELASTIC_ADDR: "http://elastic-search:9200"
       CANNAL_ADDR: "canal-server:11111"
 #    depends_on:
