@@ -9,8 +9,8 @@ services:
     restart: always
     ports:
       - "8080:8080"
-    depends_on:
-      - etcd-server
+#    depends_on:
+#      - etcd-server
     networks:
       server_net:
   prometheus:
