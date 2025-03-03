@@ -13,6 +13,15 @@ services:
       - etcd-server
     networks:
       server_net:
+  prometheus:
+    image: bitnami/prometheus:2.53.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/first_rules.yml:/etc/prometheus/first_rules.yml
+    networks:
+      server_net:
 
 networks:
   server_net:
