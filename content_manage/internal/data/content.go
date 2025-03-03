@@ -36,7 +36,7 @@ type ContentDetail struct {
 }
 
 func (c ContentDetail) TableName() string {
-	return "goods.product" //数据库的表名
+	return "ec.product" //数据库的表名
 }
 
 type EsDetail struct {
