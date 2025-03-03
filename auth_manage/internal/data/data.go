@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
+	"os"
 )
 
 // ProviderSet is data providers.
@@ -21,9 +22,13 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")
 	}
+	REDIS_ADDR := os.Getenv("REDIS_ADDR")
+	if REDIS_ADDR == "" {
+		REDIS_ADDR = "127.0.0.1:6379"
+	}
 	//redis-cli
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     c.GetRedis().Addr,
+		Addr:     REDIS_ADDR,
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
