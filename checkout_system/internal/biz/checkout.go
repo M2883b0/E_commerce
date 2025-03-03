@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -104,8 +105,8 @@ func (uc *CheckoutUsecase) GetLatestProducts(ctx context.Context, req *CheckoutP
 	return products, nil
 }
 
-func (uc *CheckoutUsecase) CheckPrice(ctx context.Context, req *CheckPrice) (*CheckPriceRsp, error) {
-	uc.log.WithContext(ctx).Infof("CheckPrice")
+func (uc *CheckoutUsecase) CheckPrice(ctx context.Context, req *CheckPrice) (bool, error) {
+	uc.log.WithContext(ctx).Infof("CheckPrice%+v", req)
 	// 将 LatestCartItems 转换为 map，键为 ProductId，值为 *CartItem
 	latestProductMap := make(map[uint64]*CartItem)
 	for _, item := range req.LatestCartItems {
@@ -114,15 +115,13 @@ func (uc *CheckoutUsecase) CheckPrice(ctx context.Context, req *CheckPrice) (*Ch
 	// 返回商品是否存在改变
 	for _, originalCartItem := range req.OriginalCartItems {
 		latestCartItem := latestProductMap[originalCartItem.ProductId]
+		log.Infof("CheckPrice: %+v", latestCartItem)
 		if originalCartItem.Price != latestCartItem.Price {
-			return &CheckPriceRsp{
-				IsChanged: true,
-			}, nil
+			return true, nil
 		}
 	}
-	return &CheckPriceRsp{
-		IsChanged: false,
-	}, nil
+	log.Infof("CheckPrice is not change")
+	return false, nil
 }
 
 func (uc *CheckoutUsecase) CheckStock(ctx context.Context, req *CheckStock) (*CheckStockRsp, error) {
@@ -139,7 +138,7 @@ func (uc *CheckoutUsecase) CheckStock(ctx context.Context, req *CheckStock) (*Ch
 	return &CheckStockRsp{CartItems: req.CartItems}, nil
 }
 
-func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *CalculateTotalPrice) (*CalculateTotalPriceRsp, error) {
+func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *CalculateTotalPrice) (float32, error) {
 	log.Infof("计算总价: %+v", c)
 
 	var totalPrice float32
@@ -147,6 +146,7 @@ func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *Calculate
 
 	// 计算总金额
 	for _, cartItem := range c.CartItems {
+		fmt.Println("111计算总金额", cartItem)
 		productPrice := cartItem.Price
 		if cartItem.IsStockSufficient == true {
 			// 库存充足才计算总价钱
@@ -154,7 +154,7 @@ func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *Calculate
 		}
 	}
 
-	return &CalculateTotalPriceRsp{TotalPrice: totalPrice}, nil
+	return totalPrice, nil
 }
 
 func (uc *CheckoutUsecase) CalculateDiscount(ctx context.Context, req *CalculateDiscount) (*CalculateDiscountRsp, error) {
@@ -164,10 +164,10 @@ func (uc *CheckoutUsecase) CalculateDiscount(ctx context.Context, req *Calculate
 	var isShippingFree bool
 	if req.TotalPrice > 99 {
 		isShippingFree = true
-		// 需要运费就加运费
-		totalPrice += req.TotalPrice
 	} else {
 		isShippingFree = false
+		// 需要运费就加运费
+		totalPrice += req.ShippingFee
 	}
 	// 满300-50
 	discount := 50

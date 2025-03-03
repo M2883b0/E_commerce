@@ -1,0 +1,11 @@
+groups:
+- name: example-group
+  rules:
+  - alert: HighErrorRate
+    expr: rate(http_requests_code_total{code='400'}[1m]) > 0.01
+    for: 10s
+    labels:
+      severity: high
+    annotations:
+      summary: High error rate detected
+      description: The error rate for Http requests

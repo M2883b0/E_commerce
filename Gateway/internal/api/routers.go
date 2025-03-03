@@ -3,6 +3,7 @@ package api
 import (
 	"Gateway/internal/services"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // 设置项目的根路径，所有接口都加上api开头
@@ -17,9 +18,9 @@ func CmsRouter(r *gin.Engine) {
 	jwtAuth := NewJWTAuth()
 
 	////资源监控中间件，上报数据到prometheus
-	//r.Use(prometheusMiddleware())
+	r.Use(prometheusMiddleware())
 	////链路追踪中间件，上报数据到zipkin
-	//r.Use(opentracingMiddleware())
+	r.Use(opentracingMiddleware())
 
 	//创建【路由组/cms/】
 	cmsGroup := r.Group(rootPath + "/cms").Use(jwtAuth.Auth) //使用jwt中间件
@@ -57,7 +58,8 @@ func CmsRouter(r *gin.Engine) {
 
 		// cart
 		cmsGroup.GET("/cart/getAll", cmsApp.GetCart)
-		cmsGroup.POST("/cart/addItem", cmsApp.AddItem)
+		cmsGroup.POST("/cart/addItem", cmsApp.AddCartItem)
+		cmsGroup.POST("/cart/updateItem", cmsApp.UpdateCartItem)
 		cmsGroup.GET("/cart/clear", cmsApp.EmptyCart)
 
 		// checkout
@@ -78,5 +80,5 @@ func CmsRouter(r *gin.Engine) {
 	}
 	//资源监控Prometheus的配置文件yml，设置了8080。这里我们要给它提供一个接口
 	// http://localhost:8080/metrics
-	//r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 }

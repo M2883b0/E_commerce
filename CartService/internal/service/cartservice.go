@@ -37,6 +37,7 @@ func (s *CartServiceService) AddItem(ctx context.Context, req *pb.AddItemReq) (*
 				State: false,
 			}, nil
 		}
+		return &pb.AddItemResp{State: true}, err
 	}
 	err := s.uc.CreateCartItem(ctx, &item)
 	if err != nil {

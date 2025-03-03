@@ -23,15 +23,33 @@ func NewCheckoutRepo(productClient *ProductClient, logger log.Logger) biz.Checko
 func (c *checkoutRepo) FindCartItem(ctx context.Context, checkout *biz.CheckoutPreviewReq) (*biz.GetLatestProductsRsp, error) {
 	// 更新购物车里的东西的信息
 	log.Infof("查找购物车里的东西的信息:%+v", checkout)
+
+	for _, cartItem := range checkout.CartItems {
+		// 添加打印语句
+		c.log.Infof("传进来的 cart item: ProductID=%d, Name=%s, Price=%.2f",
+			cartItem.ProductId,
+			cartItem.Name,
+			cartItem.Price)
+	}
+
 	idList := make([]int64, len(checkout.CartItems))
 	for i, cartItem := range checkout.CartItems {
 		idList[i] = int64(cartItem.ProductId)
 	}
+
 	productService := c.productClient.client
 	products, err := productService.GetContent(ctx,
 		&operate.GetContentReq{
 			Id: idList,
 		})
+
+	for _, item := range products.Contents {
+		log.Infof("商品接口获得的信息: ID=%d, Title=%s, Price=%.2f, Quantity=%d",
+			item.Id,
+			item.Title,
+			item.Price,
+			item.Quantity)
+	}
 
 	if products == nil {
 		log.Errorf("购物车商品不存在")
@@ -48,13 +66,30 @@ func (c *checkoutRepo) FindCartItem(ctx context.Context, checkout *biz.CheckoutP
 	}
 	for _, cartItem := range checkout.CartItems {
 		latestCartItem := mapLatestProduct[int64(cartItem.ProductId)]
-		cartItem = &biz.CartItem{
-			ProductId:  uint64(latestCartItem.GetId()),
-			Name:       latestCartItem.GetTitle(),
-			PictureUrl: latestCartItem.GetPictureUrl(),
-			Price:      float32(latestCartItem.GetPrice()),
-			Stock:      latestCartItem.GetQuantity(),
-		}
+
+		log.Infof("Map中的商品信息: ID=%d, Title=%s, Price=%.2f, Quantity=%d",
+			latestCartItem.Id,
+			latestCartItem.Title,
+			latestCartItem.Price,
+			latestCartItem.Quantity)
+
+		cartItem.Stock = latestCartItem.GetQuantity()
+		cartItem.PictureUrl = latestCartItem.GetPictureUrl()
+		cartItem.Price = float32(latestCartItem.GetPrice())
+		cartItem.Name = latestCartItem.GetTitle()
+
 	}
+
+	for _, cartItem := range checkout.CartItems {
+		// 添加打印语句
+		// 添加完整字段的打印语句
+		c.log.Infof("更新后的 cart item: ProductID=%d, Name=%s, Price=%.2f, Stock=%d, Picture=%s",
+			cartItem.ProductId,
+			cartItem.Name,
+			cartItem.Price,
+			cartItem.Stock,      // 新增库存字段
+			cartItem.PictureUrl) // 新增图片字段
+	}
+
 	return (*biz.GetLatestProductsRsp)(checkout), nil
 }

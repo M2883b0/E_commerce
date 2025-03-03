@@ -129,7 +129,7 @@ func (uc *OrderUseCase) FindOrderById(ctx context.Context, UserId int64, OrderId
 		Page:        0,
 		PageSize:    0,
 	})
-	if err != nil {
+	if err != nil || orders == nil {
 		return Order{UserID: -1}
 	}
 	return *orders[0]

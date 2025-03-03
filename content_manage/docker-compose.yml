@@ -1,6 +1,7 @@
 services:
   content_manage_mysql:
     image: mysql:8.0
+
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: goods
@@ -37,7 +38,7 @@ services:
 
 
   kibana:
-    image: kibana:v8.11.4
+    image: kibana:8.11.4
     ports:
       - "5601:5601"
     environment:

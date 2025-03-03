@@ -129,7 +129,7 @@ func (c *orderRepo) Delete(ctx context.Context, id int64) error {
 func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Order, int64, error) {
 	query := c.data.db.Model(&OrderInfo{})
 	// 构造查询条件
-	if params.UserID != 0 {
+	if params.OrderId != 0 {
 		query = query.Where("id = ?", params.OrderId)
 	}
 	if params.UserID != 0 {

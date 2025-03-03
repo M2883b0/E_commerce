@@ -1,6 +1,7 @@
 services:
   etcd-server:
     image: bitnami/etcd:latest
+    restart: always
 #    ports:
 #      - "2379:2379"
 #      - "2380:2380"
@@ -22,13 +23,39 @@ services:
       dockerfile: ./Dockerfile
     environment:
       ETCD_ADDR: "etcd-server:2379"
+    restart: always
     ports:
       - "8080:8080"
     depends_on:
       - etcd-server
     networks:
       server_net:
+  prometheus:
+    image: bitnami/prometheus:2.53.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/first_rules.yml:/etc/prometheus/first_rules.yml
+    networks:
+      server_net:
 
+  grafana:
+    image: grafana/grafana:11.3.1
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      GF_SECURITY_ADMIN_USER: "admin"
+    networks:
+      server_net:
+  zipkin:
+    image: openzipkin/zipkin:2.21.7
+
+    ports:
+      - "9411:9411"
+    networks:
+      server_net:
 networks:
   server_net:
     external: true

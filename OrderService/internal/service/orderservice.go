@@ -48,20 +48,28 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 	}
 
 	// 告知商品微服务 调整库存
+	log.Infof("告知商品微服务，调整库存")
 	if !s.uc.UpdateContent(ctx, updateItemsSub) {
 		log.Infof("调整库存失败")
 		return nil, nil
 	}
 
 	// 结算，如果结算失败，需要再次告诉商品微服务，库存回滚
+	log.Infof("告知结算微服务，结算订单信息")
 	checkoutRsp, err := s.uc.CheckoutOrder(ctx, checkoutItems)
 	if err != nil || checkoutRsp.HasChanged {
 		if !s.uc.UpdateContent(ctx, updateItemsAdd) {
 			log.Infof("回滚库存失败")
 		}
-		// TODO 记得注释回来
-		//return nil, nil
+		return nil, nil
 	}
+	//checkoutRsp := &biz.CheckoutResp{
+	//	ActualPrice:    0,
+	//	IsFreeShipping: false,
+	//	ShippingFee:    0,
+	//	TotalPrice:     0,
+	//	HasChanged:     false,
+	//}
 
 	// 数据库创建订单
 	order := &biz.Order{
@@ -79,8 +87,8 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 		OrderItems:     orderItemBiz,
 	}
 
-	err = s.uc.CreateOrder(ctx, order)
-	if err != nil {
+	erro := s.uc.CreateOrder(ctx, order)
+	if erro != nil {
 		log.Infof("数据库创建订单失败")
 		return &pb.PlaceOrderResp{
 			OrderId: 0,
@@ -93,6 +101,7 @@ func (s *OrderServiceService) PlaceOrder(ctx context.Context, req *pb.PlaceOrder
 	}, nil
 }
 func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderReq) (*pb.ListOrderResp, error) {
+	log.Infof("用户 ID %+v", req.GetUserId())
 	dbOrders, total := s.uc.FindOrderByUserId(ctx, req.GetUserId())
 	var orders []*pb.Order
 	for _, o := range dbOrders {
@@ -132,6 +141,11 @@ func (s *OrderServiceService) ListOrder(ctx context.Context, req *pb.ListOrderRe
 
 func (s *OrderServiceService) GetOrderById(ctx context.Context, req *pb.GetOrderByIdReq) (*pb.GetOrderByIdResp, error) {
 	dbOrders := s.uc.FindOrderById(ctx, req.GetUserId(), req.GetOrderId())
+	if dbOrders.UserID == -1 {
+		return &pb.GetOrderByIdResp{
+			Order: nil,
+		}, nil
+	}
 	var address = pb.Address{
 		City:          dbOrders.City,
 		Country:       dbOrders.Country,
@@ -147,6 +161,7 @@ func (s *OrderServiceService) GetOrderById(ctx context.Context, req *pb.GetOrder
 		})
 
 	}
+
 	order := pb.Order{
 		OrderId:        dbOrders.OrderId,
 		UserId:         dbOrders.UserID,
@@ -186,11 +201,19 @@ func (s *OrderServiceService) DelOrderById(ctx context.Context, req *pb.DelOrder
 }
 func (s *OrderServiceService) MarkOrderPaid(ctx context.Context, req *pb.MarkOrderPaidReq) (*pb.MarkOrderPaidResp, error) {
 	log.Infof("mark order paid. order id is %+v", req.OrderId)
+	orderExist := s.uc.FindOrderById(ctx, 0, req.GetOrderId())
+	if orderExist.UserID == -1 {
+		return &pb.MarkOrderPaidResp{
+			State: false,
+		}, nil
+	}
+
 	var order = &biz.Order{
 		OrderId:    req.GetOrderId(),
 		OrderState: "paid",
 	}
 	err := s.uc.UpdateOrder(ctx, order)
+
 	if err != nil {
 		return &pb.MarkOrderPaidResp{
 			State: false,
@@ -203,10 +226,18 @@ func (s *OrderServiceService) MarkOrderPaid(ctx context.Context, req *pb.MarkOrd
 
 func (s *OrderServiceService) MarkOrderCancel(ctx context.Context, req *pb.MarkOrderCancelReq) (*pb.MarkOrderCancelResp, error) {
 	log.Infof("mark order cancel. order id is %+v, user id is %+v", req.OrderId, req.OrderId)
+	orderExist := s.uc.FindOrderById(ctx, 0, req.GetOrderId())
+	if orderExist.UserID == -1 {
+		return &pb.MarkOrderCancelResp{
+			State: false,
+		}, nil
+	}
+
 	var order = &biz.Order{
 		OrderId:    req.GetOrderId(),
 		OrderState: "cancel",
 	}
+
 	err := s.uc.UpdateOrder(ctx, order)
 	if err != nil {
 		return &pb.MarkOrderCancelResp{
