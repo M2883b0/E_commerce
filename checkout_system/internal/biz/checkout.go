@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -144,6 +145,7 @@ func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *Calculate
 	totalPrice = 0
 	// 计算总金额
 	for _, cartItem := range c.CartItems {
+		fmt.Println("111计算总金额", cartItem)
 		productPrice := cartItem.Price
 		if cartItem.IsStockSufficient == true {
 			// 库存充足才计算总价钱
@@ -161,10 +163,10 @@ func (uc *CheckoutUsecase) CalculateDiscount(ctx context.Context, req *Calculate
 	var isShippingFree bool
 	if req.TotalPrice > 99 {
 		isShippingFree = true
-		// 需要运费就加运费
-		totalPrice += req.TotalPrice
 	} else {
 		isShippingFree = false
+		// 需要运费就加运费
+		totalPrice += req.ShippingFee
 	}
 	// 满300-50
 	discount := 50

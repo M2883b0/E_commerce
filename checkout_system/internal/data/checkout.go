@@ -64,7 +64,7 @@ func (c *checkoutRepo) FindCartItem(ctx context.Context, checkout *biz.CheckoutP
 	for _, product := range products.Contents {
 		mapLatestProduct[product.Id] = product
 	}
-	for i, cartItem := range checkout.CartItems {
+	for _, cartItem := range checkout.CartItems {
 		latestCartItem := mapLatestProduct[int64(cartItem.ProductId)]
 
 		log.Infof("Map中的商品信息: ID=%d, Title=%s, Price=%.2f, Quantity=%d",
@@ -73,14 +73,10 @@ func (c *checkoutRepo) FindCartItem(ctx context.Context, checkout *biz.CheckoutP
 			latestCartItem.Price,
 			latestCartItem.Quantity)
 
-		cartItem = &biz.CartItem{
-			ProductId:  uint64(latestCartItem.GetId()),
-			Name:       latestCartItem.GetTitle(),
-			PictureUrl: latestCartItem.GetPictureUrl(),
-			Price:      float32(latestCartItem.GetPrice()),
-			Stock:      latestCartItem.GetQuantity(),
-		}
-		checkout.CartItems[i] = cartItem
+		cartItem.Stock = latestCartItem.GetQuantity()
+		cartItem.PictureUrl = latestCartItem.GetPictureUrl()
+		cartItem.Price = float32(latestCartItem.GetPrice())
+		cartItem.Name = latestCartItem.GetTitle()
 
 	}
 
