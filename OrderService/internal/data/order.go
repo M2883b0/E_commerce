@@ -153,7 +153,10 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 	}
 	if params.PageSize > 0 {
 		pageSize = int(params.PageSize)
+	} else {
+		pageSize = int(total)
 	}
+
 	offset := (page - 1) * pageSize
 	var results []*OrderInfo
 	if err := query.Offset(offset).Limit(pageSize).Find(&results).Error; err != nil {
