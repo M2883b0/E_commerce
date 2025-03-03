@@ -100,12 +100,15 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 	if err != nil {
 		return nil, err
 	}
+	//log.Infof("查询数据库订单状态:%+v %+v %+v", payment.Status, payment.Status == "WAIT_BUYER_PAY", payment.QrUrl)
+
 	if payment != nil && payment.Status == "WAIT_BUYER_PAY" {
 		return &TradeRsp{
 			OutTradeNo: req.OutTradeNo,
 			QrCode:     payment.QrUrl,
 		}, nil
 	}
+	log.Infof("daozhhele")
 
 	//
 	trade := alipay.Trade{
@@ -248,9 +251,23 @@ type CancelResp struct {
 
 // 取消支付
 func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Client, req *CancelReq) (*CancelResp, error) {
-	uc.log.WithContext(ctx).Infof("CancelPayment: %+v", req)
+	uc.log.WithContext(ctx).Infof("取消支付: %+v", req)
 	tradeCancel := alipay.TradeCancel{
 		OutTradeNo: fmt.Sprintf("%d", req.OutTradeNo),
+	}
+
+	// 先去数据库查询，当支付状态为success和finished时，不允许取消
+	payment, err := uc.paymentRepo.FindByID(ctx, req.OutTradeNo)
+	if err != nil {
+		return nil, err
+	}
+	if payment != nil && (payment.Status == string(alipay.TradeStatusSuccess) || payment.Status == string(alipay.TradeStatusFinished)) {
+		log.Infof("支付状态为success和finished时，不允许取消")
+		return &CancelResp{
+			OutTradeNo: req.OutTradeNo,
+			Msg:        "支付已完成，不可取消",
+			Code:       "400001",
+		}, err
 	}
 	tradeRsp, err := client.TradeCancel(ctx, tradeCancel)
 	// 通知订单服务关闭订单
