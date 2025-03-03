@@ -61,12 +61,19 @@ func (c *CmsAPP) PlaceOrder(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if rsp == nil || rsp.GetOrderId() == 0 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1,
+			"msg":  "error, create order failed",
+		})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "ok",
+			"data": rsp,
+		})
+	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": rsp,
-	})
 }
 
 func (c *CmsAPP) ListOrder(ctx *gin.Context) {
