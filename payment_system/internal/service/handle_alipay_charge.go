@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/log"
 	"payment_system/api/payment"
 	"payment_system/internal/biz"
 	"strconv"
@@ -9,7 +10,7 @@ import (
 
 func (p *PaymentService) handleAlipayCharge(ctx context.Context, req *payment.ChargeReq) (*payment.ChargeResp, error) {
 	//Todo幂等键
-
+	log.Infof("支付宝支付:%s", req.OrderId)
 	// 1.初始化alipay  在service构造函数中进行了初始化
 	// 2.调用alipay支付
 	orderId, err := strconv.Atoi(req.OrderId)

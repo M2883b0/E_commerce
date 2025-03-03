@@ -21,7 +21,7 @@ func NewOrderStatusRepo(client *OrderClient, logger log.Logger) biz.OrderStatusR
 }
 
 func (c *OrderStatusRepo) MarkOrderPaid(ctx context.Context, orderId int64) (*order.MarkOrderPaidResp, error) {
-	log.Infof("MarkOrderPaid:%+v", orderId)
+	log.Infof("标记订单为已支付:%+v", orderId)
 	markOrderPaidRsp, err := c.orderClient.client.MarkOrderPaid(ctx, &order.MarkOrderPaidReq{OrderId: int64(orderId)})
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (c *OrderStatusRepo) MarkOrderPaid(ctx context.Context, orderId int64) (*or
 }
 
 func (c *OrderStatusRepo) MarkOrderCancel(ctx context.Context, orderId int64) (*order.MarkOrderCancelResp, error) {
-	log.Infof("MarkOrderCancel:%+v", orderId)
+	log.Infof("标记订单取消支付:%+v", orderId)
 	markOrderCancelRsp, err := c.orderClient.client.MarkOrderCancel(ctx, &order.MarkOrderCancelReq{OrderId: int64(orderId)})
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (c *OrderStatusRepo) MarkOrderCancel(ctx context.Context, orderId int64) (*
 }
 
 func (c *OrderStatusRepo) GetOrderInfo(ctx context.Context, orderId int64) (*order.GetOrderByIdResp, error) {
-	log.Infof("GetOrderInfo:%+v", orderId)
+	log.Infof("获取订单信息:%+v", orderId)
 	orderInfo, err := c.orderClient.client.GetOrderById(ctx, &order.GetOrderByIdReq{OrderId: orderId})
 	if err != nil {
 		return nil, err

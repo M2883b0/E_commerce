@@ -144,6 +144,7 @@ func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *Calculate
 
 	var totalPrice float32
 	totalPrice = 0
+
 	// 计算总金额
 	for _, cartItem := range c.CartItems {
 		productPrice := cartItem.Price

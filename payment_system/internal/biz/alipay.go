@@ -43,6 +43,13 @@ type QueryPaymentRsp struct {
 	Status     string
 }
 
+const (
+	TradeStatusWaitBuyerPay TradeStatus = "WAIT_BUYER_PAY" //（交易创建，等待买家付款）
+	TradeStatusClosed       TradeStatus = "TRADE_CLOSED"   //（未付款交易超时关闭，或支付完成后全额退款）
+	TradeStatusSuccess      TradeStatus = "TRADE_SUCCESS"  //（交易支付成功）
+	TradeStatusFinished     TradeStatus = "TRADE_FINISHED"
+)
+
 type TradeStatus string
 
 // PaymentRepo is a Payment repo.
@@ -52,7 +59,7 @@ type PaymentRepo interface {
 	// 更新支付订单
 	Update(ctx context.Context, payment *Payment) error
 	// 查询支付订单
-	FindByID(ctx context.Context, orderId int64) (TradeStatus, error)
+	FindByID(ctx context.Context, orderId int64) (*Payment, error)
 	//ListByHello(context.Context, string) ([]*Greeter, error)
 	//ListAll(context.Context) ([]*Greeter, error)
 }
@@ -79,7 +86,7 @@ func NewAlipayUsecase(payRepo PaymentRepo, orderStatusRepo OrderStatusRepo, logg
 }
 
 func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *TradeReq) (*TradeRsp, error) {
-	uc.log.WithContext(ctx).Infof("Trade: %+v", req)
+	uc.log.WithContext(ctx).Infof("调用支付宝接口: %+v", req)
 	orderInfo, err := uc.orderStatusRepo.GetOrderInfo(ctx, req.OutTradeNo)
 	if err != nil {
 		return nil, err
@@ -95,7 +102,7 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 		// 30分钟支付超时
 		TimeoutExpress: "30m",
 	}
-	log.Infof("支付:%+v", trade)
+	log.Infof("支付参数:%+v", trade)
 
 	tradePagePay := alipay.TradePagePay{
 		Trade:     trade,
@@ -141,22 +148,31 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 
 // QueryPayment 查询订单状态
 func (uc *AlipayUsecase) QueryPayment(ctx context.Context, client *alipay.Client, req *QueryPayment) (*QueryPaymentRsp, error) {
-	uc.log.WithContext(ctx).Infof("queryPayment: %+v", req)
+	uc.log.WithContext(ctx).Infof("查询支付状态: %+v", req)
 	tradeQuery := alipay.TradeQuery{
 		OutTradeNo: fmt.Sprintf("%d", req.OutTradeNo),
 	}
-	tradeRsp, err := client.TradeQuery(ctx, tradeQuery)
+	// 查询数据库，如果订单是已成功支付，支付关闭，支付完成不可退款
+	payment, err := uc.paymentRepo.FindByID(ctx, req.OutTradeNo)
 	if err != nil {
 		return nil, err
 	}
-	//const (
-	//	TradeStatusWaitBuyerPay TradeStatus = "WAIT_BUYER_PAY" //（交易创建，等待买家付款）
-	//	TradeStatusClosed       TradeStatus = "TRADE_CLOSED"   //（未付款交易超时关闭，或支付完成后全额退款）
-	//	TradeStatusSuccess      TradeStatus = "TRADE_SUCCESS"  //（交易支付成功）
-	//	TradeStatusFinished     TradeStatus = "TRADE_FINISHED" //（交易结束，不可退款）
-	//
-	// 查询数据库，如果订单是待支付，则调用支付宝查询订单状态，否则直接返回
-	uc.paymentRepo.FindByID(ctx, req.OutTradeNo)
+	if payment == nil {
+		return nil, fmt.Errorf("订单不存在")
+	}
+	tradeStatus := TradeStatus(payment.Status)
+	if tradeStatus == TradeStatusSuccess || tradeStatus == TradeStatusClosed || tradeStatus == TradeStatusFinished {
+		return &QueryPaymentRsp{
+			OutTradeNo: req.OutTradeNo,
+			Status:     string(tradeStatus),
+		}, nil
+	}
+	// 调用支付宝查询订单状态
+	tradeRsp, err := client.TradeQuery(ctx, tradeQuery)
+
+	if err != nil {
+		return nil, err
+	}
 	if tradeRsp.TradeStatus == alipay.TradeStatusSuccess {
 		// 支付成功
 		// Todo调用订单服务更新订单状态
@@ -166,10 +182,13 @@ func (uc *AlipayUsecase) QueryPayment(ctx context.Context, client *alipay.Client
 			return nil, err
 		}
 		// Todo 更新支付订单状态
-		uc.paymentRepo.Update(ctx, &Payment{
+		err = uc.paymentRepo.Update(ctx, &Payment{
 			OrderID: req.OutTradeNo,
 			Status:  string(tradeRsp.TradeStatus),
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		if !markOrderPaidRsp.State {
 			return nil, fmt.Errorf("订单状态更新失败")
@@ -186,10 +205,13 @@ func (uc *AlipayUsecase) QueryPayment(ctx context.Context, client *alipay.Client
 			return nil, fmt.Errorf("订单状态更新失败")
 		}
 		// Todo 更新支付订单状态
-		uc.paymentRepo.Update(ctx, &Payment{
+		err = uc.paymentRepo.Update(ctx, &Payment{
 			OrderID: req.OutTradeNo,
 			Status:  string(tradeRsp.TradeStatus),
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &QueryPaymentRsp{
@@ -214,9 +236,23 @@ func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Clien
 		OutTradeNo: fmt.Sprintf("%d", req.OutTradeNo),
 	}
 	tradeRsp, err := client.TradeCancel(ctx, tradeCancel)
+	// 通知订单服务关闭订单
+	markOrderCancelState, err := uc.orderStatusRepo.MarkOrderCancel(ctx, req.OutTradeNo)
 	if err != nil {
 		return nil, err
 	}
+	if !markOrderCancelState.State {
+		return nil, fmt.Errorf("订单状态更新失败")
+	}
+	// 通知支付订单状态
+	err = uc.paymentRepo.Update(ctx, &Payment{
+		OrderID: req.OutTradeNo,
+		Status:  string(alipay.TradeStatusClosed),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &CancelResp{
 		OutTradeNo: req.OutTradeNo,
 		Msg:        tradeRsp.SubMsg,

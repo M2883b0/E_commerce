@@ -72,9 +72,13 @@ func NewProductClient(c *conf.Data, logger log.Logger) (*ProductClient, func(), 
 		grpc.WithDiscovery(dis), //服务的发现
 	)
 	if err != nil {
+		log.Infof("注册商品微服务失败 etcd addr:%+v。 可能由于etcd服务不可达", etcdAddr)
 		panic(err)
 	}
 	productClient := operate.NewAppClient(conn)
+
+	log.Infof("成功注册商品微服务。 etcd addr:%+v, connection: %+v", etcdAddr, productClient)
+
 	return &ProductClient{
 		log:    log.NewHelper(logger),
 		client: productClient,

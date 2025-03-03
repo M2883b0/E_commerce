@@ -7,7 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/google/wire"
-	clientv3 "go.etcd.io/etcd/orderClient/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"os"
@@ -42,10 +42,13 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")
 	}
+	// 连接数据库
 	databaseAddr := os.Getenv("MYSQL_ADDR")
 	if databaseAddr == "" {
 		databaseAddr = c.GetDatabase().GetSource()
 	}
+	log.Infof("开始连接数据库 %+v", databaseAddr)
+
 	mysqlDB, er := gorm.Open(mysql.Open(databaseAddr))
 	if er != nil {
 		panic(er)
@@ -85,7 +88,7 @@ func NewOrderClient(c *conf.Data, logger log.Logger) (*OrderClient, func(), erro
 	dis := etcd.New(client)
 
 	//endpoint := "discovery:///provider"
-	endpoint := "discovery:///content_manage" //把etcd的Name标识符拿过来，找到对应的服务ip
+	endpoint := "discovery:///order_service" //把etcd的Name标识符拿过来，找到对应的服务ip
 	conn, err := grpc.DialInsecure(
 		context.Background(),
 		//grpc.WithEndpoint("127.0.0.1:9000"),
@@ -99,11 +102,14 @@ func NewOrderClient(c *conf.Data, logger log.Logger) (*OrderClient, func(), erro
 		grpc.WithDiscovery(dis), //服务的发现
 	)
 	if err != nil {
+		log.Infof("注册订单微服务失败 etcd addr:%+v。 可能由于etcd服务不可达", etcdAddr)
 		panic(err)
 	}
-	productClient := order.NewOrderServiceClient(conn)
+	orderClient := order.NewOrderServiceClient(conn)
+	log.Infof("成功注册订单微服务。 etcd addr:%+v, connection: %+v", etcdAddr, orderClient)
+
 	return &OrderClient{
 		logger: logger,
-		client: productClient,
+		client: orderClient,
 	}, cleanup, nil
 }
