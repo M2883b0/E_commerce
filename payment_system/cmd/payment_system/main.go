@@ -12,7 +12,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/joho/godotenv"
 	_ "go.uber.org/automaxprocs"
 	"payment_system/internal/conf"
 )
@@ -62,10 +61,10 @@ func newApp(logger log.Logger, gs *grpc.Server) *kratos.App {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
-	}
+	//err := godotenv.Load()
+	//if err != nil {
+	//	panic(err)
+	//}
 	flag.Parse()
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
