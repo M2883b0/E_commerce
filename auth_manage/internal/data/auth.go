@@ -39,6 +39,7 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 		return "", errors.New("user_id不能为空")
 	}
 	redisKey := fmt.Sprintf("session_id:%d", a.User_id)
+	timeKey := fmt.Sprintf("session_time:%d", a.User_id)
 	redisValue, err := r.data.rdb.Get(ctx, redisKey).Result()
 	if err != nil && err != redis.Nil {
 		return "", errors.New("session auth error")
@@ -51,9 +52,9 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 		Username: strconv.Itoa(int(a.User_id)),
 		//Password: password,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Hour)), //有效时间(过期时间)，持续5个小时
-			IssuedAt:  jwt.NewNumericDate(time.Now()),                    //签发时间
-			NotBefore: jwt.NewNumericDate(time.Now()),                    //生效时间，立即生效
+			//ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Hour)), //有效时间(过期时间)，持续5个小时
+			IssuedAt:  jwt.NewNumericDate(time.Now()), //签发时间
+			NotBefore: jwt.NewNumericDate(time.Now()), //生效时间，立即生效
 			//Issuer:    os.Getenv("JWT_ISSUER"),                            //签发人
 			//Subject:   "somebody",                                         //主题
 			//ID:        "1",                                                //JWT ID用于标识该JWT
@@ -67,9 +68,13 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := r.data.rdb.Set(ctx, redisKey, token, 5*time.Hour).Err(); err != nil {
+	if err := r.data.rdb.Set(ctx, redisKey, token, 2*time.Hour).Err(); err != nil {
 		return "", err
 	}
+	if err := r.data.rdb.Set(ctx, timeKey, 1, 2*time.Hour).Err(); err != nil {
+		return "", err
+	}
+
 	return token, nil
 }
 
@@ -91,9 +96,13 @@ func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, 
 	}
 	//信息鉴权成功
 	//还需要判断token是否过期
-	if time.Now().Unix() > claims.ExpiresAt.Unix() {
-		return false, "jwt 时间过期", 0, nil
+	timekey := fmt.Sprintf("session_time:%d", claims.Username)
+	timeValue, err := r.data.rdb.Get(ctx, timekey).Result()
+	temp, _ := strconv.Atoi(timeValue)
+	if time.Now().Unix() > claims.IssuedAt.Add(time.Duration(temp)*time.Hour).Unix() {
+		r.data.rdb.Set(ctx, timekey, temp+1, 2*time.Hour)
 	}
+
 	num, err := strconv.Atoi(claims.Username)
 	if err != nil {
 		return false, "jwt 转型失败", 0, nil
