@@ -31,11 +31,11 @@ type OrderClient struct {
 	logger log.Logger
 }
 
-type PaymentInfo struct {
-	OrderId uint64  `gorm:"order_id"`
-	Amount  float32 `gorm:"amount"`
-	Status  string  `gorm:"status"`
-}
+//type PaymentDetail struct {
+//	OrderId uint64  `gorm:"order_id"`
+//	Amount  float32 `gorm:"amount"`
+//	Status  string  `gorm:"status"`
+//}
 
 // NewData .
 func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
@@ -53,7 +53,7 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	if er != nil {
 		panic(er)
 	}
-	if er := mysqlDB.AutoMigrate(&PaymentInfo{}); er != nil {
+	if er := mysqlDB.AutoMigrate(&PaymentDetail{}); er != nil {
 		panic(er)
 	} //自动迁移，自动创建表，默认蛇行复数 命名
 	//拿到mysqlDB的实例

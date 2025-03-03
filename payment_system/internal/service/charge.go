@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/log"
 	"payment_system/api/payment"
 )
 
@@ -17,5 +18,6 @@ func (p *PaymentService) Charge(ctx context.Context, req *payment.ChargeReq) (*p
 	//		return nil, status.Error(codes.InvalidArgument, "unsupported payment method")
 	//	}
 	//}
+	log.Infof("Charge%+v", req)
 	return p.handleAlipayCharge(ctx, req)
 }

@@ -40,7 +40,10 @@ func (c *OrderStatusRepo) MarkOrderCancel(ctx context.Context, orderId int64) (*
 
 func (c *OrderStatusRepo) GetOrderInfo(ctx context.Context, orderId int64) (*order.GetOrderByIdResp, error) {
 	log.Infof("获取订单信息:%+v", orderId)
-	orderInfo, err := c.orderClient.client.GetOrderById(ctx, &order.GetOrderByIdReq{OrderId: orderId})
+	orderInfo, err := c.orderClient.client.GetOrderById(ctx, &order.GetOrderByIdReq{
+		UserId:  0,
+		OrderId: orderId,
+	})
 	if err != nil {
 		return nil, err
 	}

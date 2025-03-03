@@ -13,18 +13,18 @@ service PaymentService {
 }
 
 // 支付方式枚举
-enum PaymentMethod {
-  PAYMENT_METHOD_UNSPECIFIED = 0;
-  CREDIT_CARD = 1;     // 信用卡
-  ALIPAY = 2;          // 支付宝
-  WECHAT_PAY = 3;      // 微信支付
-}
+//enum PaymentMethod {
+//  PAYMENT_METHOD_UNSPECIFIED = 0;
+//  CREDIT_CARD = 1;     // 信用卡
+//  ALIPAY = 2;          // 支付宝
+//  WECHAT_PAY = 3;      // 微信支付
+//}
 
 message ChargeReq {
-  string order_id = 1;      // 关联订单  Todo订单id必须在64位内
+  int64 order_id = 1;      // 关联订单  Todo订单id必须在64位内
   string subject = 2;        // 订单标题
-  string PaymentMethod = 3;     // 支付方式
-  string idempotency_key = 4; // 幂等键（客户端生成唯一值）
+//  string PaymentMethod = 3;     // 支付方式
+//  string idempotency_key = 4; // 幂等键（客户端生成唯一值）
 
 }
 

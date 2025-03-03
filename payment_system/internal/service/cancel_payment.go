@@ -7,8 +7,7 @@ import (
 	"payment_system/internal/biz"
 )
 
-func (p *PaymentService) CancelPayment(ctx context.Context, req *payment.CancelReq) (*payment.CancelResp, error) {
-	//Todo幂等键
+func (p *PaymentService) Cancel(ctx context.Context, req *payment.CancelReq) (*payment.CancelResp, error) {
 	log.Infof("取消支付:%d", req.OrderId)
 	// 1.初始化alipay  在service构造函数中进行了初始化
 	// 2.调用alipay取消支付

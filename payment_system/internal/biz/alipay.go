@@ -21,6 +21,7 @@ type Payment struct {
 	OrderID int64
 	Amount  string
 	Status  string
+	QrUrl   string
 }
 
 type TradeReq struct {
@@ -93,6 +94,19 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 	}
 	totalAmount := orderInfo.GetOrder().ActualPayment
 	totalAmountString := fmt.Sprintf("%.2f", totalAmount)
+
+	// 先查询数据库，如果订单是等待支付状态，返回QrUrl
+	payment, err := uc.paymentRepo.FindByID(ctx, req.OutTradeNo)
+	if err != nil {
+		return nil, err
+	}
+	if payment != nil && payment.Status == "WAIT_BUYER_PAY" {
+		return &TradeRsp{
+			OutTradeNo: req.OutTradeNo,
+			QrCode:     payment.QrUrl,
+		}, nil
+	}
+
 	//
 	trade := alipay.Trade{
 		Subject:     req.Subject,
@@ -120,17 +134,19 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 	//log.Infof("支付:%+v",tradePagePay)
 
 	var url2 *url.URL
+	url2, err = client.TradePagePay(tradePagePay)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	// 创建支付数据
 	if err := uc.paymentRepo.Create(ctx, &Payment{
 		OrderID: req.OutTradeNo,
 		Amount:  totalAmountString,
 		Status:  "WAIT_BUYER_PAY",
+		QrUrl:   url2.String(),
 	}); err != nil {
 		return nil, err
-	}
-	url2, err = client.TradePagePay(tradePagePay)
-	if err != nil {
-		fmt.Println(err)
 	}
 
 	log.Infof("url2: %+v", url2)
@@ -152,6 +168,7 @@ func (uc *AlipayUsecase) QueryPayment(ctx context.Context, client *alipay.Client
 	tradeQuery := alipay.TradeQuery{
 		OutTradeNo: fmt.Sprintf("%d", req.OutTradeNo),
 	}
+	log.Infof("查询支付状态:%+v", tradeQuery)
 	// 查询数据库，如果订单是已成功支付，支付关闭，支付完成不可退款
 	payment, err := uc.paymentRepo.FindByID(ctx, req.OutTradeNo)
 	if err != nil {
@@ -169,10 +186,10 @@ func (uc *AlipayUsecase) QueryPayment(ctx context.Context, client *alipay.Client
 	}
 	// 调用支付宝查询订单状态
 	tradeRsp, err := client.TradeQuery(ctx, tradeQuery)
-
 	if err != nil {
 		return nil, err
 	}
+	log.Infof("支付宝返回订单状态：%+v", tradeRsp)
 	if tradeRsp.TradeStatus == alipay.TradeStatusSuccess {
 		// 支付成功
 		// Todo调用订单服务更新订单状态
@@ -253,10 +270,39 @@ func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Clien
 		return nil, err
 	}
 
+	//const (
+	//	CodeSuccess                  Code = "10000" // 接口调用成功
+	//	CodeOrderSuccessPayInProcess Code = "10003" // 表示订单创建成功，支付处理中
+	//	CodeUnknowError              Code = "20000" // 服务不可用
+	//	CodeInvalidAuthToken         Code = "20001" // 授权权限不足
+	//	CodeMissingParam             Code = "40001" // 缺少必选参数
+	//	CodeInvalidParam             Code = "40002" // 非法的参数
+	//	CodeInsufficientConditions   Code = "40003" // 条件异常
+	//	CodeBusinessFailed           Code = "40004" // 业务处理失败
+	//	CodeCallLimited              Code = "40005" // 调用频次超限
+	//	CodePermissionDenied         Code = "40006" // 权限不足
+	//)
+
+	//type Error struct {
+	//	Code    Code   `json:"code"`
+	//	Msg     string `json:"msg"`
+	//	SubCode string `json:"sub_code"`
+	//	SubMsg  string `json:"sub_msg"`
+	//}
+
+	var msg string
+	//判断支付宝公共状态码
+	if tradeRsp.Error.Code == alipay.CodeBusinessFailed {
+		msg = "BusinessFailed"
+	}
+	if tradeRsp.Error.Code == alipay.CodeSuccess {
+		msg = "Success"
+	}
+
 	return &CancelResp{
 		OutTradeNo: req.OutTradeNo,
-		Msg:        tradeRsp.SubMsg,
-		Code:       tradeRsp.SubCode,
+		Msg:        msg,
+		Code:       string(tradeRsp.Error.Code),
 	}, err
 }
 

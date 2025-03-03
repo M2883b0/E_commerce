@@ -19,14 +19,17 @@ type QueryOrderStatusReq struct {
 }
 
 func (c *CmsAPP) Charge(ctx *gin.Context) {
-	var req payment.ChargeReq
+	var req ChargeReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	// 调用微服务
-	rsp, err := c.paymentServiceClient.Charge(ctx, &payment.ChargeReq{
-		OrderId:        req.OrderId,
-		Subject:        req.Subject,
-		PaymentMethod:  "",
-		IdempotencyKey: "",
-	})
+	rsp, err := c.paymentServiceClient.Charge(ctx,
+		&payment.ChargeReq{
+			OrderId: req.OrderId,
+			Subject: req.Subject,
+		})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -39,7 +42,12 @@ func (c *CmsAPP) Charge(ctx *gin.Context) {
 }
 
 func (c *CmsAPP) QueryOrderStatus(ctx *gin.Context) {
-	var req payment.QueryOrderStatusReq
+	var req QueryOrderStatusReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	rsp, err := c.paymentServiceClient.QueryOrderStatus(ctx, &payment.QueryOrderStatusReq{
 		OrderId: req.OrderId,
 	})
@@ -61,6 +69,10 @@ func (c *CmsAPP) Cancel(ctx *gin.Context) {
 	//	return
 	//}
 	var req CancelReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	// 调用微服务
 	rsp, err := c.paymentServiceClient.Cancel(ctx, &payment.CancelReq{
 		OrderId: req.OrderId,
@@ -70,8 +82,8 @@ func (c *CmsAPP) Cancel(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"code": rsp.Code,
-		"msg":  rsp.Msg,
+		"code": "0",
+		"msg":  "ok",
 		"data": rsp,
 	})
 }

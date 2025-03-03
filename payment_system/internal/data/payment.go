@@ -27,24 +27,22 @@ type PaymentDetail struct {
 	OrderId   string    `gorm:"column:order_id;primary_key"`
 	Amount    string    `gorm:"column:amount"`
 	Status    string    `gorm:"column:status"`
+	QrUrl     string    `gorm:"column:qr_url"`
 	CreatedAt time.Time `gorm:"column:create_at"`
 	UpdatedAt time.Time `gorm:"column:update_at"`
 }
 
-// Todo 改表名
-func (p PaymentDetail) TableName() string {
-	return "ps_payment_info.t_payment_details"
-}
-
 func (p *PaymentRepo) Create(ctx context.Context, payment *biz.Payment) error {
+	log.Infof("创建订单%+v", payment)
 	detail := PaymentDetail{
 		OrderId: strconv.FormatInt(payment.OrderID, 10),
 		Amount:  payment.Amount,
 		Status:  payment.Status,
+		QrUrl:   payment.QrUrl,
 	}
 	db := p.data.db
 	if err := db.Create(&detail).Error; err != nil {
-		p.log.Errorf("payment create error = %v", err)
+		p.log.Errorf("创建支付单失败 = %v", err)
 		return err
 	}
 	return nil
@@ -58,10 +56,10 @@ func (p *PaymentRepo) Update(ctx context.Context, payment *biz.Payment) error {
 	}
 	db := p.data.db
 	if err := db.Where("order_id = ?", payment.OrderID).Updates(&detail).Error; err != nil {
-		p.log.Errorf("payment Update error = %v", err)
+		p.log.Errorf("支付单更新成功 = %v", err)
 		return err
 	}
-	panic("implement me")
+	return nil
 }
 
 func (p *PaymentRepo) FindByID(ctx context.Context, id int64) (*biz.Payment, error) {
