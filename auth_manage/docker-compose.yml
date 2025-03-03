@@ -5,6 +5,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       ETCD_ADDR: "etcd-server:2379"
+      REDIS_ADDR: "redis:6379"
     restart:
       always
     networks:
