@@ -111,7 +111,7 @@ func (uc *OrderUseCase) FindOrderByUserId(ctx context.Context, UserId int64) ([]
 		PhoneNumber: "",
 		OrderState:  "",
 		Page:        0,
-		PageSize:    9999999,
+		PageSize:    0,
 	})
 	if err != nil {
 		return nil, 0
