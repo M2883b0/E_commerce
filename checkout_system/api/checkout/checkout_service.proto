@@ -43,14 +43,15 @@ message CheckoutReq {
 message CheckoutResp {
   // 商品信息(更新后的商品详细信息)
   repeated Product products = 1;
-  // 运费
-  float shipping_fee = 5;
-  // 是否免除运费
-  bool is_free_shipping = 6;
+
   // 商品价格是否改变了
   bool has_changed = 2;
   // 订单总价
   float total_price = 3;
   // 实付价格
   float actual_price = 4;
+  // 运费
+  float shipping_fee = 5;
+  // 是否免除运费
+  bool is_free_shipping = 6;
 }

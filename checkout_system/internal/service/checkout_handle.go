@@ -12,7 +12,7 @@ import (
 func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutReq) (*checkout.CheckoutResp, error) {
 	//TODO implement me
 	// 默认运费6元
-
+	fmt.Print("====================================")
 	if req == nil || req.GetCartItems() == nil {
 		return nil, fmt.Errorf("invalid request or cart items")
 	}
@@ -58,6 +58,7 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 		LatestCartItems:   getLatestProductsRsp.CartItems,
 		OriginalCartItems: originalBizCartItems,
 	})
+	log.Infof("检查价格是否改变的返回值: %+v", checkPriceRsp)
 
 	if err != nil {
 		return nil, err
@@ -70,7 +71,7 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 		return nil, err
 	}
 	// 计算总价
-	calculateTotalPriceRsp, err := c.checkoutUc.CalculateTotalPrice(ctx, &biz.CalculateTotalPrice{
+	TotalPrice, err := c.checkoutUc.CalculateTotalPrice(ctx, &biz.CalculateTotalPrice{
 		CartItems: checkStockRsp.CartItems,
 	})
 	if err != nil {
@@ -78,7 +79,7 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 	}
 	// 计算优惠，返回是否免运费，以及实付价格
 	calculateDiscountRsp, err := c.checkoutUc.CalculateDiscount(ctx, &biz.CalculateDiscount{
-		TotalPrice: calculateTotalPriceRsp.TotalPrice,
+		TotalPrice: TotalPrice,
 		// 运费默认6元
 		ShippingFee: shippingFee,
 	})
@@ -97,12 +98,16 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 			IsStockSufficient: item.IsStockSufficient,
 		}
 	}
-	return &checkout.CheckoutResp{
+	var response = checkout.CheckoutResp{
 		Products:       products,
+		HasChanged:     checkPriceRsp,
+		TotalPrice:     TotalPrice,
+		ActualPrice:    calculateDiscountRsp.ActualPrice,
 		ShippingFee:    shippingFee,
 		IsFreeShipping: calculateDiscountRsp.IsShippingFree,
-		HasChanged:     checkPriceRsp.IsChanged,
-		TotalPrice:     calculateTotalPriceRsp.TotalPrice,
-		ActualPrice:    calculateDiscountRsp.ActualPrice,
-	}, nil
+	}
+	log.Infof("返回的商品信息是  %+v %+v %+v %+v %+v", response.Products, response.TotalPrice, response.IsFreeShipping, response.ActualPrice, response.HasChanged)
+
+	return &response, nil
+
 }

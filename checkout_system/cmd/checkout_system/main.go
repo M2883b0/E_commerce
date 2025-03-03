@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"os"
@@ -60,6 +61,7 @@ func newApp(logger log.Logger, gs *grpc.Server) *kratos.App {
 }
 
 func main() {
+	fmt.Print("================ begin server ====================")
 	flag.Parse()
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
