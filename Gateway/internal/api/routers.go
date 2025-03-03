@@ -58,7 +58,8 @@ func CmsRouter(r *gin.Engine) {
 
 		// cart
 		cmsGroup.GET("/cart/getAll", cmsApp.GetCart)
-		cmsGroup.POST("/cart/addItem", cmsApp.AddItem)
+		cmsGroup.POST("/cart/addItem", cmsApp.AddCartItem)
+		cmsGroup.POST("/cart/updateItem", cmsApp.UpdateCartItem)
 		cmsGroup.GET("/cart/clear", cmsApp.EmptyCart)
 
 		// checkout

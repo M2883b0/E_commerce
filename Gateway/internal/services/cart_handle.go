@@ -15,7 +15,7 @@ type AddItemReq struct {
 	CartItem CartItem `json:"cart_item"`
 }
 
-func (c *CmsAPP) AddItem(ctx *gin.Context) {
+func (c *CmsAPP) AddCartItem(ctx *gin.Context) {
 	tmp, state := ctx.Get("user_id")
 	var userId = tmp.(int64)
 	if !state {
@@ -33,6 +33,50 @@ func (c *CmsAPP) AddItem(ctx *gin.Context) {
 		Quantity:  req.CartItem.Quantity,
 	}
 	rsp, err := c.cartServiceClient.AddItem(ctx, &cart.AddItemReq{
+		UserId: userId,
+		Item:   &cartItem,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if rsp.GetState() {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "ok",
+			"data": rsp,
+		})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1,
+			"msg":  "add cart item failure!",
+		})
+	}
+
+}
+
+type UpdateItemReq struct {
+	CartItem CartItem `json:"cart_item"`
+}
+
+func (c *CmsAPP) UpdateCartItem(ctx *gin.Context) {
+	tmp, state := ctx.Get("user_id")
+	var userId = tmp.(int64)
+	if !state {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "session is not exist"})
+		return
+	}
+	var req UpdateItemReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// 调用微服务
+	var cartItem = cart.CartItem{
+		ProductId: uint32(req.CartItem.ProductId),
+		Quantity:  req.CartItem.Quantity,
+	}
+	rsp, err := c.cartServiceClient.UpdateItem(ctx, &cart.UpdateItemReq{
 		UserId: userId,
 		Item:   &cartItem,
 	})

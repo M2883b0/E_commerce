@@ -2,9 +2,9 @@ services:
   etcd-server:
     image: bitnami/etcd:latest
     restart: always
-    ports:
-      - "2379:2379"
-      - "2380:2380"
+#    ports:
+#      - "2379:2379"
+#      - "2380:2380"
     environment:
       - "ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379"
       - "ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379"
