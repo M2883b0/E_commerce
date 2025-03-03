@@ -47,16 +47,16 @@ func (c *CmsAPP) Checkout(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if len(rsp.Products) != 0 {
+	if rsp == nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1,
+			"msg":  "product not found",
+		})
+	} else {
 		ctx.JSON(http.StatusOK, gin.H{
 			"code": 0,
 			"msg":  "ok",
 			"data": rsp,
-		})
-	} else {
-		ctx.JSON(http.StatusOK, gin.H{
-			"code": 1,
-			"msg":  "product not found",
 		})
 	}
 
