@@ -4,8 +4,10 @@ import (
 	"auth_manage/internal/biz"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 	"strconv"
 	"time"
 )
@@ -36,6 +38,15 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 	if a.User_id == 0 {
 		return "", errors.New("user_id不能为空")
 	}
+	redisKey := fmt.Sprintf("session_id:%d", a.User_id)
+	redisValue, err := r.data.rdb.Get(ctx, redisKey).Result()
+	if err != nil && err != redis.Nil {
+		return "", errors.New("session auth error")
+	}
+	if redisValue != "" {
+		return redisValue, nil
+	}
+
 	SetClaims := MyClaims{
 		Username: strconv.Itoa(int(a.User_id)),
 		//Password: password,
@@ -54,6 +65,9 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 	//获得完整的、签名的令牌
 	token, err := tokenStruct.SignedString([]byte(key)) //加密的密钥
 	if err != nil {
+		return "", err
+	}
+	if err := r.data.rdb.Set(ctx, redisKey, token, 5*time.Hour).Err(); err != nil {
 		return "", err
 	}
 	return token, nil
