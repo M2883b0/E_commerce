@@ -14,7 +14,7 @@ type CartItm struct {
 }
 
 type CheckoutReq struct {
-	CartItems []*CartItm `json:"cart_item"`
+	CartItems []*CartItm `json:"cart_items"`
 }
 
 func (c *CmsAPP) Checkout(ctx *gin.Context) {

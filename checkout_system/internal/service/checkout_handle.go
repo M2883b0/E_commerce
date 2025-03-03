@@ -4,12 +4,19 @@ import (
 	"checkout_system/api/checkout"
 	"checkout_system/internal/biz"
 	"context"
+	"fmt"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Checkout implements Checkout.CheckOutServer.
 func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutReq) (*checkout.CheckoutResp, error) {
 	//TODO implement me
 	// 默认运费6元
+
+	if req == nil || req.GetCartItems() == nil {
+		return nil, fmt.Errorf("invalid request or cart items")
+	}
+	log.Infof("进入结算:%+v", req)
 	shippingFee := float32(6)
 
 	// 将 checkout.CartItem 转换为 biz.CartItem
@@ -24,7 +31,7 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 	//深拷贝一份原始信息
 	originalBizCartItems := make([]*biz.CartItem, len(req.GetCartItems()))
 	for i, item := range req.GetCartItems() {
-		bizCartItems[i] = &biz.CartItem{
+		originalBizCartItems[i] = &biz.CartItem{
 			ProductId:    item.ProductId,
 			BuyerNeedNum: item.Quantity,
 			Price:        item.Price,
@@ -34,9 +41,19 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 	getLatestProductsRsp, err := c.checkoutUc.GetLatestProducts(ctx, &biz.CheckoutPreviewReq{
 		bizCartItems,
 	})
-	// bizCartItems只浅拷贝了
-	// 判断价格是否发生了改变
 
+	if getLatestProductsRsp == nil || getLatestProductsRsp.CartItems == nil {
+		log.Infof("商品不存在")
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	// bizCartItems只浅拷贝了
+
+	// 判断价格是否发生了改变
 	checkPriceRsp, err := c.checkoutUc.CheckPrice(ctx, &biz.CheckPrice{
 		LatestCartItems:   getLatestProductsRsp.CartItems,
 		OriginalCartItems: originalBizCartItems,
@@ -47,7 +64,7 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 	}
 	// 判断库存
 	checkStockRsp, err := c.checkoutUc.CheckStock(ctx, &biz.CheckStock{
-		bizCartItems,
+		getLatestProductsRsp.CartItems,
 	})
 	if err != nil {
 		return nil, err
@@ -65,6 +82,10 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 		// 运费默认6元
 		ShippingFee: shippingFee,
 	})
+	if err != nil {
+		return nil, err
+	}
+
 	// 转为checkout.Product
 	products := make([]*checkout.Product, len(getLatestProductsRsp.CartItems))
 	for i, item := range checkStockRsp.CartItems {

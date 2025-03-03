@@ -90,10 +90,13 @@ func NewCheckoutUsecase(repo CheckoutRepo, logger log.Logger) *CheckoutUsecase {
 
 // 调用商品服务查询商品信息,包括价格，库存等信息
 func (uc *CheckoutUsecase) GetLatestProducts(ctx context.Context, req *CheckoutPreviewReq) (*GetLatestProductsRsp, error) {
-	uc.log.WithContext(ctx).Infof("GetLatestProducts")
+	log.Infof("开始获取最新商品信息: %+v", req)
 	// 查询商品信息Todo 转为productInfo,只留IsStockSufficient不填充
 	// 构造商品id列表
 	products, err := uc.repo.FindCartItem(ctx, req)
+	if products == nil {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +126,7 @@ func (uc *CheckoutUsecase) CheckPrice(ctx context.Context, req *CheckPrice) (*Ch
 }
 
 func (uc *CheckoutUsecase) CheckStock(ctx context.Context, req *CheckStock) (*CheckStockRsp, error) {
-	uc.log.WithContext(ctx).Infof("CheckStock")
+	log.Infof("检查库存: %+v", req)
 	// 检查库存,更新IsStockSufficient
 	for _, cartItem := range req.CartItems {
 		// 查询商品信息
@@ -137,7 +140,7 @@ func (uc *CheckoutUsecase) CheckStock(ctx context.Context, req *CheckStock) (*Ch
 }
 
 func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *CalculateTotalPrice) (*CalculateTotalPriceRsp, error) {
-	uc.log.WithContext(ctx).Infof("CalculateTotalPrice")
+	log.Infof("计算总价: %+v", c)
 
 	var totalPrice float32
 	totalPrice = 0
@@ -154,7 +157,7 @@ func (uc *CheckoutUsecase) CalculateTotalPrice(ctx context.Context, c *Calculate
 }
 
 func (uc *CheckoutUsecase) CalculateDiscount(ctx context.Context, req *CalculateDiscount) (*CalculateDiscountRsp, error) {
-	uc.log.WithContext(ctx).Infof("Checkout")
+	log.Infof("计算优惠后的实付: %+v", req)
 	totalPrice := req.TotalPrice
 	// 金额大于99免基础运费
 	var isShippingFree bool

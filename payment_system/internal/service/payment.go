@@ -65,6 +65,6 @@ func NewPaymentService(alipayUc *biz.AlipayUsecase) *PaymentService {
 		panic(err)
 	}
 	return &PaymentService{
-		alipayChargeUc: alipayUc,
-		alipayClient:   client}
+		alipayUc:     alipayUc,
+		alipayClient: client}
 }

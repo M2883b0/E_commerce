@@ -4,7 +4,6 @@ import (
 	"checkout_system/api/operate"
 	"checkout_system/internal/biz"
 	"context"
-	"errors"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -23,6 +22,7 @@ func NewCheckoutRepo(productClient *ProductClient, logger log.Logger) biz.Checko
 
 func (c *checkoutRepo) FindCartItem(ctx context.Context, checkout *biz.CheckoutPreviewReq) (*biz.GetLatestProductsRsp, error) {
 	// 更新购物车里的东西的信息
+	log.Infof("查找购物车里的东西的信息:%+v", checkout)
 	idList := make([]int64, len(checkout.CartItems))
 	for i, cartItem := range checkout.CartItems {
 		idList[i] = int64(cartItem.ProductId)
@@ -32,13 +32,16 @@ func (c *checkoutRepo) FindCartItem(ctx context.Context, checkout *biz.CheckoutP
 		&operate.GetContentReq{
 			Id: idList,
 		})
+
+	if products == nil {
+		log.Errorf("购物车商品不存在")
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	// 任一物品不存在，返回错误
-	if products.Contents == nil {
-		return nil, errors.New("product not found")
-	}
+
 	mapLatestProduct := make(map[int64]*operate.Content, len(products.Contents))
 	for _, product := range products.Contents {
 		mapLatestProduct[product.Id] = product
