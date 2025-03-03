@@ -7,14 +7,15 @@ import (
 )
 
 type CancelReq struct {
-	OrderId int64 `json:"product_id"`
+	OrderId int64 `json:"order_id"`
 }
 type ChargeReq struct {
-	OrderId int64 `json:"product_id"`
+	OrderId int64  `json:"order_id"`
+	Subject string `json:"subject"`
 }
 
 type QueryOrderStatusReq struct {
-	OrderId int64 `json:"product_id"`
+	OrderId int64 `json:"order_id"`
 }
 
 func (c *CmsAPP) Charge(ctx *gin.Context) {
