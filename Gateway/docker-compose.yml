@@ -23,6 +23,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       ETCD_ADDR: "etcd-server:2379"
+      REDIS_ADDR: "redis:6379"
     restart: always
     ports:
       - "8080:8080"
@@ -30,6 +31,13 @@ services:
       - etcd-server
     networks:
       server_net:
+
+  redis:
+    image: redis:latest
+    restart: always
+    networks:
+      server_net:
+
   prometheus:
     image: bitnami/prometheus:2.53.1
     ports:
