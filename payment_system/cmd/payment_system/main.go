@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
+	"github.com/joho/godotenv"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"os"
 
@@ -61,10 +62,12 @@ func newApp(logger log.Logger, gs *grpc.Server) *kratos.App {
 }
 
 func main() {
-	//err := godotenv.Load()
-	//if err != nil {
-	//	panic(err)
-	//}
+	if os.Getenv("ETCD_ADDR") == "" {
+		err := godotenv.Load()
+		if err != nil {
+			panic(err)
+		}
+	}
 	flag.Parse()
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
