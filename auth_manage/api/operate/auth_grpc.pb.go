@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Auth_DeliverTokenByRPC_FullMethodName = "/api.operate.Auth/DeliverTokenByRPC"
 	Auth_VerifyTokenByRPC_FullMethodName  = "/api.operate.Auth/VerifyTokenByRPC"
+	Auth_ExpireTokenByRPC_FullMethodName  = "/api.operate.Auth/ExpireTokenByRPC"
 )
 
 // AuthClient is the client API for Auth service.
@@ -29,6 +30,7 @@ const (
 type AuthClient interface {
 	DeliverTokenByRPC(ctx context.Context, in *DeliverTokenReq, opts ...grpc.CallOption) (*DeliveryResp, error)
 	VerifyTokenByRPC(ctx context.Context, in *VerifyTokenReq, opts ...grpc.CallOption) (*VerifyResp, error)
+	ExpireTokenByRPC(ctx context.Context, in *ExpireTokenReq, opts ...grpc.CallOption) (*ExpireTokenResp, error)
 }
 
 type authClient struct {
@@ -59,12 +61,23 @@ func (c *authClient) VerifyTokenByRPC(ctx context.Context, in *VerifyTokenReq, o
 	return out, nil
 }
 
+func (c *authClient) ExpireTokenByRPC(ctx context.Context, in *ExpireTokenReq, opts ...grpc.CallOption) (*ExpireTokenResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExpireTokenResp)
+	err := c.cc.Invoke(ctx, Auth_ExpireTokenByRPC_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility.
 type AuthServer interface {
 	DeliverTokenByRPC(context.Context, *DeliverTokenReq) (*DeliveryResp, error)
 	VerifyTokenByRPC(context.Context, *VerifyTokenReq) (*VerifyResp, error)
+	ExpireTokenByRPC(context.Context, *ExpireTokenReq) (*ExpireTokenResp, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedAuthServer) DeliverTokenByRPC(context.Context, *DeliverTokenR
 }
 func (UnimplementedAuthServer) VerifyTokenByRPC(context.Context, *VerifyTokenReq) (*VerifyResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyTokenByRPC not implemented")
+}
+func (UnimplementedAuthServer) ExpireTokenByRPC(context.Context, *ExpireTokenReq) (*ExpireTokenResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExpireTokenByRPC not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 func (UnimplementedAuthServer) testEmbeddedByValue()              {}
@@ -138,6 +154,24 @@ func _Auth_VerifyTokenByRPC_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_ExpireTokenByRPC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExpireTokenReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).ExpireTokenByRPC(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_ExpireTokenByRPC_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).ExpireTokenByRPC(ctx, req.(*ExpireTokenReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VerifyTokenByRPC",
 			Handler:    _Auth_VerifyTokenByRPC_Handler,
+		},
+		{
+			MethodName: "ExpireTokenByRPC",
+			Handler:    _Auth_ExpireTokenByRPC_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

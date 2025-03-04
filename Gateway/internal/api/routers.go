@@ -14,12 +14,14 @@ const (
 func CmsRouter(r *gin.Engine) {
 	//cms对象实例化
 	cmsApp := services.NewCmsApp()
+
 	//创建JWT中间件实例
 	jwtAuth := NewJWTAuth()
-
-	////资源监控中间件，上报数据到prometheus
+	//跨域中间件
+	r.Use(CORS())
+	//资源监控中间件，上报数据到prometheus
 	r.Use(prometheusMiddleware())
-	////链路追踪中间件，上报数据到zipkin
+	//链路追踪中间件，上报数据到zipkin
 	r.Use(opentracingMiddleware())
 
 	//创建【路由组/cms/】
@@ -48,6 +50,8 @@ func CmsRouter(r *gin.Engine) {
 		cmsGroup.GET("/user/delete", cmsApp.UserDelete)
 		//路径/api/cms/content/find
 		cmsGroup.GET("/user/find", cmsApp.UserFind)
+		//路径/api/cms/content/out
+		cmsGroup.GET("/user/out", cmsApp.UserOut)
 
 		// order
 		cmsGroup.POST("/order/place", cmsApp.PlaceOrder)
