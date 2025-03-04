@@ -104,17 +104,17 @@ func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, 
 	}
 	//信息鉴权成功
 	//还需要判断token是否过期
-	timekey := fmt.Sprintf("session_time:%d", claims.Username)
+	timekey := fmt.Sprintf("session_time:%s", claims.Username)
 	timeValue, err := r.data.rdb.Get(ctx, timekey).Result()
 	if err == redis.Nil || timeValue == "" {
-		log.Infof("用户%d:jwt 过期", claims.Username)
+		log.Infof("用户%s:jwt 过期", claims.Username)
 		return false, "jwt 过期", 0, nil
 	} else if err != nil {
 		log.Infof("redis错误")
 		return false, "redis错误", 0, err
 	}
 
-	redisKey := fmt.Sprintf("session_id:%d", claims.Username)
+	redisKey := fmt.Sprintf("session_id:%s", claims.Username)
 
 	temp, _ := strconv.Atoi(timeValue)
 
@@ -151,12 +151,12 @@ func (r *authRepo) ExpireToken(ctx context.Context, a *biz.Verfy) (bool, string,
 	}
 	//信息鉴权成功
 	//还需要判断token是否过期
-	timekey := fmt.Sprintf("session_time:%d", claims.Username)
-	redisKey := fmt.Sprintf("session_id:%d", claims.Username)
+	timekey := fmt.Sprintf("session_time:%s", claims.Username)
+	redisKey := fmt.Sprintf("session_id:%s", claims.Username)
 
 	r.data.rdb.Del(ctx, timekey)
 	r.data.rdb.Del(ctx, redisKey)
-	log.Infof("用户%d:登出成功")
+	log.Infof("用户%s:登出成功", claims.Username)
 	return true, "登出成功", nil
 }
 
