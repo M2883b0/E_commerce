@@ -36,6 +36,7 @@ func NewAuthRepo(data *Data, logger log.Logger) biz.AuthRepo {
 
 func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 	if a.User_id == 0 {
+		log.Infof("user_id不能为空")
 		return "", errors.New("user_id不能为空")
 	}
 	redisKey := fmt.Sprintf("session_id:%d", a.User_id)
@@ -48,6 +49,7 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 	//	return redisValue, nil
 	//}
 	if err != redis.Nil || redisValue != "" {
+		log.Infof("用户%d:登录成功", a.User_id)
 		return redisValue, nil
 	}
 
@@ -77,12 +79,13 @@ func (r *authRepo) SetToken(ctx context.Context, a *biz.Auth) (string, error) {
 	if err := r.data.rdb.Set(ctx, timeKey, 1, 2*time.Hour).Err(); err != nil {
 		return "", err
 	}
-
+	log.Infof("用户%d:登录成功", a.User_id)
 	return token, nil
 }
 
 func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, int64, error) {
 	if a.Token == "" {
+		log.Infof("传入 jwt 内容为空")
 		return false, "jwt 内容为空", 0, nil
 	}
 	//解析、验证并返回token。
@@ -90,11 +93,13 @@ func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, 
 		return []byte(key), nil //key 为自定义的密钥
 	})
 	if err != nil {
+		log.Infof("jwt 解析错误")
 		return false, "jwt 解析错误", 0, nil
 	}
 	//类型断言获取Claims
 	claims, ok := tokenObj.Claims.(*MyClaims)
 	if !(ok && tokenObj.Valid) {
+		log.Infof("jwt 鉴权失败")
 		return false, "jwt 鉴权失败", 0, nil
 	}
 	//信息鉴权成功
@@ -102,8 +107,10 @@ func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, 
 	timekey := fmt.Sprintf("session_time:%d", claims.Username)
 	timeValue, err := r.data.rdb.Get(ctx, timekey).Result()
 	if err == redis.Nil || timeValue == "" {
+		log.Infof("用户%d:jwt 过期", claims.Username)
 		return false, "jwt 过期", 0, nil
 	} else if err != nil {
+		log.Infof("redis错误")
 		return false, "redis错误", 0, err
 	}
 
@@ -113,6 +120,7 @@ func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, 
 
 	num, err := strconv.Atoi(claims.Username)
 	if err != nil {
+		log.Infof("jwt 转型失败")
 		return false, "jwt 转型失败", 0, nil
 	}
 	if time.Now().Unix() > claims.IssuedAt.Add(time.Duration(temp)*time.Hour).Unix() { //续期，覆盖redis内容
@@ -124,19 +132,22 @@ func (r *authRepo) CheckToken(ctx context.Context, a *biz.Verfy) (bool, string, 
 
 func (r *authRepo) ExpireToken(ctx context.Context, a *biz.Verfy) (bool, string, error) {
 	if a.Token == "" {
-		return false, "注销失败,jwt 内容为空", nil
+		log.Infof("登出失败,传入 jwt 内容为空")
+		return false, "登出失败,jwt 内容为空", nil
 	}
 	//解析、验证并返回token。
 	tokenObj, err := jwt.ParseWithClaims(a.Token, &MyClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(key), nil //key 为自定义的密钥
 	})
 	if err != nil {
-		return false, "注销失败,jwt 解析错误", nil
+		log.Infof("登出失败,jwt 解析错误")
+		return false, "登出失败,jwt 解析错误", nil
 	}
 	//类型断言获取Claims
 	claims, ok := tokenObj.Claims.(*MyClaims)
 	if !(ok && tokenObj.Valid) {
-		return false, "注销失败,jwt 鉴权失败", nil
+		log.Infof("登出失败,jwt 鉴权失败")
+		return false, "登出失败,jwt 鉴权失败", nil
 	}
 	//信息鉴权成功
 	//还需要判断token是否过期
@@ -145,8 +156,8 @@ func (r *authRepo) ExpireToken(ctx context.Context, a *biz.Verfy) (bool, string,
 
 	r.data.rdb.Del(ctx, timekey)
 	r.data.rdb.Del(ctx, redisKey)
-
-	return true, "注销成功", nil
+	log.Infof("用户%d:登出成功")
+	return true, "登出成功", nil
 }
 
 //实际操作（rdb，操作redis   |   jwt生成）
