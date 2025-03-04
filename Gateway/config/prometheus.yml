@@ -26,7 +26,7 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: ["172.22.121.111:9090"]
   
 
   - job_name: "content_system"
@@ -34,4 +34,4 @@ scrape_configs:
     # scheme defaults to 'http'.
   
     static_configs:
-      - targets: ["localhost:8080"]
+      - targets: ["172.22.121.111:8080"]
