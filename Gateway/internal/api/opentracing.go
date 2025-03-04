@@ -14,9 +14,9 @@ import (
 // 上报中间件 上报地址：http://localhost:9411/api/v2/spans
 func opentracingMiddleware() gin.HandlerFunc {
 	// 创建zipkin的上报节点Reporter：初始化，上报节点，指定zipkin的服务节点地址
-	report := reporter.NewReporter("http://localhost:9411/api/v2/spans")
+	report := reporter.NewReporter("http://172.22.121.111:9411/api/v2/spans")
 	// 创建本地节点,以及指定网关层的地址
-	endpoint, err := zipkin.NewEndpoint("Gateway", "localhost:8080")
+	endpoint, err := zipkin.NewEndpoint("Gateway", "172.22.121.111:8080")
 	if err != nil {
 		panic(err)
 	}
