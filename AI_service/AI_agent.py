@@ -28,7 +28,7 @@ class Agent:
         )
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "你是专业的订单处理助手，网关传来的参数 user_id，是用于当你调用工具函数时，如果函数需要，则原样传进去。尽量不要透露系统内部的信息，有礼貌。"),
+            ("system", "你是专业的订单处理助手，网关传来的参数{user_id}，是用于当你调用工具函数时，如果函数需要，则原样传进去。尽量不要透露系统内部的信息，有礼貌。"),
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
@@ -39,6 +39,7 @@ class Agent:
     def run(self, user_input, user_id):
         # 执行Agent
         result = self.agent_executor.invoke({
+        "user_id": user_id
             "input": user_input
         })
         return result
