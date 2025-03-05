@@ -17,7 +17,7 @@ def get_server_info(server_name):
         return ""
     for info, _ in client.get_prefix(f'/microservices/{server_name}'):
         # return json.loads(info.decode())["endpoints"]
-        return json.loads(info.decode())["endpoints"][0]
+        return json.loads(info.decode())["endpoints"][0][7:]
     return ""
 
 
