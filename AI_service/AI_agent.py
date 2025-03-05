@@ -39,7 +39,7 @@ class Agent:
     def run(self, user_input, user_id):
         # 执行Agent
         result = self.agent_executor.invoke({
-        "user_id": user_id
+        "user_id": user_id,
             "input": user_input
         })
         return result
