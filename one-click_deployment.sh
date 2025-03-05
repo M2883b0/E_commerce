@@ -16,3 +16,5 @@ for folder in "${folders[@]}"; do
     screen -dmS "$folder" bash -c "cd \"$folder\" && $cmd; exec bash"
 done
 
+docker-compose up -d
+
