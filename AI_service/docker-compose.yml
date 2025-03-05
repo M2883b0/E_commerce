@@ -3,9 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
     environment:
       ETCD_ADDR: "etcd-server"
-      SERVER_ADDR: "grpc://172.18.0.55:9000"
+      SERVER_ADDR: "grpc://172.22.121.111:9000"
 #      ARK_API_KEY: "33820f8b-9106-4e5d-9f98-c39739ca304a"
 #      ARK_BASE_URL: "https://ark.cn-beijing.volces.com/api/v3"
 #      MODEL_NAME: "doubao-1-5-pro-32k-250115"
@@ -13,7 +15,6 @@ services:
 
     networks:
       server_net:
-        ipv4_address: 172.18.0.55
 
 networks:
   server_net:
