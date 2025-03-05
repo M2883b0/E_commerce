@@ -14,6 +14,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"os"
+	"time"
 )
 
 type CmsAPP struct {
@@ -320,6 +321,7 @@ func connAIAgentClient(app *CmsAPP) {
 		//实现负载均衡的能力，指定请求的节点，每个请求路由到不同的机器节点上
 		grpc.WithEndpoint(endpoint),
 		grpc.WithDiscovery(dis), //服务的发现
+		grpc.WithTimeout(30*time.Second),
 	)
 	log.Infof("成功注册ai_agent微服务。 etcd addr:%+v, connection: %+v", ETCD_ADDRR, conn)
 	if err != nil {
