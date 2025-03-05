@@ -1,5 +1,9 @@
 # E_commerce
-go语言开发的抖音电商
+
+一个“简易版”抖音商城。为用户提供便捷、优质的购物环境，满足用户多样化的购物需求，打造一个具有影响力的社交电商平台，提升抖音在电商领域的市场竞争力。
+
+
+详细文档📋：[飞书文档](https://jcn514jbqcth.feishu.cn/wiki/VqTgwTkKLi3BpBkgeSdcNX8unrr?from=from_copylink)
 
 ## ✨ 技术选型
 
