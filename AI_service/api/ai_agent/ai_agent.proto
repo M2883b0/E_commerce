@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package api.order;
+package api.ai_agent;
 
 
 service AiAgent {

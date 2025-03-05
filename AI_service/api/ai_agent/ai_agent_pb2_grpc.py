@@ -35,7 +35,7 @@ class AiAgentStub(object):
             channel: A grpc.Channel.
         """
         self.UserRequest = channel.unary_unary(
-                '/api.order.AiAgent/UserRequest',
+                '/api.ai_agent.AiAgent/UserRequest',
                 request_serializer=ai__agent__pb2.UserRequestReq.SerializeToString,
                 response_deserializer=ai__agent__pb2.UserRequestResp.FromString,
                 _registered_method=True)
@@ -60,9 +60,9 @@ def add_AiAgentServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'api.order.AiAgent', rpc_method_handlers)
+            'api.ai_agent.AiAgent', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('api.order.AiAgent', rpc_method_handlers)
+    server.add_registered_method_handlers('api.ai_agent.AiAgent', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -83,7 +83,7 @@ class AiAgent(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/api.order.AiAgent/UserRequest',
+            '/api.ai_agent.AiAgent/UserRequest',
             ai__agent__pb2.UserRequestReq.SerializeToString,
             ai__agent__pb2.UserRequestResp.FromString,
             options,
