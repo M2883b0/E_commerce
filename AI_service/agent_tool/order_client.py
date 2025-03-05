@@ -80,7 +80,7 @@ def _list_order(user_id: int):
         print(e)
         return "failed"
     if response and response.total:
-        return f"用户 {user_id} 的订单信息为 {response.order_items}"
+        return f"用户 {user_id} 的订单信息为 {response.orders}"
     return f"用户 {user_id} 没有订单"
 
 
