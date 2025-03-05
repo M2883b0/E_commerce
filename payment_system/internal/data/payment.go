@@ -80,6 +80,7 @@ func (p *PaymentRepo) FindByID(ctx context.Context, id int64) (*biz.Payment, err
 		OrderID: id,
 		Amount:  detail.Amount,
 		Status:  detail.Status,
+		QrUrl:   detail.QrUrl,
 	}
 
 	return payment, nil

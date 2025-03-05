@@ -22,6 +22,7 @@ services:
     restart: always
     networks:
       - server_net
+
 networks:
   server_net:
     external: true

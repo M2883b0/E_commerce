@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"time"
 )
 
 type orderRepo struct {
@@ -170,6 +171,17 @@ func (c *orderRepo) Find(ctx context.Context, params *biz.FindParams) ([]*biz.Or
 		if err := json.Unmarshal(r.OrderItems, &items); err != nil {
 			return nil, total, errors.Unwrap(err)
 		}
+
+		// 定时取消功能
+		if r.OrderState == "waiting" {
+			now := time.Now()
+			if now.After(r.CreatedAt.Add(time.Minute * 1)) {
+				r.OrderState = "CANCELED"
+			} else {
+				r.OrderState = r.CreatedAt.Format("2006-01-02 15:04:05")
+			}
+		}
+
 		orders = append(orders, &biz.Order{
 			OrderId:        int64(r.ID),
 			UserID:         r.UserID,

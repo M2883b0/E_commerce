@@ -1,27 +1,15 @@
 services:
-  content_manage_mysql:
-    image: mysql:8.0
-
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: goods
-      MYSQL_CHARSET: utf8mb4
-    networks:
-      server_net:
   content-manage:
     build:
       context: .
       dockerfile: ./Dockerfile
     environment:
       ETCD_ADDR: "etcd-server:2379"
-      MYSQL_ADDR: "root:123456@tcp(content_manage_mysql:3306)/goods?charset=utf8mb4&parseTime=True&loc=Local"
+      MYSQL_ADDR: "root:123456@tcp(user_manage_mysql:3306)/ec?charset=utf8mb4&parseTime=True&loc=Local"
       ELASTIC_ADDR: "http://elastic-search:9200"
       CANNAL_ADDR: "canal-server:11111"
-
-#    ports:
-#      - "9010:9000"
-    depends_on:
-      - content_manage_mysql
+#    depends_on:
+#      - content_manage_mysql
     restart: always
     networks:
       server_net:
@@ -35,8 +23,6 @@ services:
       - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     networks:
       server_net:
-
-
   kibana:
     image: kibana:8.11.4
     ports:

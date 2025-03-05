@@ -17,6 +17,7 @@ type Verfy struct {
 type AuthRepo interface {
 	SetToken(context.Context, *Auth) (string, error)
 	CheckToken(context.Context, *Verfy) (bool, string, int64, error)
+	ExpireToken(context.Context, *Verfy) (bool, string, error)
 }
 
 type AuthUsecase struct {
@@ -33,6 +34,9 @@ func (uc *AuthUsecase) Set_Token(ctx context.Context, a *Auth) (string, error) {
 }
 func (uc *AuthUsecase) Check_Token(ctx context.Context, a *Verfy) (bool, string, int64, error) {
 	return uc.repo.CheckToken(ctx, a)
+}
+func (uc *AuthUsecase) Expire_Token(ctx context.Context, a *Verfy) (bool, string, error) {
+	return uc.repo.ExpireToken(ctx, a)
 }
 
 //执行组合逻辑（这里没有组合逻辑，直接下一层）

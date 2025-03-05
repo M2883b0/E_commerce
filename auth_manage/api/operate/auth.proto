@@ -11,6 +11,7 @@ option java_package = "api.operate";
 service Auth {
 	rpc DeliverTokenByRPC(DeliverTokenReq) returns (DeliveryResp) {}
 	rpc VerifyTokenByRPC(VerifyTokenReq) returns (VerifyResp) {}
+	rpc ExpireTokenByRPC(ExpireTokenReq) returns (ExpireTokenResp) {}
 }
 
 message DeliverTokenReq {
@@ -29,4 +30,12 @@ message VerifyResp {
 	bool res = 1;
 	string msg = 2;
 	int64 user_id = 3;
+}
+
+message ExpireTokenReq {
+	string token = 1;
+}
+message ExpireTokenResp {
+	bool res = 1;
+	string msg = 2;
 }

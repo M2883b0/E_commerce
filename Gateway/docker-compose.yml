@@ -1,33 +1,16 @@
 services:
-  etcd-server:
-    image: bitnami/etcd:latest
-    restart: always
-#    ports:
-#      - "2379:2379"
-#      - "2380:2380"
-    environment:
-      - "ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379"
-      - "ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379"
-      - "ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380"
-      - "ETCD_INITIAL_ADVERTISE_PEER_URLS=http://0.0.0.0:2380"
-      - "ALLOW_NONE_AUTHENTICATION=yes"
-      - "ETCD_INITIAL_CLUSTER=node1=http://0.0.0.0:2380"
-      - "ETCD_NAME=node1"
-      - "ETCD_DATA_DIR=/opt/bitnami/etcd/data"
-    networks:
-      server_net:
-
   gateway:
     build:
       context: .
       dockerfile: ./Dockerfile
     environment:
       ETCD_ADDR: "etcd-server:2379"
+      REDIS_ADDR: "redis:6379"
     restart: always
     ports:
       - "8080:8080"
-    depends_on:
-      - etcd-server
+#    depends_on:
+#      - etcd-server
     networks:
       server_net:
   prometheus:
@@ -40,22 +23,6 @@ services:
     networks:
       server_net:
 
-  grafana:
-    image: grafana/grafana:11.3.1
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: "admin"
-      GF_SECURITY_ADMIN_USER: "admin"
-    networks:
-      server_net:
-  zipkin:
-    image: openzipkin/zipkin:2.21.7
-
-    ports:
-      - "9411:9411"
-    networks:
-      server_net:
 networks:
   server_net:
     external: true

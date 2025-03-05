@@ -1,0 +1,51 @@
+services:
+  user_manage_mysql:
+    image: mysql:8.0
+    #    ports:
+    #      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: ec
+      MYSQL_CHARSET: utf8mb4
+    networks:
+      server_net:
+
+  etcd-server:
+    image: bitnami/etcd:latest
+    restart: always
+    environment:
+      - "ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379"
+      - "ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379"
+      - "ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380"
+      - "ETCD_INITIAL_ADVERTISE_PEER_URLS=http://0.0.0.0:2380"
+      - "ALLOW_NONE_AUTHENTICATION=yes"
+      - "ETCD_INITIAL_CLUSTER=node1=http://0.0.0.0:2380"
+      - "ETCD_NAME=node1"
+      - "ETCD_DATA_DIR=/opt/bitnami/etcd/data"
+    networks:
+      server_net:
+
+  redis:
+    image: redis:latest
+    restart: always
+    networks:
+      server_net:
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      GF_SECURITY_ADMIN_USER: "admin"
+    networks:
+      server_net:
+  zipkin:
+    image: openzipkin/zipkin:2.21.7
+    ports:
+      - "9411:9411"
+    networks:
+      server_net:
+networks:
+  server_net:
+    external: true
