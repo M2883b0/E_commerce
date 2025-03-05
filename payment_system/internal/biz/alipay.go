@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"payment_system/api/order"
-
 	//"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/smartwalle/alipay/v3"
@@ -42,6 +41,14 @@ type QueryPayment struct {
 type QueryPaymentRsp struct {
 	OutTradeNo int64 `json:"out_trade_no"`
 	Status     string
+}
+
+type Notify struct {
+	Params map[string][]string
+}
+
+type NotifyRsp struct {
+	State string
 }
 
 const (
@@ -91,6 +98,12 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 	orderInfo, err := uc.orderStatusRepo.GetOrderInfo(ctx, req.OutTradeNo)
 	if err != nil {
 		return nil, err
+	}
+	if orderInfo.GetOrder().GetUserId() == -1 {
+		return &TradeRsp{
+			OutTradeNo: -1,
+			QrCode:     "",
+		}, nil
 	}
 	totalAmount := orderInfo.GetOrder().ActualPayment
 	totalAmountString := fmt.Sprintf("%.2f", totalAmount)
@@ -328,12 +341,53 @@ func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Clien
 //func (uc *AlipayUsecase) NotifyHandle(ctx context.Context, client *alipay.Client, req *Notify) (*NotifyResp, error) {
 //	uc.log.WithContext(ctx).Infof("异步返回处理: %+v", req)
 //	// 验签
-//	isValid, err := client.VerifySign(ctx, req.Params)
+//	err := client.VerifySign(req.Params)
+//	// 验签失败
+//	if err != nil {
+//		return &NotifyRsp{State: "fail"}, err
+//	}
+//	// 验签成功
+//	notification, err := client.DecodeNotification(req.Params)
 //	if err != nil {
 //		return nil, err
 //	}
-//	if !isValid {
-//		return nil, fmt.Errorf("验签失败")
+//	outTradeNo, err := strconv.Atoi(notification.OutTradeNo)
+//	if err != nil {
+//		return nil, err
 //	}
-//	// 处理业务逻辑
+//	switch notification.TradeStatus {
+//	case alipay.TradeStatusSuccess:
+//		log.Infof("支付成功%+v", notification.OutTradeNo)
+//		payment, err := uc.paymentRepo.FindByID(ctx, int64(outTradeNo))
+//		if payment.Status == string(alipay.TradeStatusSuccess) {
+//			return &NotifyRsp{
+//				State: "success",
+//			}, nil
+//		}
+//		markOrderPaidRsp, err := uc.orderStatusRepo.MarkOrderPaid(ctx, int64(outTradeNo))
+//		if err != nil {
+//			return nil, err
+//		}
+//		if !markOrderPaidRsp.State {
+//			return nil, fmt.Errorf("订单状态更新失败")
+//		}
+//		err = uc.paymentRepo.Update(ctx, &Payment{
+//			OrderID: int64(outTradeNo),
+//			Status:  string(alipay.TradeStatusSuccess),
+//		})
+//	case alipay.TradeStatusClosed:
+//		log.Infof("支付关闭%+v", notification.OutTradeNo)
+//		markOrderCancelRsp, err := uc.orderStatusRepo.MarkOrderCancel(ctx, int64(outTradeNo))
+//		if err != nil {
+//			return nil, err
+//		}
+//		if !markOrderCancelRsp.State {
+//			return nil, fmt.Errorf("订单状态更新失败")
+//		}
+//		err = uc.paymentRepo.Update(ctx, &Payment{
+//			OrderID: int64(outTradeNo),
+//			Status:  string(alipay.TradeStatusClosed),
+//		})
+//	}
+//	return nil, nil
 //}
