@@ -21,6 +21,8 @@ def get_server_info(server_name):
     return ""
 
 
+
+
 def register(server_name, server_addr):
     client = etcd3.client(host=os.getenv('ETCD_ADDR'), port=2379)
     client.put(f'/microservices/{server_name}/3d1d1d1d1d1f', json.dumps({"id":"3d1d1d1d1d1f", "name":server_name, "version":"", "metadata": {}, "endpoints": [server_addr]}))
