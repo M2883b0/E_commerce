@@ -99,9 +99,9 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 	if err != nil {
 		return nil, err
 	}
-	if orderInfo.GetOrder().GetUserId() == -1 {
+	if orderInfo.GetOrder().GetUserId() == 0 {
 		return &TradeRsp{
-			OutTradeNo: -1,
+			OutTradeNo: 0,
 			QrCode:     "",
 		}, nil
 	}

@@ -34,18 +34,20 @@ func (c *CmsAPP) Charge(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if rsp.OrderId == -1 {
+	if rsp.OrderId == 0 {
 		ctx.JSON(http.StatusOK, gin.H{
 			"code": 0,
 			"msg":  "订单不存在",
 			"data": "",
 		})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "ok",
+			"data": rsp,
+		})
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": rsp,
-	})
+
 }
 
 func (c *CmsAPP) QueryOrderStatus(ctx *gin.Context) {
