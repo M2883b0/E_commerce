@@ -13,7 +13,7 @@ type AIAgentReq struct {
 
 func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 	var req AIAgentReq
-	log.Infof("begin AiAgent, user Message is %+v ", req.UserMessage)
+	log.Infof("begin AiAgent, user Message is %+v ", req)
 	tmp, state := ctx.Get("user_id")
 	var userId = tmp.(int64)
 	if !state {
