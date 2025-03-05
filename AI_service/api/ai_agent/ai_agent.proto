@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package api.order;
+
+
+service AiAgent {
+	rpc UserRequest(UserRequestReq) returns (UserRequestResp) {}
+}
+
+// PlaceOrderReq
+message UserRequestReq {
+	int64 user_id = 1;
+	string user_message = 2;
+
+}
+
+message UserRequestResp {
+	string agent_response = 1;
+}
