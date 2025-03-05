@@ -113,6 +113,7 @@ func (c *userRepo) Login(ctx context.Context, user *biz.Login) (*biz.User, error
 
 func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) (int32, string, error) {
 	c.log.Infof("用户请求更新信息 = %+v", user)
+	db := c.data.db
 	//密码加密
 	hashedPassword, err := encryptPassword(user.Password)
 	if err != nil {
@@ -121,6 +122,15 @@ func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) (int32,
 	}
 	if user.Password == "" { //如果不更新密码
 		hashedPassword = "" //加密后，强行置为空
+	}
+	if user.Phone_number != "" {
+		//查看是否有这个账号
+		if isExist, err := c.IsExistbyPhone(ctx, user.Phone_number); err != nil {
+			c.log.Infof("用户查询错误 = %v", err)
+			return 400, "服务器错误，查询失败", err
+		} else if isExist {
+			return 400, "更新失败，该账号已被占用", nil
+		}
 	}
 	detail := UserDetail{
 		Phone_number: user.Phone_number,
@@ -131,7 +141,6 @@ func (c *userRepo) Update(ctx context.Context, id int64, user *biz.User) (int32,
 		Description:  user.Description,
 		Address:      user.Address,
 	}
-	db := c.data.db
 	if err := db.Where("id = ?", id).Updates(&detail).Error; err != nil {
 		c.log.Infof("用户更新错误 = %v", err)
 		return 400, "服务器错误，用户信息更新失败", err
