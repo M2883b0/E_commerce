@@ -116,9 +116,41 @@ func (c *CmsAPP) Cancel(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": "0",
-		"msg":  "ok",
-		"data": rsp,
-	})
+	if rsp.OrderId == 0 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1,
+			"msg":  "订单不存在",
+			"data": "",
+		})
+	} else if rsp.OrderId == -1 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 2,
+			"msg":  "订单已超时",
+			"data": "",
+		})
+	} else if rsp.OrderId == -2 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 3,
+			"msg":  "交易不存在",
+			"data": "",
+		})
+	} else if rsp.OrderId == -3 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 4,
+			"msg":  "订单成功，不可取消",
+			"data": "",
+		})
+	} else if rsp.OrderId == -4 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 5,
+			"msg":  "交易已关闭",
+			"data": "",
+		})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "ok",
+			"data": rsp,
+		})
+	}
 }

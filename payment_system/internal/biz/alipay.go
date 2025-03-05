@@ -305,7 +305,41 @@ type CancelResp struct {
 
 // 取消支付
 func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Client, req *CancelReq) (*CancelResp, error) {
-	uc.log.WithContext(ctx).Infof("CancelPayment: %+v", req)
+	uc.log.WithContext(ctx).Infof("取消支付: %+v", req)
+	// 查询支付订单是否存在
+	if orderInfo, err := uc.orderStatusRepo.GetOrderInfo(ctx, req.OutTradeNo); err != nil {
+		return nil, err
+	} else if orderInfo.GetOrder().GetOrderId() == 0 {
+		return &CancelResp{
+			OutTradeNo: 0, //订单不存在
+		}, nil
+	} else if orderInfo.GetOrder().GetOrderState() == "CANCELED" {
+		return &CancelResp{
+			OutTradeNo: -1, //订单已超时
+		}, nil
+	}
+
+	// 查询数据库，如果订单是已成功支付，支付关闭，支付完成不可退款
+	payment, err := uc.paymentRepo.FindByID(ctx, req.OutTradeNo)
+	if err != nil {
+		return nil, err
+	}
+	if payment == nil {
+		return &CancelResp{
+			OutTradeNo: -2, // 交易不存在
+		}, nil
+	}
+	if payment.Status == string(alipay.TradeStatusSuccess) || payment.Status == string(alipay.TradeStatusFinished) {
+		return &CancelResp{
+			OutTradeNo: -3, // 交易成功，不可取消
+		}, nil
+	}
+	if payment.Status == string(alipay.TradeStatusClosed) {
+		return &CancelResp{
+			OutTradeNo: -4, // 交易已关闭
+		}, nil
+	}
+	// 调用支付宝取消支付
 	tradeCancel := alipay.TradeCancel{
 		OutTradeNo: fmt.Sprintf("%d", req.OutTradeNo),
 	}
