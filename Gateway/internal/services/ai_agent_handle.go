@@ -19,7 +19,7 @@ func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx2, cancel := context.WithTimeout(ctx.Request.Context(), 30*time.Second)
+	ctx2, cancel := context.WithTimeout(ctx.Request.Context(), 30000*time.Second)
 	ctx.Request = ctx.Request.WithContext(ctx2)
 	defer cancel()
 	log.Infof("begin AiAgent, user Message is %+v ", req)
