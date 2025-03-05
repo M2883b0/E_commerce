@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package api.ai_agent;
+
+option go_package = "OrderService/api/checkout;checkout";
+option java_multiple_files = true;
+option java_package = "api.checkout";
+
+service AiAgent {
+	rpc UserRequest(UserRequestReq) returns (UserRequestResp) {}
+}
+
+// PlaceOrderReq
+message UserRequestReq {
+	int64 user_id = 1;
+	string user_message = 2;
+
+}
+
+message UserRequestResp {
+	string agent_response = 1;
+}
