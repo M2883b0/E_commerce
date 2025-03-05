@@ -15,17 +15,19 @@ def get_server_info(server_name):
     except Exception as e:
         print(e)
         return ""
-    for info, _ in client.get_prefix(f'/microservices/user_manage'):
+    for info, _ in client.get_prefix(f'/microservices/{server_name}'):
         # return json.loads(info.decode())["endpoints"]
         return json.loads(info.decode())["endpoints"][0]
     return ""
 
 
+
+
 def register(server_name, server_addr):
     client = etcd3.client(host=os.getenv('ETCD_ADDR'), port=2379)
-    client.put(f'/microservices/{server_name}', json.dumps({"endpoints": [server_addr]}))
+    client.put(f'/microservices/{server_name}/3d1d1d1d1d1f', json.dumps({"id":"3d1d1d1d1d1f", "name":server_name, "version":"", "metadata": {}, "endpoints": [server_addr]}))
 
 
 if __name__ == '__main__':
-    print(register("ai_agent", "127.0.0.1:9000"))
-    print(get_server_info("content_manage"))
+    print(register("ai_agent", "grpc://127.0.0.1:9000"))
+    print(get_server_info("ai_agent"))
