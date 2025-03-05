@@ -10,9 +10,7 @@ import (
 
 // Checkout implements Checkout.CheckOutServer.
 func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutReq) (*checkout.CheckoutResp, error) {
-	//TODO implement me
 	// 默认运费6元
-	fmt.Print("====================================")
 	if req == nil || req.GetCartItems() == nil {
 		return nil, fmt.Errorf("invalid request or cart items")
 	}
@@ -50,8 +48,6 @@ func (c *CheckoutService) Checkout(ctx context.Context, req *checkout.CheckoutRe
 	if err != nil {
 		return nil, err
 	}
-
-	// bizCartItems只浅拷贝了
 
 	// 判断价格是否发生了改变
 	checkPriceRsp, err := c.checkoutUc.CheckPrice(ctx, &biz.CheckPrice{

@@ -106,7 +106,24 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 			QrCode:     payment.QrUrl,
 		}, nil
 	}
-
+	if payment != nil && payment.Status == "TRADE_SUCCESS" {
+		return &TradeRsp{
+			OutTradeNo: req.OutTradeNo,
+			QrCode:     "订单已支付",
+		}, nil
+	}
+	if payment != nil && payment.Status == "TRADE_FINISHED" {
+		return &TradeRsp{
+			OutTradeNo: req.OutTradeNo,
+			QrCode:     "订单已支付",
+		}, nil
+	}
+	if payment != nil && payment.Status == "TRADE_CLOSED" {
+		return &TradeRsp{
+			OutTradeNo: req.OutTradeNo,
+			QrCode:     "订单已关闭",
+		}, nil
+	}
 	//
 	trade := alipay.Trade{
 		Subject:     req.Subject,
@@ -115,6 +132,8 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 		ProductCode: "FAST_INSTANT_TRADE_PAY",
 		// 30分钟支付超时
 		TimeoutExpress: "30m",
+		// 异步通知url
+		//NotifyURL:     "http://127.0.0.1:8080/payment/notify",
 	}
 	log.Infof("支付参数:%+v", trade)
 
@@ -306,6 +325,15 @@ func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Clien
 	}, err
 }
 
-//func (uc *AlipayUsecase) CreatePayment(ctx context.Context) {
-//	uc.repo.Create(ctx)
+//func (uc *AlipayUsecase) NotifyHandle(ctx context.Context, client *alipay.Client, req *Notify) (*NotifyResp, error) {
+//	uc.log.WithContext(ctx).Infof("异步返回处理: %+v", req)
+//	// 验签
+//	isValid, err := client.VerifySign(ctx, req.Params)
+//	if err != nil {
+//		return nil, err
+//	}
+//	if !isValid {
+//		return nil, fmt.Errorf("验签失败")
+//	}
+//	// 处理业务逻辑
 //}
