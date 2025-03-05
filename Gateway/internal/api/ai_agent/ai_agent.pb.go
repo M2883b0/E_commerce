@@ -4,7 +4,7 @@
 // 	protoc        v5.26.1
 // source: ai_agent/ai_agent.proto
 
-package checkout
+package ai_agent
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
