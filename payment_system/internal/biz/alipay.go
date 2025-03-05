@@ -100,16 +100,30 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 	if err != nil {
 		return nil, err
 	}
-	//log.Infof("查询数据库订单状态:%+v %+v %+v", payment.Status, payment.Status == "WAIT_BUYER_PAY", payment.QrUrl)
-
 	if payment != nil && payment.Status == "WAIT_BUYER_PAY" {
 		return &TradeRsp{
 			OutTradeNo: req.OutTradeNo,
 			QrCode:     payment.QrUrl,
 		}, nil
 	}
-	log.Infof("daozhhele")
-
+	if payment != nil && payment.Status == "TRADE_SUCCESS" {
+		return &TradeRsp{
+			OutTradeNo: req.OutTradeNo,
+			QrCode:     "订单已支付",
+		}, nil
+	}
+	if payment != nil && payment.Status == "TRADE_FINISHED" {
+		return &TradeRsp{
+			OutTradeNo: req.OutTradeNo,
+			QrCode:     "订单已支付",
+		}, nil
+	}
+	if payment != nil && payment.Status == "TRADE_CLOSED" {
+		return &TradeRsp{
+			OutTradeNo: req.OutTradeNo,
+			QrCode:     "订单已关闭",
+		}, nil
+	}
 	//
 	trade := alipay.Trade{
 		Subject:     req.Subject,
@@ -118,6 +132,8 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 		ProductCode: "FAST_INSTANT_TRADE_PAY",
 		// 30分钟支付超时
 		TimeoutExpress: "30m",
+		// 异步通知url
+		//NotifyURL:     "http://127.0.0.1:8080/payment/notify",
 	}
 	log.Infof("支付参数:%+v", trade)
 
@@ -251,23 +267,9 @@ type CancelResp struct {
 
 // 取消支付
 func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Client, req *CancelReq) (*CancelResp, error) {
-	uc.log.WithContext(ctx).Infof("取消支付: %+v", req)
+	uc.log.WithContext(ctx).Infof("CancelPayment: %+v", req)
 	tradeCancel := alipay.TradeCancel{
 		OutTradeNo: fmt.Sprintf("%d", req.OutTradeNo),
-	}
-
-	// 先去数据库查询，当支付状态为success和finished时，不允许取消
-	payment, err := uc.paymentRepo.FindByID(ctx, req.OutTradeNo)
-	if err != nil {
-		return nil, err
-	}
-	if payment != nil && (payment.Status == string(alipay.TradeStatusSuccess) || payment.Status == string(alipay.TradeStatusFinished)) {
-		log.Infof("支付状态为success和finished时，不允许取消")
-		return &CancelResp{
-			OutTradeNo: req.OutTradeNo,
-			Msg:        "支付已完成，不可取消",
-			Code:       "400001",
-		}, err
 	}
 	tradeRsp, err := client.TradeCancel(ctx, tradeCancel)
 	// 通知订单服务关闭订单
@@ -323,6 +325,15 @@ func (uc *AlipayUsecase) CancelPayment(ctx context.Context, client *alipay.Clien
 	}, err
 }
 
-//func (uc *AlipayUsecase) CreatePayment(ctx context.Context) {
-//	uc.repo.Create(ctx)
+//func (uc *AlipayUsecase) NotifyHandle(ctx context.Context, client *alipay.Client, req *Notify) (*NotifyResp, error) {
+//	uc.log.WithContext(ctx).Infof("异步返回处理: %+v", req)
+//	// 验签
+//	isValid, err := client.VerifySign(ctx, req.Params)
+//	if err != nil {
+//		return nil, err
+//	}
+//	if !isValid {
+//		return nil, fmt.Errorf("验签失败")
+//	}
+//	// 处理业务逻辑
 //}
