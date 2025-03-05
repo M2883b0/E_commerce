@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import order_service_pb2 as order__service__pb2
+import api.order.order_service_pb2 as order__service__pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
