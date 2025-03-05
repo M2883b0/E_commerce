@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 	"net/http"
+	"time"
 )
 
 type AIAgentReq struct {
@@ -18,8 +19,8 @@ func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx2, _ := context.WithTimeout(ctx.Request.Context(), 30)
-	//defer c.Cancel(ctx)
+	ctx2, cancel := context.WithTimeout(ctx.Request.Context(), 30*time.Second)
+	defer cancel()
 	log.Infof("begin AiAgent, user Message is %+v ", req)
 	tmp, state := ctx.Get("user_id")
 	var userId = tmp.(int64)
