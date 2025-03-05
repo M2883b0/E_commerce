@@ -9,6 +9,7 @@ import (
 	"Gateway/internal/api/payment"
 	"context"
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -320,6 +321,7 @@ func connAIAgentClient(app *CmsAPP) {
 		grpc.WithEndpoint(endpoint),
 		grpc.WithDiscovery(dis), //服务的发现
 	)
+	log.Infof("成功注册ai_agent微服务。 etcd addr:%+v, connection: %+v", ETCD_ADDRR, conn)
 	if err != nil {
 		panic(err)
 	}
