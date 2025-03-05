@@ -323,6 +323,6 @@ func connAIAgentClient(app *CmsAPP) {
 	if err != nil {
 		panic(err)
 	}
-	appClient := payment.NewPaymentServiceClient(conn)
-	app.paymentServiceClient = appClient
+	appClient := ai.NewAiAgentClient(conn)
+	app.aiAgentClient = appClient
 }
