@@ -2,6 +2,7 @@ package services
 
 import (
 	ai "Gateway/internal/api/ai_agent"
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/log"
 	"net/http"
@@ -17,6 +18,7 @@ func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	context.WithTimeout(ctx.Request.Context(), 30)
 	log.Infof("begin AiAgent, user Message is %+v ", req)
 	tmp, state := ctx.Get("user_id")
 	var userId = tmp.(int64)
