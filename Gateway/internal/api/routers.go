@@ -73,6 +73,9 @@ func CmsRouter(r *gin.Engine) {
 		cmsGroup.POST("/payment/charge", cmsApp.Charge)
 		cmsGroup.POST("/payment/queryOrderStatus", cmsApp.QueryOrderStatus)
 		cmsGroup.POST("/payment/cancel", cmsApp.Cancel)
+
+		// ai agent
+		cmsGroup.POST("/ai/agent", cmsApp.AIAgent)
 	}
 	//创建不需要鉴权的【路由组】例如注册、登录
 	noAuthGroup := r.Group(rootPath + "/noauth")
