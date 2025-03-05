@@ -13,6 +13,10 @@ type AIAgentReq struct {
 
 func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 	var req AIAgentReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	log.Infof("begin AiAgent, user Message is %+v ", req)
 	tmp, state := ctx.Get("user_id")
 	var userId = tmp.(int64)
