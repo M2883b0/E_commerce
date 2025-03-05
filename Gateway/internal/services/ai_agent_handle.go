@@ -20,6 +20,7 @@ func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 		return
 	}
 	ctx2, cancel := context.WithTimeout(ctx.Request.Context(), 30*time.Second)
+	ctx.Request = ctx.Request.WithContext(ctx2)
 	defer cancel()
 	log.Infof("begin AiAgent, user Message is %+v ", req)
 	tmp, state := ctx.Get("user_id")
@@ -30,7 +31,7 @@ func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 	}
 
 	//下面不走，直接db的方法(dao层)，走的是微服务grpc的方法。【内容网关功能很干净了，不走db的操作，转发给grpc去执行操作】
-	rsp, err := c.aiAgentClient.UserRequest(ctx2, &ai.UserRequestReq{
+	rsp, err := c.aiAgentClient.UserRequest(ctx, &ai.UserRequestReq{
 		UserId:      userId,
 		UserMessage: req.UserMessage,
 	})
