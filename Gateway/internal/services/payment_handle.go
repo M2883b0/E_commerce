@@ -40,6 +40,12 @@ func (c *CmsAPP) Charge(ctx *gin.Context) {
 			"msg":  "订单不存在",
 			"data": "",
 		})
+	} else if rsp.OrderId == -1 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1,
+			"msg":  "订单已超时",
+			"data": "",
+		})
 	} else {
 		ctx.JSON(http.StatusOK, gin.H{
 			"code": 0,
@@ -64,11 +70,31 @@ func (c *CmsAPP) QueryOrderStatus(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": rsp,
-	})
+	if rsp.OrderId == -2 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 3,
+			"msg":  "等待用户扫描二维码",
+			"data": "",
+		})
+	} else if rsp.OrderId == -1 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1,
+			"msg":  "订单已超时",
+			"data": "",
+		})
+	} else if rsp.OrderId == 0 {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 2,
+			"msg":  "订单不存在",
+			"data": "",
+		})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 0,
+			"msg":  "ok",
+			"data": rsp,
+		})
+	}
 }
 func (c *CmsAPP) Cancel(ctx *gin.Context) {
 	//tmp, state := ctx.Get("user_id")

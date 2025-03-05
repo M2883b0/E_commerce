@@ -99,9 +99,17 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 	if err != nil {
 		return nil, err
 	}
+	// 订单不存在
 	if orderInfo.GetOrder().GetUserId() == 0 {
 		return &TradeRsp{
 			OutTradeNo: 0,
+			QrCode:     "",
+		}, nil
+	}
+	// 订单超时关闭
+	if orderInfo.GetOrder().GetOrderState() == "CANCELED" {
+		return &TradeRsp{
+			OutTradeNo: -1,
 			QrCode:     "",
 		}, nil
 	}
@@ -197,6 +205,20 @@ func (uc *AlipayUsecase) Trade(ctx context.Context, client *alipay.Client, req *
 // QueryPayment 查询订单状态
 func (uc *AlipayUsecase) QueryPayment(ctx context.Context, client *alipay.Client, req *QueryPayment) (*QueryPaymentRsp, error) {
 	uc.log.WithContext(ctx).Infof("查询支付状态: %+v", req)
+	// 查询支付订单是否存在
+	if orderInfo, err := uc.orderStatusRepo.GetOrderInfo(ctx, req.OutTradeNo); err != nil {
+		return nil, err
+	} else if orderInfo.GetOrder().GetOrderId() == 0 {
+		return &QueryPaymentRsp{
+			OutTradeNo: 0,
+			Status:     "订单不存在",
+		}, nil
+	} else if orderInfo.GetOrder().GetOrderState() == "CANCELED" {
+		return &QueryPaymentRsp{
+			OutTradeNo: -1,
+			Status:     "订单已超时",
+		}, nil
+	}
 	tradeQuery := alipay.TradeQuery{
 		OutTradeNo: fmt.Sprintf("%d", req.OutTradeNo),
 	}
@@ -207,7 +229,10 @@ func (uc *AlipayUsecase) QueryPayment(ctx context.Context, client *alipay.Client
 		return nil, err
 	}
 	if payment == nil {
-		return nil, fmt.Errorf("订单不存在")
+		return &QueryPaymentRsp{
+			OutTradeNo: -2,
+			Status:     "用户还未扫描二维码，支付订单不存在",
+		}, nil
 	}
 	tradeStatus := TradeStatus(payment.Status)
 	if tradeStatus == TradeStatusSuccess || tradeStatus == TradeStatusClosed || tradeStatus == TradeStatusFinished {
