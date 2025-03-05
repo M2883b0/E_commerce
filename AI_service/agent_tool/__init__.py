@@ -1,0 +1,11 @@
+# -*- coding:utf-8 -*-
+# @FileName :__init__.py.py
+# @Time :2025/3/4 15:41
+# @Author :M2883b0
+from .order_client import create_order
+from .product_client import query_product_by_id, find_product_by_decription
+
+tools = [create_order, query_product_by_id, find_product_by_decription]
+
+if __name__ == '__main__':
+    pass

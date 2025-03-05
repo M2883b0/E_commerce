@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package api.operate;
+
+service App {
+	// 查找-搜索框批量查找（搜索框->ES返回索引->Mysql）
+	rpc FindContent (FindContentReq) returns (FindContentRsp);
+	// 查找-id批量查找(通过商品id列表批量查找某条商品的信息)
+	rpc GetContent (GetContentReq) returns (GetContentRsp);
+}
+//数据格式
+message Content {
+	// 商品唯一ID
+	int64 id = 1;
+	// 商品标题
+	string title = 2;
+	// 商品描述
+	string description = 3;
+	// 图片url
+	string picture_url = 4;
+	// 商品价格
+	float price = 5;
+	// 商品库存>=0
+	uint32 quantity = 6;
+	// 商品分类（可多个分类）
+	repeated string categories = 7;
+
+}
+
+
+//批量查找的前端后端返回的数据格式
+message FindContentReq {
+	// 搜索内容
+	string query = 1;
+	// 页
+	int32 page = 2;
+	// 页大小
+	int32 page_size = 3;
+}
+message FindContentRsp {
+	// 内容总数
+	int64 total = 1;
+	// 内容列表
+	repeated Content contents = 2;
+	int32 code = 3;
+	string msg = 4;
+}
+
+//id批量查找，多个内容
+message GetContentReq {
+	// 商品id
+	repeated int64 id = 1;
+}
+message GetContentRsp {
+	// 内容
+	repeated Content contents = 1;
+	int32 code = 2;
+	string msg = 3;
+}
+
