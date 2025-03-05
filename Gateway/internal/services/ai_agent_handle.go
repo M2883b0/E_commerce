@@ -26,6 +26,7 @@ func (c *CmsAPP) AIAgent(ctx *gin.Context) {
 		UserId:      userId,
 		UserMessage: req.UserMessage,
 	})
+	log.Infof("already begin aiagent server  %+v ", req)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
