@@ -13,7 +13,7 @@ from agent_tool import get_server_info
 
 
 def _find_user_info_by_id(user_id: int):
-    user_server = get_server_info("operate")
+    user_server = get_server_info("user_manage")
     if not user_server:
         user_server = "127.0.0.1:8061"
     channel = grpc.insecure_channel(user_server)
