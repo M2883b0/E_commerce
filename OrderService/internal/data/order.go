@@ -45,6 +45,9 @@ func NewOrderRepo(data *Data, logger log.Logger) biz.OrderRepo {
 func (c *orderRepo) Create(ctx context.Context, order *biz.Order) error {
 	c.log.Infof("OrderInfo Create order = %+v", order)
 	itemJSON, err := json.Marshal(order.OrderItems)
+	if itemJSON == nil {
+		return errors.New("json marshal error")
+	}
 	if err != nil {
 		return errors.Unwrap(err)
 	}
@@ -74,10 +77,10 @@ func (c *orderRepo) Create(ctx context.Context, order *biz.Order) error {
 }
 
 func (c *orderRepo) Update(ctx context.Context, id int64, order *biz.Order) error {
-	itemsJSON, err := json.Marshal(order.OrderItems)
-	if err != nil {
-		return errors.Unwrap(err)
-	}
+	//itemsJSON, err := json.Marshal(order.OrderItems)
+	//if err != nil {
+	//	return errors.Unwrap(err)
+	//}
 	c.log.Infof("OrderInfo Update order = %+v", order)
 	detail := OrderInfo{
 		UserID:         order.UserID,
@@ -91,7 +94,7 @@ func (c *orderRepo) Update(ctx context.Context, id int64, order *biz.Order) erro
 		City:           order.City,
 		Country:        order.Country,
 		ZipCode:        order.ZipCode,
-		OrderItems:     datatypes.JSON(itemsJSON),
+		//OrderItems:     datatypes.JSON(itemsJSON),
 	}
 	db := c.data.db
 	if err := db.Where("id = ?", id).Updates(&detail).Error; err != nil {
