@@ -83,17 +83,17 @@ func (c *orderRepo) Update(ctx context.Context, id int64, order *biz.Order) erro
 	//}
 	c.log.Infof("OrderInfo Update order = %+v", order)
 	detail := OrderInfo{
-		UserID:         order.UserID,
-		PhoneNumber:    order.PhoneNumber,
-		OriginalCharge: order.OriginalCharge,
-		ActualPayment:  order.ActualPayment,
-		IsFreeShipping: order.IsFreeShipping,
-		ShippingFee:    order.ShippingFee,
-		OrderState:     order.OrderState,
-		StreetAddress:  order.StreetAddress,
-		City:           order.City,
-		Country:        order.Country,
-		ZipCode:        order.ZipCode,
+		//UserID:         order.UserID,
+		//PhoneNumber:    order.PhoneNumber,
+		//OriginalCharge: order.OriginalCharge,
+		//ActualPayment:  order.ActualPayment,
+		//IsFreeShipping: order.IsFreeShipping,
+		//ShippingFee:    order.ShippingFee,
+		OrderState: order.OrderState,
+		//City:           order.City,
+		//Country:        order.Country,
+		//ZipCode:        order.ZipCode,
+
 		//OrderItems:     datatypes.JSON(itemsJSON),
 	}
 	db := c.data.db
